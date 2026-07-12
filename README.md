@@ -1,5 +1,6 @@
 # BFSI real-time, agentic personalization — a structural reference demo
 
+[![CI](https://github.com/wyattstanson/bfsi-demo/actions/workflows/ci.yml/badge.svg)](https://github.com/wyattstanson/bfsi-demo/actions/workflows/ci.yml)
 [![Open in Streamlit](https://static.streamlit.io/badges/streamlit_badge_black_white.svg)](https://share.streamlit.io/deploy?repository=wyattstanson/bfsi-demo&branch=main&mainModule=streamlit_app.py)
 
 > **Live demo:** deploy your own in ~4 clicks — click the badge above (or go to
