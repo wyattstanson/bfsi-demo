@@ -1,0 +1,144 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>BFSI real-time personalization — structural demo</title>
+  <style>
+    :root { --bg:#0f1420; --card:#1a2130; --ink:#e8edf4; --muted:#8b98ad;
+            --line:#2a3345; --accent:#4f9cff; --good:#38c172; --warn:#e3b341; --bad:#e5484d; }
+    * { box-sizing:border-box; }
+    body { margin:0; font:14px/1.5 system-ui,Segoe UI,Roboto,sans-serif;
+           background:var(--bg); color:var(--ink); }
+    header { padding:20px 28px; border-bottom:1px solid var(--line); }
+    header h1 { margin:0; font-size:18px; }
+    header p { margin:4px 0 0; color:var(--muted); font-size:13px; }
+    .wrap { display:grid; grid-template-columns:1fr 1fr; gap:18px; padding:22px 28px; }
+    @media (max-width:860px){ .wrap{ grid-template-columns:1fr; } }
+    .card { background:var(--card); border:1px solid var(--line); border-radius:12px; padding:18px; }
+    .card h2 { margin:0 0 12px; font-size:14px; letter-spacing:.02em; text-transform:uppercase; color:var(--muted); }
+    label { display:block; font-size:12px; color:var(--muted); margin:10px 0 4px; }
+    select,input,button { font:inherit; }
+    select,input { width:100%; padding:8px 10px; background:#0d1220; color:var(--ink);
+                   border:1px solid var(--line); border-radius:8px; }
+    button { margin-top:14px; padding:9px 16px; background:var(--accent); color:#04122b;
+             border:0; border-radius:8px; font-weight:600; cursor:pointer; }
+    button:hover { filter:brightness(1.08); }
+    .row { display:flex; gap:10px; align-items:baseline; }
+    .big { font-size:22px; font-weight:700; }
+    .pill { display:inline-block; padding:2px 9px; border-radius:999px; font-size:12px; font-weight:600; }
+    .pill.ok{ background:rgba(56,193,114,.15); color:var(--good);}
+    .pill.slow{ background:rgba(229,72,77,.15); color:var(--bad);}
+    .pill.warn{ background:rgba(227,179,65,.15); color:var(--warn);}
+    .kv { display:flex; justify-content:space-between; border-bottom:1px dashed var(--line); padding:5px 0; }
+    .kv span:first-child{ color:var(--muted); }
+    pre { background:#0b1020; border:1px solid var(--line); border-radius:8px; padding:12px;
+          overflow:auto; font-size:12px; max-height:260px; }
+    .steps div { padding:6px 10px; border-left:2px solid var(--accent); margin:6px 0;
+                 background:#0d1424; border-radius:0 6px 6px 0; font-size:12.5px; }
+    .steps .escalate { border-color:var(--warn); }
+    .muted { color:var(--muted); font-size:12px; }
+  </style>
+</head>
+<body>
+  <header>
+    <h1>BFSI real-time personalization — structural demo</h1>
+    <p>Five layers · agentic loop · every decision audited · sub-98ms hot path. Local stand-ins for cloud services.</p>
+  </header>
+
+  <div class="wrap">
+    <!-- DECIDE -->
+    <div class="card">
+      <h2>Layer 4/5 · Next-best-action</h2>
+      <label>Persona (non-PII)</label>
+      <select id="party"></select>
+      <label>Live context event</label>
+      <select id="event">
+        <option value="session_start">session_start</option>
+        <option value="large_transfer_attempt">large_transfer_attempt (4000)</option>
+        <option value="product_page_view">product_page_view</option>
+        <option value="card_declined">card_declined</option>
+      </select>
+      <button onclick="decide()">Decide</button>
+      <div id="decision" style="margin-top:16px"></div>
+    </div>
+
+    <!-- AGENT -->
+    <div class="card">
+      <h2>Agentic layer · task loop</h2>
+      <label>Party</label>
+      <select id="aparty"></select>
+      <label>Goal</label>
+      <input id="goal" value="I want a pre-approved loan of 50000" />
+      <div class="muted">Try: "dispute an unauthorized charge of 15000", "give me a financial tip"</div>
+      <button onclick="runAgent()">Run agent</button>
+      <div class="steps" id="steps" style="margin-top:14px"></div>
+      <div id="agentFinal"></div>
+    </div>
+  </div>
+
+<script>
+async function loadPersonas(){
+  const r = await fetch('/personas?limit=15'); const ps = await r.json();
+  for (const sel of [party, aparty]) {
+    sel.innerHTML = ps.map(p=>`<option value="${p.party_id}">${p.party_id} · ${p.domain}/${p.journey_stage} · ${p.risk_band}</option>`).join('');
+  }
+}
+function amtFor(ev){ return ev==='large_transfer_attempt'?4000:0; }
+
+async function decide(){
+  const body = { party_id: party.value, channel:'web',
+                 event:{ event_type:event.value, amount:amtFor(event.value) } };
+  const r = await fetch('/decide',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(body)});
+  const d = await r.json();
+  const sloClass = d.within_slo ? 'ok':'slow';
+  const fairClass = d.fairness_flag==='adverse_impact' ? 'warn':'ok';
+  const reasons = d.reason_codes.map(rc=>`<div class="kv"><span>${rc.label}</span><span>${rc.direction} · ${rc.contribution}</span></div>`).join('');
+  decision.innerHTML = `
+    <div class="row"><div class="big">${d.action}</div></div>
+    <div class="row" style="gap:8px;margin:8px 0">
+      <span class="pill ${sloClass}">${d.latency_ms} ms (SLO ${d.slo_ms})</span>
+      <span class="pill ${fairClass}">fairness: ${d.fairness_flag}</span>
+      <span class="pill ok">EV ${d.score}</span>
+    </div>
+    <div class="muted">decision_id ${d.decision_id}</div>
+    <label>Why (SHAP-style reason codes)</label>${reasons}
+    <label>Model scores</label>
+    <pre>${JSON.stringify(d.model_scores,null,2)}</pre>
+    <label>Audit row</label><pre id="audit">loading…</pre>`;
+  const a = await (await fetch('/audit/'+d.decision_id)).json();
+  document.getElementById('audit').textContent = JSON.stringify(a,null,2);
+}
+
+async function runAgent(){
+  steps.innerHTML=''; agentFinal.innerHTML='';
+  const resp = await fetch('/agent',{method:'POST',headers:{'Content-Type':'application/json'},
+                 body:JSON.stringify({party_id:aparty.value, goal:goal.value})});
+  const reader = resp.body.getReader(); const dec = new TextDecoder(); let buf='';
+  while(true){
+    const {value,done} = await reader.read(); if(done) break;
+    buf += dec.decode(value,{stream:true});
+    let idx;
+    while((idx=buf.indexOf('\n\n'))>=0){
+      const line = buf.slice(0,idx).replace(/^data: /,''); buf=buf.slice(idx+2);
+      if(!line) continue; const ev = JSON.parse(line);
+      if(ev.type==='final'){
+        const cls = ev.escalated?'warn':'ok';
+        agentFinal.innerHTML = `<div class="row" style="margin-top:10px;gap:8px">
+          <span class="pill ${cls}">${ev.escalated?'escalated':'completed'}</span>
+          <span class="pill ok">confidence ${ev.confidence}</span>
+          <span class="pill ok">engine: ${ev.engine}</span></div>
+          <p>${ev.answer}</p>`;
+      } else {
+        const d=document.createElement('div');
+        d.className = ev.node==='escalate'?'escalate':'';
+        d.innerHTML = `<b>${ev.node}</b> — ${ev.detail}`;
+        steps.appendChild(d);
+      }
+    }
+  }
+}
+loadPersonas();
+</script>
+</body>
+</html>

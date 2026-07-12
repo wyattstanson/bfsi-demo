@@ -1,0 +1,36 @@
+# Optional infrastructure for the "full" path. The demo also runs with NO docker
+# (SQLite + in-process store fallbacks). Bring these up to exercise the real stack.
+#   docker compose up -d
+# then set DATABASE_URL / REDIS_URL in .env to point here.
+services:
+  postgres:
+    # pgvector image = Postgres 16 + the vector extension pre-installed.
+    # PROD: swap for Snowflake + Databricks (system of record + lakehouse).
+    image: pgvector/pgvector:pg16
+    environment:
+      POSTGRES_USER: bfsi
+      POSTGRES_PASSWORD: bfsi
+      POSTGRES_DB: bfsi
+    ports:
+      - "5432:5432"
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U bfsi"]
+      interval: 5s
+      timeout: 3s
+      retries: 10
+
+  redis:
+    # PROD: swap for ElastiCache (Redis) or DynamoDB on the sub-98ms hot path.
+    image: redis:7-alpine
+    ports:
+      - "6379:6379"
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 5s
+      timeout: 3s
+      retries: 10
+
+volumes:
+  pgdata:
