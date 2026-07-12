@@ -1,5 +1,12 @@
 # BFSI real-time, agentic personalization — a structural reference demo
 
+[![Open in Streamlit](https://static.streamlit.io/badges/streamlit_badge_black_white.svg)](https://share.streamlit.io/deploy?repository=wyattstanson/bfsi-demo&branch=main&mainModule=streamlit_app.py)
+
+> **Live demo:** deploy your own in ~4 clicks — click the badge above (or go to
+> [share.streamlit.io](https://share.streamlit.io) → *Create app* → repo
+> `wyattstanson/bfsi-demo`, branch `main`, main file `streamlit_app.py`).
+> Locally: `streamlit run streamlit_app.py`.
+
 A small, runnable system that mirrors the **five-layer architecture** of a
 production real-time personalization platform for banking, financial services
 and insurance. It proves the *structure*, not feature-completeness: every box is
