@@ -91,15 +91,22 @@ def shap_reasons(engine, decision: dict, top_k: int = 3) -> list[dict]:
         return reasons
 
     vec = [decision["features_snapshot"][f] for f in feature_store.FEATURES]
-    base = engine.baseline
-    f_full = engine.signal_predict(signal, vec)
 
-    contribs = []
-    for i, fname in enumerate(feature_store.FEATURES):
-        perturbed = list(vec)
-        perturbed[i] = base[i]
-        delta = f_full - engine.signal_predict(signal, perturbed)
-        contribs.append((fname, delta, vec[i]))
+    exact = engine.signal_contributions(signal, vec)
+    if exact is not None:
+        # Linear model: contributions are exact and need no extra model calls.
+        contribs = [(fname, exact[i], vec[i])
+                    for i, fname in enumerate(feature_store.FEATURES)]
+    else:
+        # Tree model: fall back to baseline perturbation attribution.
+        base = engine.baseline
+        f_full = engine.signal_predict(signal, vec)
+        contribs = []
+        for i, fname in enumerate(feature_store.FEATURES):
+            perturbed = list(vec)
+            perturbed[i] = base[i]
+            delta = f_full - engine.signal_predict(signal, perturbed)
+            contribs.append((fname, delta, vec[i]))
 
     contribs.sort(key=lambda c: abs(c[1]), reverse=True)
     return [

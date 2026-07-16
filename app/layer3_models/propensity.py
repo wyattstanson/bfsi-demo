@@ -61,6 +61,23 @@ class BinaryModel:
         p = self._est.predict_proba(x)[0][1]
         return float(p)
 
+    def linear_contributions(self, vector: list[float]) -> list[float] | None:
+        """Exact per-feature log-odds contributions for the logistic path.
+
+        Returns None for tree models (XGBoost), signalling the caller to fall
+        back to baseline perturbation. This keeps reason codes O(features) with
+        no extra model calls on the hot path.
+        """
+        est = self._est
+        steps = getattr(est, "named_steps", None)
+        if not steps or "logisticregression" not in steps:
+            return None
+        scaler = steps["standardscaler"]
+        lr = steps["logisticregression"]
+        x = np.asarray(vector, dtype=float)
+        z = (x - scaler.mean_) / scaler.scale_
+        return (lr.coef_[0] * z).tolist()
+
     # ---- persistence -----------------------------------------------------
     def _path(self) -> Path:
         return config.ARTIFACTS_DIR / f"{self.name}.pkl"

@@ -12,12 +12,17 @@ httpx>=0.27
 networkx>=3.2
 pytest>=8.0
 
+# ---- Database drivers (dormant unless DATABASE_URL / REDIS_URL are set) ----
+# Shipping these lets the deployed app connect to a hosted Postgres (Neon /
+# Supabase) and Redis (Upstash) the moment those secrets are provided, with no
+# code change. Without the env vars the app uses SQLite + an in-process store.
+psycopg[binary]>=3.1   # Postgres driver (ledger)
+redis>=5.0             # Redis client (hot store)
+
 # ---- Named production libraries (used automatically if importable) ----
 # On Python 3.13 some of these may lack wheels; the code falls back cleanly.
 xgboost>=2.0
-# redis>=5.0            # online store; falls back to in-process dict if absent
-# psycopg[binary]>=3.1  # Postgres driver; falls back to stdlib sqlite3 if absent
-# pgvector>=0.2         # vector column type for Postgres
+# pgvector>=0.2         # native vector column for Postgres (production upgrade)
 
 # ---- Optional / heavy (guarded imports, pure-Python fallbacks provided) ----
 # econml>=0.15          # uplift X-learner; falls back to sklearn T-learner

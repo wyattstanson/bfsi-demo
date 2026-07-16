@@ -67,6 +67,11 @@ class DecisionEngine:
             return max(0.0, self.uplift.uplift(vec))
         return 0.0  # fraud is graph-based; explained separately
 
+    def signal_contributions(self, signal: str, vec: list[float]) -> list[float] | None:
+        """Fast exact attribution for linear signals; None means use perturbation."""
+        model = {"propensity": self.propensity, "churn": self.churn}.get(signal)
+        return model.linear_contributions(vec) if model is not None else None
+
     # ---- eligibility + guardrails ---------------------------------------
     @staticmethod
     def _eligible(action: dict, attrs: dict, scores: dict) -> tuple[bool, str]:
