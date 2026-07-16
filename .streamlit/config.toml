@@ -1,0 +1,10 @@
+# Enterprise-analytics palette (violet → magenta), applied app-wide.
+[theme]
+primaryColor = "#6D28D9"
+backgroundColor = "#F4F3FA"
+secondaryBackgroundColor = "#FFFFFF"
+textColor = "#171334"
+font = "sans serif"
+
+[server]
+headless = true
