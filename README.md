@@ -1,6 +1,7 @@
 # Aria, a BFSI Personalization Platform
 
 [![CI](https://github.com/wyattstanson/bfsi-demo/actions/workflows/ci.yml/badge.svg)](https://github.com/wyattstanson/bfsi-demo/actions/workflows/ci.yml)
+[![Deploy to Render](https://render.com/images/deploy-to-render-button.svg)](https://render.com/deploy?repo=https://github.com/wyattstanson/bfsi-demo)
 
 Aria decides the next-best-action for every customer interaction, explains it in
 plain language, keeps a regulator-ready audit trail, and hands the hard calls to a
@@ -19,11 +20,13 @@ The fifth is restricted.
 
 | Mode | Who it is for | What it shows |
 |------|---------------|---------------|
-| Customer | The person on the app | A warm, personal moment. Plain language, no scores. An assistant, Ava, that acts end to end and brings in a human when needed. |
-| Advisor | The relationship manager | A ready-to-use brief, the recommended action, drivers, talking points and a suitability note, in the style of Aladdin Auto-Commentary. |
-| Executive | The C-suite | The book of decisions. Value captured, latency against budget, fairness, and a live decision stream, by action and by region. |
-| Regulator | The supervisor | Every consequential decision with SHAP reason codes, an adverse-impact fairness signal, and a replayable 16-field audit record. |
-| Developer | The AI engineer | Under the hood. The five-layer pipeline, warm latency percentiles, the model registry, the live CDC event stream and the raw agentic trace. Passcode protected. |
+| Concierge | The person on the app | A warm, personal moment. Plain language, no scores. An assistant, Ava, that acts end to end and brings in a human when needed. |
+| Co-pilot | The relationship manager | A ready-to-use brief, the recommended action, drivers, talking points and a suitability note, in the style of Aladdin Auto-Commentary. |
+| Control Tower | The C-suite | The book of decisions. Value captured, latency against budget, fairness, and a live decision stream, by action and by region. |
+| Assurance | The supervisor | Every consequential decision with SHAP reason codes, an adverse-impact fairness signal, and a replayable 16-field audit record. |
+| Engine Room | The AI engineer | Under the hood. The five-layer pipeline, warm latency percentiles, the model registry, the live CDC event stream and the raw agentic trace. Passcode protected. |
+
+A light and dark theme are both available, toggled from the header.
 
 The Developer mode passcode is `Aryansh@Tredence` (override with the `DEV_PASSCODE`
 environment variable).
