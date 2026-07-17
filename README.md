@@ -1,155 +1,144 @@
-# BFSI real-time, agentic personalization
+# Aria, a BFSI Personalization Platform
 
 [![CI](https://github.com/wyattstanson/bfsi-demo/actions/workflows/ci.yml/badge.svg)](https://github.com/wyattstanson/bfsi-demo/actions/workflows/ci.yml)
-[![Open in Streamlit](https://static.streamlit.io/badges/streamlit_badge_black_white.svg)](https://share.streamlit.io/deploy?repository=wyattstanson/bfsi-demo&branch=main&mainModule=streamlit_app.py)
 
-A runnable, five-layer reference system for real-time, agentic personalization in
-banking, financial services and insurance. It makes a personalized next-best-action
-in single-digit milliseconds, explains and audits every decision, and runs an agent
-that completes low-stakes tasks on its own and escalates high-stakes ones to a human.
+Aria decides the next-best-action for every customer interaction, explains it in
+plain language, keeps a regulator-ready audit trail, and hands the hard calls to a
+human. It is a real-time, explainable, agentic personalization platform for banking,
+financial services and insurance, patterned on the products that set the bar: BofA
+Erica (sub-44ms, 2B interactions), BlackRock Aladdin (23T dollars AUM), Lemonade
+(3-second claims) and Bajaj FINAI (800+ autonomous agents).
 
-Every component is a local stand-in that maps one to one onto a managed cloud
-service, so the path to production is a series of swaps, not a rewrite.
+The same decision engine is shown through five points of view, so a customer, an
+advisor, an executive, a regulator and an engineer each see what matters to them.
 
-**Live demo:** click the Streamlit badge above, or go to
-[share.streamlit.io](https://share.streamlit.io), pick repo `wyattstanson/bfsi-demo`,
-branch `main`, main file `streamlit_app.py`. Locally: `streamlit run streamlit_app.py`.
+## Five points of view
 
-## What it does
+Open the platform and pick a lens. The first four are customer and business facing.
+The fifth is restricted.
 
-* A `/decide` endpoint that returns a next-best-action in **well under the 98ms p99
-  budget** (measured warm p99 around 6ms in process) with SHAP-style reason codes, a
-  fairness flag, and an append-only audit row for every decision.
-* An agentic loop (perceive, reason, act, observe, escalate) on the same data, using
-  MCP-style tools, vector memory, and a hard human-escalation path.
-* The BFSI vocabulary throughout: domains (retail, wealth, payments, nbfc, insurance)
-  and journey stages (discover, originate, engage, cross-sell, service, retain).
+| Mode | Who it is for | What it shows |
+|------|---------------|---------------|
+| Customer | The person on the app | A warm, personal moment. Plain language, no scores. An assistant, Ava, that acts end to end and brings in a human when needed. |
+| Advisor | The relationship manager | A ready-to-use brief, the recommended action, drivers, talking points and a suitability note, in the style of Aladdin Auto-Commentary. |
+| Executive | The C-suite | The book of decisions. Value captured, latency against budget, fairness, and a live decision stream, by action and by region. |
+| Regulator | The supervisor | Every consequential decision with SHAP reason codes, an adverse-impact fairness signal, and a replayable 16-field audit record. |
+| Developer | The AI engineer | Under the hood. The five-layer pipeline, warm latency percentiles, the model registry, the live CDC event stream and the raw agentic trace. Passcode protected. |
+
+The Developer mode passcode is `Aryansh@Tredence` (override with the `DEV_PASSCODE`
+environment variable).
 
 ## Architecture
 
 ```mermaid
 flowchart LR
-  T["Customer touchpoint"] --> APP["App layer<br/>Streamlit UI, FastAPI /decide, /agent"]
+  T["Customer touchpoint"] --> APP["Aria app<br/>landing, five modes, Ava"]
   APP --> DEC["L4 Decisioning<br/>rules + LinUCB bandit"]
   DEC --> FS["L2 Feature store<br/>online read, sub-ms"]
   DEC --> MOD["L3 Models<br/>propensity, uplift, fraud, LLM"]
-  DEC --> GOV["L5 Governance<br/>reasons, fairness, audit"]
+  DEC --> GOV["L5 Governance<br/>SHAP, fairness, 16-field audit"]
   FS --> HOT[("Hot store<br/>Redis / Upstash")]
   GOV --> LED[("Ledger<br/>Postgres / Neon + pgvector")]
-  APP --> AG["Agent loop<br/>perceive, reason, act, observe"]
+  APP --> AG["Agentic loop<br/>perceive, reason, act, observe"]
   AG --> HQ[("Human queue")]
-  CDC["Events<br/>Kafka + Flink (prod), stub (demo)"] --> HOT
+  CDC["Event stream<br/>Kafka + Flink (prod), stub (demo)"] --> HOT
 ```
-
-Two stores by design: Redis on the sub-98ms hot path, Postgres as the ledger. No
-third store is added, because it would be neither the ledger nor on the hot path.
 
 | Layer | Folder | Responsibility |
 |------|--------|----------------|
-| 1 Data Foundation | `app/layer1_data` | Ledger, online hot store, CDC event stream |
-| 2 Feature Store | `app/layer2_features` | One definition served offline and online, sub-ms, `domain__entity__metric__window` keys |
+| 1 Data Foundation | `app/layer1_data` | Ledger, online hot store, live CDC event stream |
+| 2 Feature Store | `app/layer2_features` | Offline and online serving, sub-ms, `domain__entity__metric__window` keys |
 | 3 Models | `app/layer3_models` | Propensity, churn, uplift, graph fraud score, grounded LLM |
 | 4 Decisioning | `app/layer4_decisioning` | Online features, model scores, eligibility and do-no-harm rules, LinUCB ranking |
-| 5 Governance | `app/layer5_governance` | Reason codes, adverse-impact fairness, drift, 16-field audit log |
-| Agent | `app/agent` | Stateful loop, MCP-style tools, vector memory, human queue |
+| 5 Governance | `app/layer5_governance` | SHAP reason codes, adverse-impact fairness, drift, 16-field audit log |
+| Agent | `app/agent` | Stateful loop, MCP-style tools, vector memory, human escalation |
 
-## Run it locally (zero infrastructure)
-
-The app falls back to SQLite and an in-process store, so it runs with no services.
+## Run it locally
 
 ```bash
 pip install -r requirements.txt
-python -m app.bootstrap                     # seed, features, models, policies (one-time)
-streamlit run streamlit_app.py              # the UI, or:
-python -m uvicorn app.main:app --port 8000  # the API + a second UI at /
+uvicorn app.main:app --port 8000     # the Aria platform, open http://127.0.0.1:8000
 ```
 
-Verify:
+The first request runs a one-time bootstrap (seed, features, models, policies). With
+no services configured it uses SQLite and an in-process store. Verify:
 
 ```bash
-python -m pytest tests/ -q -s               # latency, one-audit-row, escalation, no-PII
-python -m scripts.benchmark 800             # prints p50/p95/p99, asserts p99 < 98ms
+python -m pytest tests/ -q            # latency, one-audit-row, escalation, no-PII
+python -m scripts.benchmark 800       # warm p50/p95/p99, asserts p99 under 98ms
 ```
 
-## Persistent cloud database (recommended for a shared demo)
+A lightweight Streamlit build of the same engine is also included
+(`streamlit run streamlit_app.py`).
 
-Streamlit Cloud has an ephemeral filesystem, so the SQLite fallback resets on
-redeploy. Attaching a free hosted database makes the data persist, with no code
-change. The app reads two environment variables and switches backends when they are
-present.
+## Deploy the platform
 
-1. **Ledger:** create a free Postgres on [Neon](https://neon.tech) or
-   [Supabase](https://supabase.com). Both include pgvector. Copy the pooled
-   connection string.
-2. **Hot store:** create a free Redis on [Upstash](https://upstash.com). Copy the
-   `rediss://` URL.
-3. In Streamlit Cloud, open app settings, then Secrets, and paste (see
-   `.streamlit/secrets.toml.example`):
+The Aria website is served by FastAPI, so deploy it as a web service. A free
+[Render](https://render.com) blueprint is included:
 
-   ```toml
-   DATABASE_URL = "postgresql://USER:PWD@HOST-pooler.REGION.neon.tech/DB?sslmode=require"
-   REDIS_URL    = "rediss://default:PWD@HOST.upstash.io:6379"
-   ```
+1. Push this repo to GitHub.
+2. On Render, New, Blueprint, and point it at the repo. `render.yaml` provisions a
+   free Python web service running `uvicorn app.main:app`.
+3. Optionally set `DATABASE_URL`, `REDIS_URL` and `ANTHROPIC_API_KEY` in the service
+   settings to attach a persistent database and live Claude grounding.
 
-`GET /health` reports which backends are live. This is not a paper claim: CI runs
-the entire test suite against a real Postgres (pgvector) plus Redis on every push,
-so the database path is verified, not just the SQLite one.
+## Data at scale, local to global
 
-Efficiency choices: use Neon's pooled endpoint (server-side pooling that fits
-serverless connection limits), both Neon and Upstash scale to zero when idle, and
-the hot path only ever touches Redis while the ledger stays off the hot path.
+The dataset spans the dossier's ten BFSI sub-verticals (retail, corporate, wealth,
+asset management, payments, capital markets, NBFC, personal, general and commercial
+insurance) across six regions and currencies. The demo seeds a few thousand synthetic
+parties for a snappy start. To move from a small local set to a global one:
+
+```bash
+python -m scripts.seed_bulk 1000000   # loads a million parties (Postgres COPY fast path)
+```
+
+The app never loads the whole population into memory. It warms features on demand per
+requested party, materializes and trains on a representative sample (`MATERIALIZE_CAP`,
+default 25000), and serves any of the millions from the ledger. Point `DATABASE_URL`
+at a hosted Postgres and `REDIS_URL` at a hosted Redis and the same code runs at
+global scale. A live CDC event stream drives the real-time and agentic feeds.
+
+## Persistent cloud database
+
+Set two environment variables and the backends switch with no code change:
+
+```toml
+DATABASE_URL = "postgresql://USER:PWD@HOST-pooler.REGION.neon.tech/DB?sslmode=require"
+REDIS_URL    = "rediss://default:PWD@HOST.upstash.io:6379"
+```
+
+Neon and Supabase give free Postgres with pgvector; Upstash gives free Redis. CI runs
+the entire suite against a real Postgres (pgvector) plus Redis on every push, so the
+database path is verified, not just SQLite.
 
 ## From demo to production
 
-Production is a series of swaps. The five-layer folders and their contracts stay put.
-
-| Piece | Local (this demo) | Production swap |
+| Piece | Local | Production |
 |---|---|---|
-| Ledger | SQLite | Snowflake + Databricks, or Neon/Aurora Postgres |
-| Hot store | in-process dict | ElastiCache (Redis), DynamoDB, or Upstash |
-| Streaming / CDC | `cdc_stub.py` | Kafka / MSK + Flink |
-| Feature store | `feature_store.py` | Feast, Databricks Feature Store, Tecton |
-| Vector memory | JSON + Python cosine | pgvector (ivfflat), then a managed vector DB |
+| Ledger | SQLite | Snowflake and Databricks, or Neon and Aurora Postgres |
+| Hot store | in-process dict | ElastiCache, DynamoDB, or Upstash |
+| Streaming | `cdc_stub.py` | Kafka and MSK plus Flink |
+| Feature store | `feature_store.py` | Feast, Databricks, Tecton |
+| Vector memory | JSON and Python cosine | pgvector, then a managed vector DB |
 | Models | pickled artifacts | SageMaker or Databricks Model Serving |
-| Fraud | networkx PageRank | GraphSAGE / GAT on a graph feature store |
+| Fraud | networkx PageRank | GraphSAGE and GAT on a graph feature store |
 | Grounded LLM | offline stub | Bedrock or a hosted Claude endpoint |
-| Bandit | in-memory LinUCB | managed bandit / RL service, state persisted |
-| Explanations | linear + baseline SHAP | `shap` on the served model |
-| Audit log | `audit_log` table | Unity Catalog + ModelOp lineage |
-| Agent runtime | hand-rolled / LangGraph | LangGraph on EKS + a real MCP server |
-
-## API
-
-| Method | Path | Purpose |
-|-------|------|---------|
-| POST | `/decide` | `{party_id, event, channel}` returns action, score, reason_codes, fairness_flag, latency_ms, decision_id |
-| POST | `/agent` | `{party_id, goal}` streams loop steps, then a final result |
-| GET | `/personas` | non-PII sample customers for the UI |
-| GET | `/audit/{decision_id}` | the 16-field audit row |
-| GET | `/governance` | drift and fairness snapshots, audit and human-queue counts |
-| GET | `/health` | active backends and counts |
+| Explanations | linear and baseline SHAP | the `shap` library on the served model |
+| Audit log | `audit_log` table | Unity Catalog and ModelOp lineage |
+| Agent runtime | hand-rolled or LangGraph | LangGraph on EKS with a real MCP server |
 
 ## Design decisions
 
 * Every decision is regulated. Governance runs inside the measured request and no
   response is returned without its audit row.
-* PII never reaches a model. The ledger holds name, email and ssn; the hot path and
-  every model or LLM payload carry ids and non-PII features only. A test enforces it.
-* Latency first. The hot path does zero matrix inversions per decision (the LinUCB
-  inverse is cached and refreshed only on learning) and reason codes are exact linear
-  attributions for logistic models, with baseline perturbation kept for tree models.
-* Graceful degradation is the fallback, not the design. XGBoost to sklearn, EconML to
-  a sklearn T-learner, torch-geometric to networkx, LangGraph to a hand-rolled driver,
-  hosted LLM to an offline stub, Postgres to SQLite, Redis to an in-process store.
-  `GET /health` reports which implementation is live.
-
-## Acceptance checks
-
-* `python -m app.bootstrap` then `uvicorn app.main:app` boots with no manual steps.
-* `POST /decide` returns the required fields and warm `latency_ms` under 98;
-  `scripts/benchmark.py` prints p99 under 98ms.
-* Exactly one `audit_log` row per decision (`test_audit.py`).
-* `POST /agent` streams steps and either completes or escalates to `human_queue`
-  (`test_agent_escalation.py`).
-* Model and LLM payloads carry ids, not PII (`test_no_pii_to_model.py`).
-* CI runs the whole suite on SQLite (Python 3.11 and 3.12) and on Postgres + Redis.
+* PII never reaches a model. Names, emails and identifiers stay in the ledger. The
+  hot path and every model and LLM payload carry ids and non-PII features only. A test
+  enforces it.
+* Latency first. The LinUCB inverse is cached and refreshed only on learning, so a
+  decision does zero matrix inversions, and reason codes are exact linear attributions
+  for logistic models. Warm p99 is in the single-digit milliseconds.
+* Graceful degradation. XGBoost to sklearn, EconML to a sklearn T-learner,
+  torch-geometric to networkx, LangGraph to a hand-rolled driver, hosted LLM to an
+  offline stub, Postgres to SQLite, Redis to an in-process store. `GET /health`
+  reports which implementation is live.

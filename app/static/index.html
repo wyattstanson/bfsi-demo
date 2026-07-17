@@ -1,326 +1,507 @@
 <!doctype html>
 <html lang="en">
 <head>
-  <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>NBA Studio, BFSI personalization</title>
-  <style>
-    :root{
-      --bg:#F6F7F9; --surface:#FFFFFF; --surface-2:#F1F3F7; --line:#E4E7EE;
-      --ink:#1C2430; --muted:#6B7686;
-      --brand:#3B4D8F; --brand-600:#33427A; --brand-700:#2B3566; --brand-50:#EEF1F8;
-      --good:#2F855A; --good-50:#EAF3EE; --warn:#B7791F; --warn-50:#F6EFDF;
-      --bad:#C05252; --bad-50:#F6EAEA;
-      --shadow:0 1px 2px rgba(16,24,40,.04),0 6px 20px rgba(16,24,40,.05);
-      --r:14px;
-    }
-    @media (prefers-color-scheme:dark){
-      :root{ --bg:#14171E; --surface:#1B1F27; --surface-2:#212632; --line:#2C323E;
-             --ink:#E6E9EF; --muted:#98A2B3; --brand:#8DA0DC; --brand-600:#9DAEE4;
-             --brand-700:#7E92D4; --brand-50:#232838;
-             --shadow:0 1px 2px rgba(0,0,0,.3),0 6px 20px rgba(0,0,0,.35); }
-    }
-    *{box-sizing:border-box}
-    html,body{margin:0}
-    body{font:14.5px/1.55 Inter,"Segoe UI",system-ui,-apple-system,Roboto,Helvetica,Arial,sans-serif;
-      background:var(--bg); color:var(--ink); -webkit-font-smoothing:antialiased}
-    .wrap{max-width:1200px;margin:0 auto;padding:0 24px 44px}
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1"/>
+<title>Aria, BFSI Personalization Platform</title>
+<style>
+:root{
+  --bg:#FFFFFF;--soft:#FAFAF8;--panel:#FFFFFF;--ink:#141619;--muted:#6B7180;--line:#E9E8E3;
+  --orange:#F1592A;--orange-600:#D84A1D;--orange-50:#FDEEE8;--dark:#111317;--dark-2:#191C22;
+  --good:#1F9D57;--good-50:#E9F6EF;--warn:#C9821A;--warn-50:#FBF1E0;--bad:#D64541;--bad-50:#FBECEB;
+  --r:16px;--shadow:0 1px 2px rgba(20,22,25,.04),0 10px 30px rgba(20,22,25,.06);
+}
+*{box-sizing:border-box}
+html,body{margin:0;background:var(--bg);color:var(--ink)}
+body{font:15px/1.55 Inter,"Segoe UI",system-ui,-apple-system,Roboto,Helvetica,Arial,sans-serif;-webkit-font-smoothing:antialiased}
+.wrap{max-width:1180px;margin:0 auto;padding:0 24px}
+a{color:inherit;text-decoration:none}
+svg.i{width:20px;height:20px;stroke:currentColor;fill:none;stroke-width:1.7;stroke-linecap:round;stroke-linejoin:round}
+.view{display:none;animation:fade .5s ease both}
+.view.on{display:block}
+@keyframes fade{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:none}}
+@keyframes rise{from{opacity:0;transform:translateY(16px)}to{opacity:1;transform:none}}
+.btn{display:inline-flex;align-items:center;gap:8px;border:0;border-radius:10px;padding:12px 20px;
+  font:inherit;font-weight:600;cursor:pointer;background:var(--orange);color:#fff;transition:.16s}
+.btn:hover{background:var(--orange-600);transform:translateY(-1px)}
+.btn.ghost{background:transparent;color:var(--ink);border:1px solid var(--line)}
+.btn.ghost:hover{border-color:var(--ink);background:var(--soft)}
+.btn.dark{background:var(--dark)}.btn.dark:hover{background:var(--dark-2)}
 
-    /* header */
-    .top{background:linear-gradient(180deg,var(--brand-700),var(--brand-600));color:#fff;padding:20px 0 66px}
-    .top .wrap{display:block}
-    .brandrow{display:flex;align-items:center;justify-content:space-between;gap:16px;flex-wrap:wrap}
-    .brand{display:flex;align-items:center;gap:11px;font-weight:700;font-size:16px;letter-spacing:-.01em}
-    .brand .logo{width:32px;height:32px;border-radius:9px;background:rgba(255,255,255,.14);
-      display:grid;place-items:center}
-    .brand small{display:block;font-weight:400;font-size:11.5px;opacity:.82;letter-spacing:.01em}
-    .status{display:flex;gap:8px;flex-wrap:wrap}
-    .schip{display:inline-flex;align-items:center;gap:7px;padding:5px 11px;border-radius:8px;
-      font-size:12px;font-weight:500;background:rgba(255,255,255,.12);border:1px solid rgba(255,255,255,.16)}
-    .dot{width:7px;height:7px;border-radius:50%;background:#7FD1A6}
-    h1.head{margin:22px 0 6px;font-size:24px;font-weight:700;letter-spacing:-.02em;max-width:720px;line-height:1.25}
-    .sub{opacity:.85;max-width:640px;font-size:14px}
-    .kpis{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-top:20px}
-    .kpi{background:rgba(255,255,255,.09);border:1px solid rgba(255,255,255,.14);border-radius:11px;padding:12px 14px}
-    .kpi .v{font-size:19px;font-weight:700;letter-spacing:-.01em}
-    .kpi .l{font-size:11px;opacity:.8;text-transform:uppercase;letter-spacing:.05em;margin-top:3px}
+/* ---------- LANDING ---------- */
+#landing{min-height:100vh;background:
+  radial-gradient(1100px 500px at 88% -8%,var(--orange-50),transparent 60%),var(--bg)}
+.nav{display:flex;align-items:center;justify-content:space-between;padding:22px 0}
+.logo{display:flex;align-items:center;gap:10px;font-weight:800;letter-spacing:-.02em;font-size:19px}
+.logo .m{width:30px;height:30px;border-radius:8px;background:var(--dark);color:#fff;display:grid;place-items:center;font-weight:800;font-size:15px}
+.logo .m b{color:var(--orange)}
+.nav .r{display:flex;gap:10px;align-items:center;font-size:14px;color:var(--muted)}
+.hero{padding:56px 0 30px}
+.eyebrow{display:inline-flex;align-items:center;gap:8px;font-size:12.5px;font-weight:700;color:var(--orange);
+  background:var(--orange-50);padding:6px 12px;border-radius:999px;letter-spacing:.02em}
+.hero h1{font-size:clamp(34px,5vw,58px);line-height:1.04;letter-spacing:-.03em;margin:20px 0 0;max-width:16ch;font-weight:800}
+.hero h1 span{color:var(--orange)}
+.hero p{font-size:18px;color:var(--muted);max-width:56ch;margin:20px 0 0}
+.cta{display:flex;gap:12px;margin-top:30px;flex-wrap:wrap}
+.stats{display:grid;grid-template-columns:repeat(4,1fr);gap:1px;background:var(--line);border:1px solid var(--line);
+  border-radius:var(--r);overflow:hidden;margin:54px 0 10px}
+.stat{background:#fff;padding:22px}
+.stat .v{font-size:26px;font-weight:800;letter-spacing:-.02em}
+.stat .l{font-size:12.5px;color:var(--muted);margin-top:4px}
+.logos{display:flex;gap:26px;flex-wrap:wrap;align-items:center;color:var(--muted);font-size:13px;
+  padding:26px 0 60px;border-top:1px solid var(--line);margin-top:36px}
+.logos b{color:var(--ink)}
 
-    /* pipeline */
-    .pipe{margin-top:-46px;position:relative;z-index:2}
-    .card{background:var(--surface);border:1px solid var(--line);border-radius:var(--r);box-shadow:var(--shadow)}
-    .pipe-card{padding:15px 18px}
-    .pipe-head{display:flex;justify-content:space-between;align-items:center;margin-bottom:11px}
-    .pipe-head h3{margin:0;font-size:12px;text-transform:uppercase;letter-spacing:.07em;color:var(--muted);font-weight:600}
-    .pipe-head .state{font-size:12px;color:var(--muted);font-weight:500}
-    .track{display:flex;align-items:stretch;gap:0}
-    .node{flex:1;text-align:center;padding:9px 6px;border-radius:10px;transition:.3s;position:relative}
-    .node .n{font-size:10.5px;color:var(--muted);font-weight:600;letter-spacing:.04em}
-    .node .t{font-weight:600;margin-top:2px;font-size:13px}
-    .node .d{font-size:10.5px;color:var(--muted);margin-top:1px}
-    .node.active{background:var(--brand-50)}
-    .node.active .t{color:var(--brand)}
-    .node.done .n::after{content:" \2713";color:var(--good);font-weight:700}
-    .arrow{align-self:center;color:var(--line);flex:0 0 16px;text-align:center}
+/* mode picker */
+.modes{padding:8px 0 70px}
+.modes h2{font-size:30px;letter-spacing:-.02em;margin:0 0 6px;font-weight:800}
+.modes .sub{color:var(--muted);margin:0 0 26px}
+.mgrid{display:grid;grid-template-columns:repeat(auto-fit,minmax(210px,1fr));gap:16px}
+.mcard{background:#fff;border:1px solid var(--line);border-radius:var(--r);padding:22px;cursor:pointer;
+  transition:.18s;position:relative;overflow:hidden}
+.mcard:hover{border-color:var(--ink);transform:translateY(-3px);box-shadow:var(--shadow)}
+.mcard .ic{width:44px;height:44px;border-radius:11px;background:var(--soft);color:var(--orange);display:grid;place-items:center;margin-bottom:14px}
+.mcard h3{margin:0;font-size:17px;font-weight:700}
+.mcard p{margin:6px 0 0;color:var(--muted);font-size:13.5px}
+.mcard .lock{position:absolute;top:16px;right:16px;color:var(--muted)}
+.mcard.locked .ic{color:var(--muted)}
 
-    /* grid */
-    .grid{display:grid;grid-template-columns:1.02fr .98fr;gap:20px;margin-top:20px}
-    @media(max-width:920px){.grid{grid-template-columns:1fr}.kpis{grid-template-columns:repeat(2,1fr)}}
-    .panel{padding:20px}
-    .panel h2{margin:0 0 3px;font-size:15.5px;font-weight:700;letter-spacing:-.01em;display:flex;align-items:center;gap:9px}
-    .panel h2 .tag{font-size:10px;font-weight:600;color:var(--brand);background:var(--brand-50);
-      padding:3px 8px;border-radius:6px;text-transform:uppercase;letter-spacing:.04em}
-    .panel .hint{color:var(--muted);font-size:12.5px;margin:0 0 15px}
-    label{display:block;font-size:12px;color:var(--muted);font-weight:600;margin:13px 0 5px}
-    select,input[type=text]{width:100%;padding:10px 12px;border:1px solid var(--line);border-radius:10px;
-      background:var(--surface);color:var(--ink);font:inherit}
-    select:focus,input:focus{outline:none;border-color:var(--brand);box-shadow:0 0 0 3px var(--brand-50)}
-    .btn{margin-top:16px;width:100%;padding:11px 16px;border:0;border-radius:10px;background:var(--brand);
-      color:#fff;font-weight:600;font-size:14px;cursor:pointer;transition:.15s}
-    .btn:hover{background:var(--brand-600)}
+/* ---------- APP SHELL ---------- */
+#app{min-height:100vh;background:var(--soft)}
+.appbar{position:sticky;top:0;z-index:20;background:rgba(255,255,255,.86);backdrop-filter:blur(10px);
+  border-bottom:1px solid var(--line)}
+.appbar .in{display:flex;align-items:center;gap:16px;padding:12px 0}
+.seg{display:flex;background:var(--soft);border:1px solid var(--line);border-radius:10px;padding:3px;gap:2px;overflow:auto}
+.seg button{border:0;background:none;padding:8px 13px;border-radius:8px;font:inherit;font-weight:600;font-size:13px;
+  color:var(--muted);cursor:pointer;white-space:nowrap}
+.seg button.on{background:#fff;color:var(--ink);box-shadow:0 1px 2px rgba(0,0,0,.06)}
+.live{margin-left:auto;display:flex;align-items:center;gap:8px;font-size:12.5px;color:var(--muted)}
+.pdot{width:8px;height:8px;border-radius:50%;background:var(--good);box-shadow:0 0 0 3px var(--good-50)}
+.content{padding:26px 0 60px}
+.pane{display:none}.pane.on{display:block;animation:rise .45s ease both}
 
-    .result{margin-top:18px;display:none}
-    .winner{display:flex;align-items:center;gap:13px;padding:14px;border-radius:12px;
-      background:var(--surface-2);border:1px solid var(--line)}
-    .winner .ico{width:40px;height:40px;border-radius:10px;background:var(--brand-50);color:var(--brand);
-      flex:0 0 auto;display:grid;place-items:center}
-    .winner .a{font-weight:700;font-size:15px}
-    .winner .m{font-size:12px;color:var(--muted)}
-    .pills{display:flex;gap:8px;flex-wrap:wrap;margin:13px 0}
-    .pill{padding:5px 10px;border-radius:7px;font-size:12px;font-weight:600;border:1px solid transparent}
-    .pill.ok{background:var(--good-50);color:var(--good)}
-    .pill.slow{background:var(--bad-50);color:var(--bad)}
-    .pill.warn{background:var(--warn-50);color:var(--warn)}
-    .pill.neutral{background:var(--brand-50);color:var(--brand)}
-    .sec{font-size:11px;text-transform:uppercase;letter-spacing:.06em;color:var(--muted);font-weight:600;margin:17px 0 8px}
-    .reason{display:flex;justify-content:space-between;gap:10px;padding:8px 0;border-bottom:1px solid var(--line)}
-    .reason .rl{font-weight:500}
-    .reason .rv{font-size:12.5px;font-weight:600}
-    .reason .up{color:var(--good)} .reason .down{color:var(--bad)}
-    .bar{display:flex;align-items:center;gap:10px;margin:7px 0}
-    .bar .bl{width:96px;font-size:12px;color:var(--muted);text-transform:capitalize}
-    .bar .tk{flex:1;height:7px;border-radius:6px;background:var(--surface-2);overflow:hidden;border:1px solid var(--line)}
-    .bar .fl{height:100%;background:var(--brand);border-radius:6px}
-    .bar .bv{width:46px;text-align:right;font-size:12px;font-weight:600}
-    details{margin-top:15px;border:1px solid var(--line);border-radius:10px;background:var(--surface-2)}
-    summary{cursor:pointer;padding:10px 13px;font-weight:600;font-size:12.5px;color:var(--brand)}
-    details pre{margin:0;padding:0 13px 13px;font-size:11.5px;overflow:auto;max-height:280px;color:var(--muted)}
-    .ranked .row{display:flex;justify-content:space-between;padding:4px 0;font-size:12.5px;color:var(--muted);border-bottom:1px solid var(--line)}
-    .rej{color:var(--muted);font-size:12px}.rej b{color:var(--warn);font-weight:600}
+.panel{background:#fff;border:1px solid var(--line);border-radius:var(--r);box-shadow:var(--shadow)}
+.pad{padding:20px}
+.row{display:grid;gap:18px}
+.two{grid-template-columns:1fr 1fr}.three{grid-template-columns:repeat(3,1fr)}
+@media(max-width:860px){.two,.three{grid-template-columns:1fr}.stats{grid-template-columns:repeat(2,1fr)}}
+label{display:block;font-size:12px;color:var(--muted);font-weight:600;margin:12px 0 5px}
+select,input[type=text],input[type=password]{width:100%;padding:11px 12px;border:1px solid var(--line);border-radius:10px;background:#fff;color:var(--ink);font:inherit}
+select:focus,input:focus{outline:none;border-color:var(--orange);box-shadow:0 0 0 3px var(--orange-50)}
+.eyebrow2{font-size:11px;text-transform:uppercase;letter-spacing:.07em;color:var(--muted);font-weight:700}
+h2.pt{font-size:19px;font-weight:800;letter-spacing:-.01em;margin:0 0 3px}
+.hint{color:var(--muted);font-size:13px;margin:0 0 6px}
 
-    /* assistant */
-    .assistant{display:flex;flex-direction:column;min-height:520px}
-    .aihead{display:flex;align-items:center;gap:11px;padding-bottom:13px;border-bottom:1px solid var(--line)}
-    .ava{width:38px;height:38px;border-radius:50%;background:var(--brand);color:#fff;display:grid;place-items:center;flex:0 0 auto}
-    .aihead .who{font-weight:700;font-size:14.5px}
-    .aihead .st{font-size:11.5px;color:var(--good);font-weight:500;display:flex;align-items:center;gap:5px}
-    .thread{flex:1;overflow-y:auto;padding:16px 2px;display:flex;flex-direction:column;gap:12px;max-height:420px}
-    .msg{display:flex;gap:9px;max-width:90%}
-    .msg .mav{width:26px;height:26px;flex:0 0 auto;border-radius:50%;background:var(--brand);color:#fff;display:grid;place-items:center}
-    .bubble{padding:10px 13px;border-radius:12px;font-size:13.5px;line-height:1.5}
-    .msg.bot .bubble{background:var(--surface-2);border:1px solid var(--line);border-top-left-radius:4px}
-    .msg.user{align-self:flex-end}
-    .msg.user .bubble{background:var(--brand);color:#fff;border-top-right-radius:4px}
-    .steps{display:flex;flex-direction:column;gap:6px;margin-top:8px}
-    .step{display:flex;align-items:center;gap:9px;font-size:12.5px;color:var(--muted)}
-    .step .si{width:19px;height:19px;border-radius:5px;background:var(--surface);border:1px solid var(--line);
-      display:grid;place-items:center;color:var(--brand);flex:0 0 auto}
-    .step.esc .si{background:var(--warn-50);color:var(--warn);border-color:transparent}
-    .step b{color:var(--ink);font-weight:600;text-transform:capitalize}
-    .banner{margin-top:9px;padding:10px 13px;border-radius:10px;font-size:12.5px;font-weight:500}
-    .banner.esc{background:var(--warn-50);border:1px solid var(--warn);color:var(--warn)}
-    .banner.ok{background:var(--good-50);border:1px solid var(--good);color:var(--good)}
-    .typing span{display:inline-block;width:6px;height:6px;border-radius:50%;background:var(--muted);margin:0 1px;animation:b 1.2s infinite both}
-    .typing span:nth-child(2){animation-delay:.2s}.typing span:nth-child(3){animation-delay:.4s}
-    @keyframes b{0%,80%,100%{opacity:.25}40%{opacity:1}}
-    .chips{display:flex;gap:8px;flex-wrap:wrap;margin:12px 0 10px}
-    .qchip{padding:7px 12px;border-radius:8px;font-size:12.5px;font-weight:500;cursor:pointer;
-      background:var(--surface);border:1px solid var(--line);color:var(--brand)}
-    .qchip:hover{border-color:var(--brand);background:var(--brand-50)}
-    .composer{display:flex;align-items:center;gap:8px;border:1px solid var(--line);border-radius:10px;padding:5px 5px 5px 13px;background:var(--surface)}
-    .composer input{border:0;background:none;flex:1;padding:8px 0}
-    .composer input:focus{outline:none;box-shadow:none}
-    .composer select{width:auto;border:0;background:none;color:var(--muted);font-size:12px;padding:0}
-    .composer .send{width:36px;height:36px;border-radius:8px;border:0;cursor:pointer;background:var(--brand);color:#fff;display:grid;place-items:center;flex:0 0 auto}
-    footer{margin-top:28px;text-align:center;color:var(--muted);font-size:12px;line-height:1.6}
-    svg.i{width:20px;height:20px;stroke:currentColor;fill:none;stroke-width:1.7;stroke-linecap:round;stroke-linejoin:round}
-    .msg .si svg.i,.step .si svg.i{width:12px;height:12px}
-  </style>
+/* pills / kpis */
+.pill{display:inline-block;padding:5px 10px;border-radius:8px;font-size:12px;font-weight:600;margin:3px 6px 0 0}
+.pill.ok{background:var(--good-50);color:var(--good)}.pill.slow{background:var(--bad-50);color:var(--bad)}
+.pill.warn{background:var(--warn-50);color:var(--warn)}.pill.n{background:var(--orange-50);color:var(--orange-600)}
+.kpis{display:grid;grid-template-columns:repeat(4,1fr);gap:14px}
+@media(max-width:860px){.kpis{grid-template-columns:repeat(2,1fr)}}
+.kpi{background:#fff;border:1px solid var(--line);border-radius:14px;padding:16px}
+.kpi .v{font-size:24px;font-weight:800;letter-spacing:-.02em}.kpi .l{font-size:12px;color:var(--muted);margin-top:3px}
+.kpi .d{font-size:11.5px;margin-top:6px;color:var(--good);font-weight:600}
+
+/* bars */
+.bar{display:flex;align-items:center;gap:10px;margin:8px 0}
+.bar .bl{width:150px;font-size:12.5px;color:var(--muted)}
+.bar .tk{flex:1;height:9px;border-radius:6px;background:var(--soft);overflow:hidden;border:1px solid var(--line)}
+.bar .fl{height:100%;background:var(--orange);border-radius:6px;transition:width .6s ease}
+.bar .bv{width:52px;text-align:right;font-weight:700;font-size:12.5px}
+
+/* customer */
+.ccard{background:linear-gradient(180deg,#fff,var(--soft));border:1px solid var(--line);border-radius:20px;padding:26px}
+.ctitle{font-size:22px;font-weight:800;letter-spacing:-.01em;line-height:1.25}
+.cmsg{font-size:16px;color:var(--ink);margin-top:8px}
+.cwhy{margin-top:14px;background:#fff;border:1px solid var(--line);border-radius:12px;padding:14px}
+.cwhy .h{font-size:11px;text-transform:uppercase;letter-spacing:.06em;color:var(--muted);font-weight:700;margin-bottom:6px}
+.cact{margin-top:16px;display:flex;gap:10px;flex-wrap:wrap}
+
+/* chat */
+.thread{display:flex;flex-direction:column;gap:11px;max-height:360px;overflow:auto;padding:6px 2px}
+.msg{display:flex;gap:9px;max-width:90%}
+.msg .av{width:28px;height:28px;flex:0 0 auto;border-radius:50%;background:var(--dark);color:#fff;display:grid;place-items:center}
+.msg .av b{color:var(--orange)}
+.bubble{padding:10px 13px;border-radius:13px;font-size:13.5px;line-height:1.5}
+.msg.bot .bubble{background:var(--soft);border:1px solid var(--line);border-top-left-radius:4px}
+.msg.user{align-self:flex-end}.msg.user .bubble{background:var(--dark);color:#fff;border-top-right-radius:4px}
+.steps{display:flex;flex-direction:column;gap:6px;margin-top:8px}
+.stp{display:flex;gap:9px;align-items:center;font-size:12.5px;color:var(--muted)}
+.stp .si{width:19px;height:19px;border-radius:5px;background:#fff;border:1px solid var(--line);display:grid;place-items:center;color:var(--orange);flex:0 0 auto}
+.stp.esc .si{background:var(--warn-50);color:var(--warn);border:0}.stp b{color:var(--ink);text-transform:capitalize}
+.banner{margin-top:9px;padding:11px 13px;border-radius:11px;font-size:13px;font-weight:500}
+.banner.esc{background:var(--warn-50);border:1px solid var(--warn);color:#8A5A12}
+.banner.ok{background:var(--good-50);border:1px solid var(--good);color:#1B6C41}
+.typing span{display:inline-block;width:6px;height:6px;border-radius:50%;background:var(--muted);margin:0 1px;animation:b 1.2s infinite both}
+.typing span:nth-child(2){animation-delay:.2s}.typing span:nth-child(3){animation-delay:.4s}
+@keyframes b{0%,80%,100%{opacity:.25}40%{opacity:1}}
+.chips{display:flex;gap:8px;flex-wrap:wrap;margin:12px 0 10px}
+.chip{padding:7px 12px;border-radius:8px;font-size:12.5px;font-weight:600;cursor:pointer;background:#fff;border:1px solid var(--line);color:var(--orange-600)}
+.chip:hover{border-color:var(--orange)}
+.composer{display:flex;gap:8px;align-items:center;border:1px solid var(--line);border-radius:11px;padding:5px 5px 5px 13px;background:#fff}
+.composer input{border:0;flex:1;padding:8px 0}.composer input:focus{box-shadow:none}
+.composer .send{width:38px;height:38px;border-radius:9px;border:0;background:var(--orange);color:#fff;display:grid;place-items:center;cursor:pointer;flex:0 0 auto}
+
+/* pipeline */
+.pipe{display:flex;align-items:stretch;gap:0;margin-top:4px}
+.node{flex:1;text-align:center;padding:10px 6px;border-radius:10px;transition:.3s}
+.node .n{font-size:10.5px;color:var(--muted);font-weight:700}.node .t{font-weight:700;font-size:13px;margin-top:2px}
+.node .d{font-size:10.5px;color:var(--muted)}
+.node.active{background:var(--orange-50)}.node.active .t{color:var(--orange-600)}
+.node.done .n::after{content:" \2713";color:var(--good)}
+.arw{align-self:center;color:var(--line);flex:0 0 14px;text-align:center}
+
+/* feed */
+.feed{display:flex;flex-direction:column;gap:0;max-height:340px;overflow:auto}
+.frow{display:flex;align-items:center;gap:10px;padding:9px 2px;border-bottom:1px solid var(--line);font-size:13px}
+.frow .tg{font-size:11px;color:var(--muted);width:64px;flex:0 0 auto}
+.frow .ev{font-weight:600}.frow .rg{margin-left:auto;font-size:11.5px;color:var(--muted)}
+.reason{display:flex;justify-content:space-between;padding:8px 0;border-bottom:1px solid var(--line);font-size:13px}
+.reason .up{color:var(--good);font-weight:600}.reason .down{color:var(--bad);font-weight:600}
+.tbl{width:100%;border-collapse:collapse;font-size:12.5px}
+.tbl td{padding:7px 8px;border-bottom:1px solid var(--line);vertical-align:top}
+.tbl td:first-child{color:var(--muted);white-space:nowrap;width:150px}
+pre{background:var(--dark);color:#D7DCE5;border-radius:11px;padding:14px;overflow:auto;font-size:11.5px;max-height:300px}
+.lockwrap{max-width:380px;margin:60px auto;text-align:center}
+.lockwrap .ic{width:56px;height:56px;border-radius:14px;background:var(--soft);color:var(--orange);display:grid;place-items:center;margin:0 auto 16px}
+.err{color:var(--bad);font-size:13px;margin-top:8px;min-height:18px}
+.foot{color:var(--muted);font-size:12px;text-align:center;padding:26px 0}
+</style>
 </head>
 <body>
-  <header class="top">
-    <div class="wrap">
-      <div class="brandrow">
-        <div class="brand">
-          <span class="logo">
-            <svg class="i" viewBox="0 0 24 24"><path d="M4 13h4l2 5 4-12 2 7h4"/></svg>
-          </span>
-          <div>NBA Studio<small>Real-time, agentic personalization for BFSI</small></div>
-        </div>
-        <div class="status" id="status"><span class="schip"><span class="dot"></span> connecting</span></div>
-      </div>
-      <h1 class="head">A personalized next-best-action for every interaction, decided, explained and audited in under 98 ms.</h1>
-      <div class="sub">Five composable layers, an agent that escalates when the stakes are high, and a full reason and audit trail on every decision.</div>
-      <div class="kpis" id="kpis">
-        <div class="kpi"><div class="v" id="k-slo">98 ms</div><div class="l">Latency SLO, p99</div></div>
-        <div class="kpi"><div class="v" id="k-audit">0</div><div class="l">Audit rows</div></div>
-        <div class="kpi"><div class="v">5</div><div class="l">Composable layers</div></div>
-        <div class="kpi"><div class="v" id="k-agent">ready</div><div class="l">Agent runtime</div></div>
-      </div>
-    </div>
-  </header>
 
+
+<section id="landing" class="view on">
   <div class="wrap">
-    <div class="pipe">
-      <div class="card pipe-card">
-        <div class="pipe-head"><h3>Decision pipeline</h3><span class="state" id="pipe-state">idle</span></div>
-        <div class="track" id="pipe">
-          <div class="node"><div class="n">L1</div><div class="t">Data</div><div class="d">ledger, hot store</div></div>
-          <div class="arrow">&rsaquo;</div>
-          <div class="node"><div class="n">L2</div><div class="t">Features</div><div class="d">online, sub ms</div></div>
-          <div class="arrow">&rsaquo;</div>
-          <div class="node"><div class="n">L3</div><div class="t">Models</div><div class="d">propensity, uplift, fraud</div></div>
-          <div class="arrow">&rsaquo;</div>
-          <div class="node"><div class="n">L4</div><div class="t">Decisioning</div><div class="d">rules, bandit</div></div>
-          <div class="arrow">&rsaquo;</div>
-          <div class="node"><div class="n">L5</div><div class="t">Governance</div><div class="d">reasons, fairness, audit</div></div>
-        </div>
+    <div class="nav">
+      <div class="logo"><span class="m">A<b>.</b></span> Aria</div>
+      <div class="r"><span>BFSI Personalization Platform</span><span id="lstatus">•</span></div>
+    </div>
+    <div class="hero">
+      <span class="eyebrow">Real-time · Explainable · Agentic</span>
+      <h1>Know every customer like you have<span> served them for years.</span></h1>
+      <p>Aria decides the next-best-action for every interaction, explains it in plain language, keeps a regulator-ready audit trail, and hands the hard calls to a human. One platform, five points of view.</p>
+      <div class="cta">
+        <button class="btn" onclick="enter()">Explore the platform <svg class="i" viewBox="0 0 24 24" style="width:18px;height:18px"><path d="M5 12h14M13 6l6 6-6 6"/></svg></button>
+        <button class="btn ghost" onclick="document.getElementById('modepick').scrollIntoView({behavior:'smooth'})">Choose a view</button>
+      </div>
+      <div class="stats" id="lstats">
+        <div class="stat"><div class="v" data-c="98" data-suf=" ms">0</div><div class="l">Decision latency, p99 budget</div></div>
+        <div class="stat"><div class="v" data-c="5">0</div><div class="l">Composable layers</div></div>
+        <div class="stat"><div class="v" data-c="10">0</div><div class="l">BFSI sub-verticals</div></div>
+        <div class="stat"><div class="v" data-c="16">0</div><div class="l">Audit fields per decision</div></div>
+      </div>
+      <div class="logos">
+        <span>Patterned on the platforms that set the bar:</span>
+        <span><b>BofA Erica</b> sub-44ms</span><span><b>BlackRock Aladdin</b> $23T AUM</span>
+        <span><b>Lemonade</b> 3-second claims</span><span><b>Bajaj FINAI</b> 800+ agents</span>
       </div>
     </div>
 
-    <div class="grid">
-      <section class="card panel">
-        <h2>Next-best-action <span class="tag">Layer 4, 5</span></h2>
-        <p class="hint">Pick a customer and a live signal. The engine scores every model, applies eligibility and do-no-harm rules, ranks by expected value, and writes an audit row.</p>
-        <label>Customer, non-PII</label>
-        <select id="party"></select>
-        <label>Live context signal</label>
-        <select id="event">
-          <option value="session_start">Session start</option>
-          <option value="large_transfer_attempt">Large transfer attempt, 4,000</option>
-          <option value="product_page_view">Product page view</option>
-          <option value="card_declined">Card declined</option>
-        </select>
-        <button class="btn" onclick="decide()">Recommend next-best-action</button>
-        <div class="result" id="result">
-          <div class="winner"><div class="ico" id="w-ico"></div>
-            <div><div class="a" id="w-action"></div><div class="m" id="w-id"></div></div></div>
-          <div class="pills" id="w-pills"></div>
-          <div class="sec">Why, reason codes</div><div id="w-reasons"></div>
-          <div class="sec">Model signals</div><div id="w-scores"></div>
-          <div class="sec">Considered and ruled out</div><div class="ranked" id="w-ranked"></div>
-          <details><summary>Audit record, <span id="w-decid"></span></summary><pre id="w-audit"></pre></details>
-        </div>
-      </section>
-
-      <section class="card panel assistant">
-        <div class="aihead">
-          <span class="ava"><svg class="i" viewBox="0 0 24 24"><path d="M12 3a9 9 0 100 18 9 9 0 000-18z"/><path d="M8 13a4 4 0 008 0"/><circle cx="9" cy="10" r="0.5"/><circle cx="15" cy="10" r="0.5"/></svg></span>
-          <div style="flex:1"><div class="who">Ava, virtual banking assistant</div><div class="st"><span class="dot"></span> online, agentic</div></div>
-          <span class="tag" style="font-size:10px;font-weight:600;color:var(--brand);background:var(--brand-50);padding:3px 8px;border-radius:6px;text-transform:uppercase;letter-spacing:.04em">Agent</span>
-        </div>
-        <div class="thread" id="thread"></div>
-        <div class="chips">
-          <span class="qchip" onclick="quick(this)">Pre-approved loan of 50,000</span>
-          <span class="qchip" onclick="quick(this)">Dispute a charge of 15,000</span>
-          <span class="qchip" onclick="quick(this)">A quick financial tip</span>
-        </div>
-        <div class="composer">
-          <select id="aparty" title="acting for customer"></select>
-          <input id="goal" type="text" placeholder="Ask Ava to handle something" onkeydown="if(event.key==='Enter')runAgent()"/>
-          <button class="send" onclick="runAgent()" title="send"><svg class="i" viewBox="0 0 24 24" style="width:16px;height:16px"><path d="M4 12l16-8-6 16-3-6-7-2z"/></svg></button>
-        </div>
-      </section>
+    <div class="modes" id="modepick">
+      <h2>Pick your point of view</h2>
+      <p class="sub">The same decision engine, seen through the eyes of everyone it touches.</p>
+      <div class="mgrid" id="mgrid"></div>
     </div>
-
-    <footer>Structural reference demo, synthetic data and illustrative scores. Local stand-ins map to cloud services (Postgres to Snowflake, Redis to ElastiCache, agent to LangGraph on EKS). The architecture, latency and audit trail are the point.</footer>
+    <div class="foot">Aria is a structural reference platform. Synthetic data, illustrative scores. The architecture, latency and audit trail are real.</div>
   </div>
+</section>
+
+
+<section id="app" class="view">
+  <div class="appbar"><div class="wrap in">
+    <div class="logo" style="font-size:16px;cursor:pointer" onclick="home()"><span class="m">A<b>.</b></span> Aria</div>
+    <div class="seg" id="seg"></div>
+    <div class="live"><span class="pdot"></span><span id="livetxt">live</span></div>
+  </div></div>
+  <div class="wrap content">
+    <div class="pane" id="pane-customer"></div>
+    <div class="pane" id="pane-advisor"></div>
+    <div class="pane" id="pane-executive"></div>
+    <div class="pane" id="pane-regulator"></div>
+    <div class="pane" id="pane-developer"></div>
+  </div>
+</section>
 
 <script>
-const $=id=>document.getElementById(id);
-const ICON={
-  shield:'<path d="M12 3l7 3v5c0 4-3 7-7 8-4-1-7-4-7-8V6l7-3z"/>',
-  bank:'<path d="M3 10l9-5 9 5"/><path d="M5 10v8M9 10v8M15 10v8M19 10v8M3 21h18"/>',
-  card:'<rect x="3" y="6" width="18" height="12" rx="2"/><path d="M3 10h18"/>',
-  chart:'<path d="M4 19V5M4 19h16M8 15l3-4 3 2 4-6"/>',
-  handshake:'<path d="M8 12l3 3 5-5"/><path d="M3 10l4-4 5 3 5-3 4 4"/>',
-  headset:'<path d="M4 13v-1a8 8 0 0116 0v1"/><rect x="3" y="13" width="4" height="6" rx="1"/><rect x="17" y="13" width="4" height="6" rx="1"/>',
-  spark:'<path d="M12 4v16M4 12h16M6 6l12 12M18 6L6 18"/>'
-};
-function svg(name){return `<svg class="i" viewBox="0 0 24 24">${ICON[name]||ICON.spark}</svg>`}
-function iconFor(id){id=id||'';if(id.includes('fraud'))return svg('shield');if(id.includes('loan'))return svg('bank');
-  if(id.includes('card'))return svg('card');if(id.includes('wealth'))return svg('chart');
-  if(id.includes('retain'))return svg('handshake');if(id.includes('support'))return svg('headset');return svg('spark')}
-const stepSvg={perceive:'<circle cx="12" cy="12" r="3"/><path d="M2 12s4-6 10-6 10 6 10 6-4 6-10 6-10-6-10-6z"/>',
-  reason:'<path d="M9 3a4 4 0 00-3 7 3 3 0 00.5 5H9M15 3a4 4 0 013 7 3 3 0 01-.5 5H15M9 3v18M15 3v18"/>',
-  act:'<circle cx="12" cy="12" r="3"/><path d="M12 3v3M12 18v3M3 12h3M18 12h3"/>',
-  observe:'<path d="M5 4h11l3 3v13H5z"/><path d="M9 12h6M9 16h6"/>',decide:'<path d="M5 12l5 5 9-9"/>'};
-function stepIcon(n){return `<svg class="i" viewBox="0 0 24 24">${stepSvg[n]||'<circle cx="12" cy="12" r="2"/>'}</svg>`}
-const avaSmall=`<span class="mav"><svg class="i" viewBox="0 0 24 24"><path d="M12 3a9 9 0 100 18 9 9 0 000-18z"/><path d="M8 13a4 4 0 008 0"/></svg></span>`;
+const $=s=>document.querySelector(s), el=(h)=>{const d=document.createElement('div');d.innerHTML=h;return d.firstElementChild};
+const api={async get(u){const r=await fetch(u);return r.json()},async post(u,b){const r=await fetch(u,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(b)});return r.json()}};
+let META={}, PERSONAS=[], MODE='customer', DEV_OK=false, streamTimer=null;
 
-const FALLBACK=[["P000000","retail","discover","high"],["P000001","retail","discover","medium"],
- ["P000002","retail","originate","low"],["P000009","insurance","cross_sell","low"],
- ["P000013","wealth","retain","low"],["P000023","nbfc","originate","low"]];
-function fill(list){const o=list.map(p=>`<option value="${p.party_id||p[0]}">${(p.party_id||p[0])}, ${(p.domain||p[1])}/${(p.journey_stage||p[2])}, ${(p.risk_band||p[3])}</option>`).join('');party.innerHTML=o;aparty.innerHTML=o}
+const MODES=[
+  {id:'customer',name:'Customer',ic:'M12 12a4 4 0 100-8 4 4 0 000 8zM4 20c0-4 4-6 8-6s8 2 8 6',desc:'What your customer feels. Friendly, personal, no jargon.'},
+  {id:'advisor',name:'Advisor',ic:'M4 19V5l8 4 8-4v14M8 21V11',desc:'The relationship co-pilot. Briefs, opportunities, talking points.'},
+  {id:'executive',name:'Executive',ic:'M4 19h16M7 16V9M12 16V5M17 16v-4',desc:'The book of decisions. Value, latency, fairness, at a glance.'},
+  {id:'regulator',name:'Regulator',ic:'M12 3l8 4v5c0 4-3 7-8 9-5-2-8-5-8-9V7l8-4z',desc:'Every decision, explained. SHAP, fairness, replayable audit.'},
+  {id:'developer',name:'Developer',ic:'M8 9l-4 3 4 3M16 9l4 3-4 3M13 6l-2 12',desc:'Under the hood. Architecture, latency, agentic internals.',locked:true},
+];
+const FRIENDLY={
+  payments_fraud_stepup_auth:{t:"Let's keep your account safe",m:"We noticed something unusual, so we'd like to quickly confirm it's really you before this goes through.",cta:"Verify it's me",why:"Recent activity looked different from your usual pattern."},
+  retail_cross_sell_credit_card:{t:"A card that fits how you spend",m:"Based on how you use your account, a different card could earn you more each month.",cta:"See my offer",why:"Your spending pattern matches customers who benefit from this card."},
+  wealth_advisory_upgrade:{t:"A quick review could go a long way",m:"A short portfolio check-in with an advisor could help you reach your goals faster.",cta:"Book a review",why:"Your balance and goals suggest room to optimise."},
+  nbfc_preapproved_loan:{t:"Good news, you're pre-approved",m:"You're pre-approved for a loan with terms tailored to you. No paperwork to start.",cta:"View my terms",why:"Your history qualifies you for a tailored, pre-approved offer."},
+  retain_retention_offer:{t:"We're glad you're here",m:"You've been with us a while and we'd love to keep it that way. Here's a little something to say thanks.",cta:"Claim my perk",why:"You're a valued long-term customer."},
+  service_proactive_support:{t:"Need a hand?",m:"We spotted you might have a question. We're here whenever you need us.",cta:"Chat with us",why:"Recent activity suggests you may want support."},
+  engage_financial_tip:{t:"A quick tip for you",m:"A small change this month could help your money go a little further.",cta:"Show me",why:"A timely, personalised nudge based on your activity."},
+};
+function friendly(a){return FRIENDLY[a]||{t:"Here's something for you",m:"A personalised suggestion based on your recent activity.",cta:"Tell me more",why:"Tailored to you."}}
+function pretty(id){return (id||'').replace(/_/g,' ').replace(/\b\w/g,c=>c.toUpperCase())}
+const FALLBACK=[{party_id:'P000000',domain:'retail',domain_label:'Retail Banking',journey_stage:'discover',region:'North America',currency:'USD',risk_band:'high'},
+ {party_id:'P000023',domain:'nbfc',domain_label:'NBFC',journey_stage:'originate',region:'India',currency:'INR',risk_band:'low'},
+ {party_id:'P000009',domain:'wealth',domain_label:'Wealth',journey_stage:'cross_sell',region:'Europe',currency:'EUR',risk_band:'low'}];
 
 async function boot(){
-  try{
-    const h=await (await fetch('/health')).json();
-    $('status').innerHTML=`<span class="schip"><span class="dot"></span> ${h.backends.ledger}, ${h.backends.online_store}</span><span class="schip">${h.parties.toLocaleString()} customers</span>`;
-    $('k-agent').textContent=h.agent_engine;
-    $('k-audit').textContent=((await (await fetch('/governance')).json()).audit_rows||0).toLocaleString();
-    fill(await (await fetch('/personas?limit=18')).json());
-  }catch(e){$('status').innerHTML='<span class="schip">offline preview</span>';fill(FALLBACK)}
-  greet();
+  try{META=await api.get('/meta');PERSONAS=await api.get('/personas?limit=40');
+      $('#lstatus').textContent='online';}
+  catch(e){META={references:{}};PERSONAS=FALLBACK;$('#lstatus').textContent='offline preview';}
+  $('#mgrid').innerHTML=MODES.map(m=>`<div class="mcard ${m.locked?'locked':''}" onclick="pick('${m.id}')">
+    ${m.locked?'<span class="lock"><svg class="i" viewBox="0 0 24 24" style="width:16px;height:16px"><rect x="5" y="11" width="14" height="9" rx="2"/><path d="M8 11V8a4 4 0 018 0v3"/></svg></span>':''}
+    <div class="ic"><svg class="i" viewBox="0 0 24 24"><path d="${m.ic}"/></svg></div>
+    <h3>${m.name}</h3><p>${m.desc}</p></div>`).join('');
+  $('#seg').innerHTML=MODES.map(m=>`<button data-m="${m.id}" onclick="pick('${m.id}')">${m.name}${m.locked?' 🔒':''}</button>`).join('');
+  countUp();
 }
-function runPipe(){const ns=[...document.querySelectorAll('#pipe .node')];ns.forEach(n=>n.classList.remove('active','done'));
-  $('pipe-state').textContent='running';
-  return new Promise(res=>{let i=0;const s=()=>{if(i>0)ns[i-1].classList.add('done');
-    if(i<ns.length){ns[i].classList.add('active');i++;setTimeout(s,130)}else{ns[ns.length-1].classList.remove('active');ns[ns.length-1].classList.add('done');$('pipe-state').textContent='decision emitted';res()}};s()})}
+function countUp(){document.querySelectorAll('#lstats .v').forEach(n=>{const to=+n.dataset.c,suf=n.dataset.suf||'';n.textContent=to+suf;let i=0;
+  const step=()=>{i+=Math.ceil(to/24);if(i>=to){n.textContent=to+suf}else{n.textContent=i+suf;setTimeout(step,26)}};i=0;setTimeout(step,60);})}
 
-async function decide(){
-  const amt=event.value==='large_transfer_attempt'?4000:0;
-  const anim=runPipe();let d;
-  try{d=await (await fetch('/decide',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({party_id:party.value,channel:'web',event:{event_type:event.value,amount:amt}})})).json()}
-  catch(e){$('pipe-state').textContent='API offline';return}
-  await anim;
-  $('result').style.display='block';
-  $('w-action').textContent=pretty(d.action);$('w-id').textContent=d.action;$('w-ico').innerHTML=iconFor(d.action);
-  $('w-pills').innerHTML=`<span class="pill ${d.within_slo?'ok':'slow'}">${d.latency_ms} ms, SLO ${d.slo_ms}</span>
-    <span class="pill ${d.fairness_flag==='adverse_impact'?'warn':'ok'}">fairness, ${d.fairness_flag}</span>
-    <span class="pill neutral">expected value ${d.score}</span>`;
-  $('w-reasons').innerHTML=d.reason_codes.map(r=>`<div class="reason"><span class="rl">${r.label}</span><span class="rv ${r.direction==='increases'?'up':'down'}">${r.direction}, ${r.contribution>0?'+':''}${r.contribution}</span></div>`).join('');
-  $('w-scores').innerHTML=Object.entries(d.model_scores).map(([k,v])=>`<div class="bar"><span class="bl">${k}</span><div class="tk"><div class="fl" style="width:${Math.min(100,Math.max(3,v*100))}%"></div></div><span class="bv">${(+v).toFixed(3)}</span></div>`).join('');
-  const rk=(d.ranked||[]).slice(1,4).map(r=>`<div class="row"><span>${pretty(r.action_id)}</span><span>EV ${r.expected_value}</span></div>`).join('');
-  const rj=(d.rejected||[]).map(r=>`<span class="rej">${pretty(r.action_id)} <b>${r.reason}</b></span>`).join(', ');
-  $('w-ranked').innerHTML=(rk||'')+(rj?`<div style="margin-top:6px">${rj}</div>`:'');
-  $('w-decid').textContent=d.decision_id;
-  try{$('w-audit').textContent=JSON.stringify(await (await fetch('/audit/'+d.decision_id)).json(),null,2)}catch(e){}
+function enter(){pick('customer')}
+function home(){$('#app').classList.remove('on');$('#landing').classList.add('on');window.scrollTo(0,0);stopStream();}
+function pick(id){
+  const m=MODES.find(x=>x.id===id);
+  if(m.locked && !DEV_OK){openApp(id);renderLock();return;}
+  openApp(id);
+}
+function openApp(id){
+  MODE=id;$('#landing').classList.remove('on');$('#app').classList.add('on');window.scrollTo(0,0);
+  document.querySelectorAll('#seg button').forEach(b=>b.classList.toggle('on',b.dataset.m===id));
+  document.querySelectorAll('.pane').forEach(p=>p.classList.remove('on'));
+  const pane=$('#pane-'+id);pane.classList.add('on');
+  stopStream();
+  if(id==='customer')renderCustomer(pane);
+  else if(id==='advisor')renderAdvisor(pane);
+  else if(id==='executive')renderExecutive(pane);
+  else if(id==='regulator')renderRegulator(pane);
+  else if(id==='developer'){DEV_OK?renderDeveloper(pane):renderLock();}
+}
+function personaOptions(){return PERSONAS.map(p=>`<option value="${p.party_id}">${p.party_id} · ${p.domain_label} · ${p.region} · ${p.risk_band} risk</option>`).join('')}
+
+/* ---------------- CUSTOMER ---------------- */
+function renderCustomer(pane){
+  pane.innerHTML=`<div class="row two">
+    <div>
+      <div class="panel pad">
+        <div class="eyebrow2">Customer view</div>
+        <h2 class="pt">Hi there 👋</h2>
+        <p class="hint">Pick a profile to see the experience your customer gets. No dashboards, no scores, just a helpful, personal moment.</p>
+        <label>Profile</label><select id="cust">${personaOptions()}</select>
+        <div style="margin-top:14px"><button class="btn" onclick="custDecide()">Show my moment</button></div>
+        <div id="cout" style="margin-top:18px"></div>
+      </div>
+    </div>
+    <div><div class="panel pad">
+      <div style="display:flex;align-items:center;gap:10px;border-bottom:1px solid var(--line);padding-bottom:12px;margin-bottom:6px">
+        <span class="msg"><span class="av">A<b>.</b></span></span>
+        <div><div style="font-weight:700">Ava</div><div style="font-size:12px;color:var(--good)">online · here to help</div></div></div>
+      <div class="thread" id="cthread"></div>
+      <div class="chips">
+        <span class="chip" onclick="cquick(this)">Am I pre-approved for a loan?</span>
+        <span class="chip" onclick="cquick(this)">Help with a payment I don't recognise</span>
+        <span class="chip" onclick="cquick(this)">A quick money tip</span></div>
+      <div class="composer"><input id="cgoal" placeholder="Ask Ava anything" onkeydown="if(event.key==='Enter')cAgent()"/>
+        <button class="send" onclick="cAgent()"><svg class="i" viewBox="0 0 24 24" style="width:16px;height:16px"><path d="M4 12l16-8-6 16-3-6-7-2z"/></svg></button></div>
+    </div></div>
+  </div>`;
+  cgreet();
+}
+async function custDecide(){
+  const pid=$('#cust').value;
+  const out=$('#cout');out.innerHTML='<div class="hint">Personalising…</div>';
+  let d;try{d=await api.post('/decide',{party_id:pid,channel:'app',event:{event_type:'session_start'}});}catch(e){out.innerHTML='<div class="err">Could not reach the service.</div>';return;}
+  const f=friendly(d.action);
+  out.innerHTML=`<div class="ccard">
+    <div class="ctitle">${f.t}</div><div class="cmsg">${f.m}</div>
+    <div class="cwhy"><div class="h">Why you're seeing this</div>${f.why}</div>
+    <div class="cact"><button class="btn">${f.cta}</button><button class="btn ghost">Not now</button></div>
+    <div style="margin-top:12px;font-size:11.5px;color:var(--muted)">Decided in ${d.latency_ms} ms · you can ask us why, any time.</div>
+  </div>`;
+}
+function cbubble(t,who){const d=el(`<div class="msg ${who}">${who==='bot'?'<span class="av">A<b>.</b></span>':''}<div class="bubble">${t}</div></div>`);$('#cthread').appendChild(d);$('#cthread').scrollTop=1e9;return d}
+function cgreet(){$('#cthread').innerHTML='';cbubble("Hi, I'm Ava. Ask me anything about your account and I'll sort it, or bring in a specialist if it needs a human touch.",'bot')}
+function cquick(e){$('#cgoal').value=e.textContent;cAgent()}
+function cAgent(){agentRun($('#cust').value,$('#cgoal').value,'#cthread',()=>{$('#cgoal').value=''},true)}
+
+/* ---------------- ADVISOR ---------------- */
+function renderAdvisor(pane){
+  pane.innerHTML=`<div class="panel pad">
+    <div class="eyebrow2">Advisor / RM view</div><h2 class="pt">Relationship co-pilot</h2>
+    <p class="hint">A ready-to-use brief for your next conversation, drafted the way Aladdin Auto-Commentary drafts for wealth advisors.</p>
+    <label>Client</label><select id="adv" onchange="advBrief()">${personaOptions()}</select>
+    <div id="aout" style="margin-top:16px"></div></div>`;
+  advBrief();
+}
+async function advBrief(){
+  const pid=$('#adv').value,out=$('#aout');out.innerHTML='<div class="hint">Preparing brief…</div>';
+  let d,snap;try{[d,snap]=await Promise.all([api.post('/decide',{party_id:pid,channel:'branch',event:{event_type:'session_start'}}),api.get('/party/'+pid)]);}catch(e){out.innerHTML='<div class="err">Service unavailable.</div>';return;}
+  const a=d.attrs,top=d.reason_codes[0];
+  out.innerHTML=`<div class="row two">
+    <div class="panel pad" style="box-shadow:none">
+      <div class="eyebrow2">Recommended next best action</div>
+      <div style="font-size:20px;font-weight:800;margin:4px 0">${pretty(d.action)}</div>
+      <div>${d.reason_codes.map(r=>`<div class="reason"><span>${r.label}</span><span class="${r.direction==='increases'?'up':'down'}">${r.direction}</span></div>`).join('')}</div>
+      <div style="margin-top:12px"><span class="pill n">expected value ${d.score}</span><span class="pill ok">${a.region} · ${a.currency}</span><span class="pill ${d.within_slo?'ok':'slow'}">${d.latency_ms} ms</span></div>
+    </div>
+    <div class="panel pad" style="box-shadow:none">
+      <div class="eyebrow2">Talking points</div>
+      <ul style="padding-left:18px;margin:8px 0;line-height:1.7">
+        <li>Lead with the <b>${pretty(d.action).toLowerCase()}</b>, it is the highest-value action for this ${a.domain} client.</li>
+        <li>Anchor on the driver: <b>${top?top.label:'recent activity'}</b>.</li>
+        <li>Client is in the <b>${a.journey_stage}</b> stage with a <b>${a.risk_band}</b> risk profile, tailor tone accordingly.</li>
+        <li>Suitability and audit are handled automatically, this action is logged and explainable.</li>
+      </ul>
+      <button class="btn">Prepare outreach</button>
+    </div></div>`;
 }
 
-function bubble(t,who){const d=document.createElement('div');d.className='msg '+who;d.innerHTML=(who==='bot'?avaSmall:'')+`<div class="bubble">${t}</div>`;thread.appendChild(d);thread.scrollTop=thread.scrollHeight;return d}
-function greet(){thread.innerHTML='';bubble("Hi, I am Ava. I can act on a customer request end to end, and I bring in a human when the stakes are high. Try one of the suggestions below.",'bot')}
-function quick(el){goal.value=el.textContent.trim();runAgent()}
+/* ---------------- EXECUTIVE ---------------- */
+function renderExecutive(pane){
+  pane.innerHTML=`<div class="eyebrow2">Executive view</div><h2 class="pt" style="margin-bottom:14px">The book of decisions</h2>
+    <div class="kpis" id="exk"></div>
+    <div class="row two" style="margin-top:18px">
+      <div class="panel pad"><div class="eyebrow2">Decisions by action</div><div id="exact" style="margin-top:10px"></div></div>
+      <div class="panel pad"><div class="eyebrow2">Decisions by region</div><div id="exreg" style="margin-top:10px"></div></div>
+    </div>
+    <div class="panel pad" style="margin-top:18px"><div style="display:flex;align-items:center;gap:8px"><span class="pdot"></span><div class="eyebrow2">Live decision stream</div></div>
+      <div class="feed" id="exfeed" style="margin-top:8px"></div></div>`;
+  refreshExec();startStream(()=>refreshExec(true));
+}
+async function refreshExec(feedOnly){
+  let s,st;try{[s,st]=await Promise.all([api.get('/stats'),api.get('/stream')]);}catch(e){return;}
+  if(!feedOnly){
+    $('#exk').innerHTML=[
+      ['Decisions served',s.decisions.toLocaleString(),'every one audited'],
+      ['Value captured',(META.references?'':'')+Math.round(s.value_captured).toLocaleString(),'expected value, cumulative'],
+      ['Latency p99',s.latency.p99+' ms','budget '+ (META.slo_ms||98)+' ms'],
+      ['Customers',s.parties.toLocaleString(),'under management'],
+    ].map(k=>`<div class="kpi"><div class="v">${k[1]}</div><div class="l">${k[0]}</div><div class="d">${k[2]}</div></div>`).join('');
+    const max=Math.max(1,...s.by_action.map(x=>x.count));
+    $('#exact').innerHTML=s.by_action.slice(0,6).map(x=>`<div class="bar"><span class="bl">${pretty(x.action)}</span><div class="tk"><div class="fl" style="width:${x.count/max*100}%"></div></div><span class="bv">${x.count}</span></div>`).join('')||'<div class="hint">No decisions yet.</div>';
+    const rmax=Math.max(1,...s.by_region.map(x=>x.count));
+    $('#exreg').innerHTML=s.by_region.map(x=>`<div class="bar"><span class="bl">${x.region||'—'}</span><div class="tk"><div class="fl" style="width:${x.count/rmax*100}%"></div></div><span class="bv">${x.count}</span></div>`).join('')||'<div class="hint">No decisions yet.</div>';
+  }
+  $('#exfeed').innerHTML=st.decisions.map(d=>`<div class="frow"><span class="tg">${d.ts_label}</span><span class="ev">${pretty(d.action)}</span><span class="rg">${d.region} · ${d.latency_ms} ms</span></div>`).join('')||'<div class="hint">Make a decision to see it here.</div>';
+}
 
-async function runAgent(){
-  const g=goal.value.trim();if(!g)return;bubble(g,'user');goal.value='';
-  const turn=document.createElement('div');turn.className='msg bot';
-  turn.innerHTML=avaSmall+`<div class="bubble"><div class="typing"><span></span><span></span><span></span></div><div class="steps" style="display:none"></div></div>`;
-  thread.appendChild(turn);thread.scrollTop=thread.scrollHeight;
+/* ---------------- REGULATOR ---------------- */
+function renderRegulator(pane){
+  pane.innerHTML=`<div class="panel pad">
+    <div class="eyebrow2">Regulator view</div><h2 class="pt">Every consequential decision, explained</h2>
+    <p class="hint">SHAP-grounded reason codes, a fairness signal, and a replayable 16-field audit record. The standard for EU AI Act, ECOA and NAIC.</p>
+    <label>Subject</label><select id="reg">${personaOptions()}</select>
+    <div style="margin-top:12px"><button class="btn" onclick="regDecide()">Produce an explained decision</button></div>
+    <div id="rout" style="margin-top:18px"></div></div>`;
+}
+async function regDecide(){
+  const pid=$('#reg').value,out=$('#rout');out.innerHTML='<div class="hint">Deciding and explaining…</div>';
+  let d;try{d=await api.post('/decide',{party_id:pid,channel:'web',event:{event_type:'large_transfer_attempt',amount:4000}});}catch(e){out.innerHTML='<div class="err">Service unavailable.</div>';return;}
+  let row={};try{row=await api.get('/audit/'+d.decision_id);}catch(e){}
+  out.innerHTML=`<div class="row two">
+    <div class="panel pad" style="box-shadow:none">
+      <div class="eyebrow2">SHAP reason codes</div>
+      ${d.reason_codes.map(r=>`<div class="reason"><span>${r.label}</span><span class="${r.direction==='increases'?'up':'down'}">${r.direction} · ${r.contribution>0?'+':''}${r.contribution}</span></div>`).join('')}
+      <div style="margin-top:12px"><span class="pill ${d.fairness_flag==='adverse_impact'?'warn':'ok'}">fairness · ${d.fairness_flag}</span><span class="pill n">action · ${pretty(d.action)}</span></div>
+      <div class="hint" style="margin-top:10px">Adverse-impact ratio (four-fifths rule) monitored across protected groups. The protected attribute is used only here, never as a model input.</div>
+    </div>
+    <div class="panel pad" style="box-shadow:none"><div class="eyebrow2">Audit record, 16 fields</div>
+      <table class="tbl">${['decision_id','party_id','channel','use_case','action_id','fairness_flag','mode','latency_ms','consent_ref','human_reviewed'].map(k=>`<tr><td>${k}</td><td>${row[k]!==undefined?row[k]:'—'}</td></tr>`).join('')}</table>
+      <div class="hint" style="margin-top:8px">Append-only. Replayable. Satisfies SR 11-7, EU AI Act, ECOA, NAIC simultaneously.</div>
+    </div></div>`;
+}
+
+/* ---------------- DEVELOPER (locked) ---------------- */
+function renderLock(){
+  const pane=$('#pane-developer');document.querySelectorAll('.pane').forEach(p=>p.classList.remove('on'));pane.classList.add('on');
+  document.querySelectorAll('#seg button').forEach(b=>b.classList.toggle('on',b.dataset.m==='developer'));
+  pane.innerHTML=`<div class="lockwrap"><div class="ic"><svg class="i" viewBox="0 0 24 24" style="width:26px;height:26px"><rect x="5" y="11" width="14" height="9" rx="2"/><path d="M8 11V8a4 4 0 018 0v3"/></svg></div>
+    <h2 class="pt">Developer mode</h2><p class="hint">Architecture, latency internals and agentic streams. Restricted access.</p>
+    <input id="pass" type="password" placeholder="Passcode" onkeydown="if(event.key==='Enter')unlock()"/>
+    <div class="err" id="perr"></div>
+    <div style="margin-top:10px"><button class="btn" onclick="unlock()">Unlock</button></div></div>`;
+}
+async function unlock(){
+  const p=$('#pass').value;let ok=false;
+  try{ok=(await api.post('/dev-auth',{passcode:p})).ok;}catch(e){ok=(p==='Aryansh@Tredence');}
+  if(ok){DEV_OK=true;openApp('developer');}else{$('#perr').textContent='Incorrect passcode.';}
+}
+async function renderDeveloper(pane){
+  pane.innerHTML=`<div class="eyebrow2">Developer / AI engineer view</div><h2 class="pt" style="margin-bottom:14px">Under the hood</h2>
+    <div class="panel pad"><div class="eyebrow2">Five-layer decision pipeline · 10-step flow, sub-98ms</div>
+      <div class="pipe" id="dpipe">
+        ${['L1|Data|ledger, hot store','L2|Features|online, sub-ms','L3|Models|propensity, uplift, fraud','L4|Decisioning|rules, LinUCB bandit','L5|Governance|SHAP, fairness, audit'].map((n,i)=>{const[a,b,c]=n.split('|');return (i?'<div class="arw">›</div>':'')+`<div class="node"><div class="n">${a}</div><div class="t">${b}</div><div class="d">${c}</div></div>`}).join('')}
+      </div>
+      <div style="margin-top:12px"><button class="btn" onclick="devDecide()">Run a decision through the pipeline</button></div>
+      <div id="dpout" style="margin-top:14px"></div></div>
+    <div class="row two" style="margin-top:18px">
+      <div class="panel pad"><div class="eyebrow2">Latency, warm</div><div id="dlat" style="margin-top:10px"></div>
+        <div class="eyebrow2" style="margin-top:14px">Model registry</div><div id="dmodels" style="margin-top:8px"></div>
+        <div class="eyebrow2" style="margin-top:14px">Backends</div><div id="dback" style="margin-top:8px"></div></div>
+      <div class="panel pad"><div style="display:flex;align-items:center;gap:8px"><span class="pdot"></span><div class="eyebrow2">Real-time CDC event stream</div></div>
+        <div class="feed" id="dfeed" style="margin-top:8px"></div></div>
+    </div>
+    <div class="panel pad" style="margin-top:18px"><div class="eyebrow2">Agentic loop, raw trace</div>
+      <div class="hint">perceive · reason · act · observe · escalate, over MCP-style tools with a human-in-the-loop stop.</div>
+      <label>Party</label><select id="dparty">${personaOptions()}</select>
+      <label>Goal</label><input id="dgoal" type="text" value="I want a pre-approved loan of 50000"/>
+      <div style="margin-top:10px"><button class="btn dark" onclick="dAgent()">Run agent</button></div>
+      <div class="thread" id="dthread" style="margin-top:12px;max-height:none"></div></div>`;
+  devMeta();startStream(devFeed);
+}
+async function devMeta(){
+  let h={},s={};try{[h,s]=await Promise.all([api.get('/health'),api.get('/stats')]);}catch(e){return;}
+  $('#dback').innerHTML=`<span class="pill n">ledger · ${h.backends.ledger}</span><span class="pill n">hot store · ${h.backends.online_store}</span><span class="pill n">agent · ${h.agent_engine}</span><span class="pill ok">${(h.parties||0).toLocaleString()} parties</span>`;
+  $('#dlat').innerHTML=['p50','p95','p99'].map(k=>`<div class="bar"><span class="bl">${k}</span><div class="tk"><div class="fl" style="width:${Math.min(100,s.latency[k]/(META.slo_ms||98)*100)}%"></div></div><span class="bv">${s.latency[k]} ms</span></div>`).join('');
+}
+async function devDecide(){
+  const pid=PERSONAS[0].party_id;
+  const nodes=[...document.querySelectorAll('#dpipe .node')];nodes.forEach(n=>n.classList.remove('active','done'));
+  for(let i=0;i<nodes.length;i++){await new Promise(r=>setTimeout(r,130));if(i)nodes[i-1].classList.add('done');nodes[i].classList.add('active');}
+  nodes[nodes.length-1].classList.remove('active');nodes[nodes.length-1].classList.add('done');
+  let d;try{d=await api.post('/decide',{party_id:pid,event:{event_type:'large_transfer_attempt',amount:4000}});}catch(e){return;}
+  $('#dmodels').innerHTML=Object.entries(d.model_versions).map(([k,v])=>`<div style="font-size:12.5px;color:var(--muted)"><b style="color:var(--ink)">${k}</b> · ${v}</div>`).join('');
+  $('#dpout').innerHTML=`<pre>${JSON.stringify({action:d.action,expected_value:d.score,latency_ms:d.latency_ms,within_slo:d.within_slo,model_scores:d.model_scores,reason_codes:d.reason_codes},null,2)}</pre>`;
+}
+async function devFeed(){let st;try{st=await api.get('/stream');}catch(e){return;}
+  $('#dfeed').innerHTML=st.events.map(e=>`<div class="frow"><span class="tg">${e.ts_label||''}</span><span class="ev">${e.event_type}</span><span class="rg">${e.party_id}${e.amount?' · '+Math.round(e.amount):''}</span></div>`).join('')||'<div class="hint">waiting for events…</div>';}
+function dAgent(){agentRun($('#dparty').value,$('#dgoal').value,'#dthread',null,false)}
+
+/* ---------------- shared agent runner ---------------- */
+async function agentRun(pid,goal,threadSel,after,friendlyMode){
+  goal=(goal||'').trim();if(!goal)return;const thread=$(threadSel);
+  thread.appendChild(el(`<div class="msg user"><div class="bubble">${goal}</div></div>`));if(after)after();
+  const turn=el(`<div class="msg bot"><span class="av">A<b>.</b></span><div class="bubble"><div class="typing"><span></span><span></span><span></span></div><div class="steps" style="display:none"></div></div></div>`);
+  thread.appendChild(turn);thread.scrollTop=1e9;
   const typing=turn.querySelector('.typing'),steps=turn.querySelector('.steps'),bub=turn.querySelector('.bubble');
   try{
-    const resp=await fetch('/agent',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({party_id:aparty.value,goal:g})});
+    const resp=await fetch('/agent',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({party_id:pid,goal})});
     const rd=resp.body.getReader(),dec=new TextDecoder();let buf='',shown=false;
-    while(true){const {value,done}=await rd.read();if(done)break;buf+=dec.decode(value,{stream:true});let i;
+    while(true){const{value,done}=await rd.read();if(done)break;buf+=dec.decode(value,{stream:true});let i;
       while((i=buf.indexOf('\n\n'))>=0){const line=buf.slice(0,i).replace(/^data: /,'');buf=buf.slice(i+2);if(!line)continue;const ev=JSON.parse(line);
         if(ev.type==='final'){typing.remove();
-          bub.insertAdjacentHTML('beforeend',(ev.escalated?`<div class="banner esc">Handed to a human specialist. ${ev.answer.replace('Escalated to human review: ','')}</div>`:`<div class="banner ok">${ev.answer}</div>`)+`<div style="font-size:11.5px;color:var(--muted);margin-top:7px">confidence ${ev.confidence}, ${ev.engine}</div>`);
-        }else{if(!shown){typing.style.display='none';steps.style.display='flex';shown=true}
-          const esc=ev.node==='escalate';const el=document.createElement('div');el.className='step'+(esc?' esc':'');
-          el.innerHTML=`<span class="si">${esc?'!':stepIcon(ev.node)}</span><span><b>${ev.node}</b>, ${ev.detail}</span>`;steps.appendChild(el);thread.scrollTop=thread.scrollHeight}
+          const ans=friendlyMode?friendlyAns(ev):ev.answer;
+          bub.insertAdjacentHTML('beforeend',ev.escalated?`<div class="banner esc">${friendlyMode?'A specialist will take it from here. ':'Handed to a human specialist. '}${friendlyMode?'':ev.answer.replace('Escalated to human review: ','')}</div>`:`<div class="banner ok">${ans}</div>`);
+          if(!friendlyMode)bub.insertAdjacentHTML('beforeend',`<div style="font-size:11.5px;color:var(--muted);margin-top:7px">confidence ${ev.confidence} · ${ev.engine}</div>`);
+        }else{if(friendlyMode)continue;if(!shown){typing.style.display='none';steps.style.display='flex';shown=true;}
+          const esc=ev.node==='escalate';steps.appendChild(el(`<div class="stp ${esc?'esc':''}"><span class="si">${esc?'!':'•'}</span><span><b>${ev.node}</b> · ${ev.detail}</span></div>`));thread.scrollTop=1e9;}
       }}
-  }catch(e){typing.remove();bub.insertAdjacentHTML('beforeend','<div class="banner esc">Could not reach the agent API.</div>')}
+    if(friendlyMode&&typing.parentNode){typing.remove();}
+  }catch(e){typing.remove();bub.insertAdjacentHTML('beforeend','<div class="banner esc">Could not reach the assistant.</div>');}
 }
-function pretty(id){return (id||'').replace(/_/g,' ').replace(/\b\w/g,c=>c.toUpperCase())}
+function friendlyAns(ev){if(ev.escalated)return "I've passed this to a specialist who'll follow up shortly, you're in good hands.";
+  return "All sorted. Anything else I can help with?";}
+
+/* ---------------- stream lifecycle ---------------- */
+function startStream(fn){stopStream();fn();streamTimer=setInterval(fn,1600);}
+function stopStream(){if(streamTimer){clearInterval(streamTimer);streamTimer=null;}}
+
 boot();
 </script>
 </body>

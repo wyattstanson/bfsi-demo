@@ -1,18 +1,10 @@
-# Layer 4 — Decisioning: the catalog of next-best-actions.
-# Each action declares the journey stage it serves, its economic value, the
-# model signal it is ranked on, eligibility rules, and do-no-harm guardrails.
-# Editing this file changes decisions WITHOUT redeploying code — the point of a
-# decision engine.
-# PROD: this catalog would live in a decision-management system (e.g. a rules
-#       service) with versioning and approvals.
-
 actions:
   - id: retail_cross_sell_credit_card
     domain: retail
     journey_stage: cross_sell
     use_case: cross_sell
-    base_value: 120.0          # expected margin if accepted
-    signal: propensity          # ranked on propensity-to-accept
+    base_value: 120.0
+    signal: propensity
     eligibility:
       min_age: 21
       requires_consent_marketing: true
@@ -20,13 +12,12 @@ actions:
     do_no_harm:
       max_churn: 0.6            # don't upsell someone about to leave
       max_fraud: 0.5
-
   - id: wealth_advisory_upgrade
     domain: wealth
     journey_stage: cross_sell
     use_case: cross_sell
     base_value: 300.0
-    signal: uplift              # ranked on incremental effect (who to persuade)
+    signal: uplift
     eligibility:
       min_age: 25
       requires_consent_marketing: true
@@ -34,7 +25,6 @@ actions:
     do_no_harm:
       max_churn: 0.7
       max_fraud: 0.4
-
   - id: nbfc_preapproved_loan
     domain: nbfc
     journey_stage: originate
@@ -48,31 +38,28 @@ actions:
     do_no_harm:
       max_churn: 0.8
       max_fraud: 0.4
-
   - id: payments_fraud_stepup_auth
     domain: payments
     journey_stage: service
     use_case: service
-    base_value: 500.0          # loss avoided
-    signal: fraud              # ranked on fraud risk (protective action)
+    base_value: 500.0
+    signal: fraud
     eligibility:
       min_age: 0
       requires_consent_marketing: false
       min_balance: 0
-    do_no_harm: {}             # protective actions have no upsell guardrail
-
+    do_no_harm: {}
   - id: retain_retention_offer
     domain: retail
     journey_stage: retain
     use_case: retain
     base_value: 80.0
-    signal: churn              # ranked on churn risk (save the relationship)
+    signal: churn
     eligibility:
       min_age: 18
       requires_consent_marketing: false
       min_balance: 0
     do_no_harm: {}
-
   - id: service_proactive_support
     domain: retail
     journey_stage: service
@@ -84,8 +71,6 @@ actions:
       requires_consent_marketing: false
       min_balance: 0
     do_no_harm: {}
-
-  # Always-eligible fallback so /decide never returns empty.
   - id: engage_financial_tip
     domain: retail
     journey_stage: engage

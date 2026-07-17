@@ -1,144 +1,143 @@
-"""FastAPI application — the seam that ties all five layers + the agent together.
-
-Routes:
-  GET  /                 the minimal demo frontend
-  POST /decide           Layer 4 decision + Layer 5 governance, under the SLO
-  POST /agent            the agentic loop, streamed as Server-Sent Events
-  GET  /personas         non-PII sample parties for the frontend picker
-  GET  /audit/{id}       fetch one audit row
-  GET  /governance       drift + fairness snapshots
-  GET  /health           backends + row counts
-"""
 from __future__ import annotations
-
 import json
+import random
+import threading
 import time
-from pathlib import Path
-
+from collections import deque
 from contextlib import asynccontextmanager
-
+from pathlib import Path
 from fastapi import FastAPI
 from fastapi.responses import FileResponse, StreamingResponse
 from pydantic import BaseModel
-
 from app import bootstrap, config
 from app.agent import agent
-from app.layer1_data import db
+from app.layer1_data import cdc_stub, db
+from app.layer2_features import feature_store
 from app.layer4_decisioning.decisioning import get_engine
 from app.layer5_governance import audit, fairness, governance
+_STATIC = Path(__file__).parent / 'static'
+_events: deque = deque(maxlen=60)
+_recent: deque = deque(maxlen=40)
+_stop = threading.Event()
+_party_ids: list[str] = []
 
-_STATIC = Path(__file__).parent / "static"
-
+def _stream_loop():
+    while not _stop.is_set():
+        if _party_ids:
+            ev = cdc_stub.make_event(random.choice(_party_ids))
+            ev['ts_label'] = time.strftime('%H:%M:%S')
+            _events.appendleft(ev)
+        time.sleep(0.7)
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
     bootstrap.ensure()
-    get_engine()  # load models + warm the engine so the first /decide is warm
+    get_engine()
+    global _party_ids
+    _party_ids = [r[0] for r in db.fetchall('SELECT party_id FROM party LIMIT 800')]
+    t = threading.Thread(target=_stream_loop, daemon=True)
+    t.start()
     yield
-
-
-app = FastAPI(title="BFSI structural personalization demo", lifespan=lifespan)
-
+    _stop.set()
+app = FastAPI(title='BFSI personalization platform', lifespan=lifespan)
 
 class DecideRequest(BaseModel):
     party_id: str
     event: dict | None = None
-    channel: str = "app"
-
+    channel: str = 'app'
 
 class AgentRequest(BaseModel):
     party_id: str
     goal: str
 
+class DevAuth(BaseModel):
+    passcode: str
 
-@app.get("/")
+@app.get('/')
 def index():
-    return FileResponse(_STATIC / "index.html")
+    return FileResponse(_STATIC / 'index.html')
 
+@app.get('/meta')
+def meta():
+    return {'domains': config.DOMAINS, 'domain_labels': config.DOMAIN_LABELS, 'regions': config.REGIONS, 'currency_symbol': config.CURRENCY_SYMBOL, 'journey_stages': config.JOURNEY_STAGES, 'slo_ms': config.LATENCY_SLO_MS, 'references': {'erica_ms': 44, 'aladdin_aum': '$23T', 'lemonade_claim_s': 3, 'bajaj_agents': '800+', 'flow_steps': 10}}
 
-@app.post("/decide")
+@app.post('/dev-auth')
+def dev_auth(req: DevAuth):
+    return {'ok': req.passcode == config.DEV_PASSCODE}
+
+@app.post('/decide')
 def decide(req: DecideRequest):
-    """Return a personalized next-best-action with full governance, under SLO.
-
-    Latency is measured across the entire hot path *including* the SHAP-style
-    explanation and fairness flag — governance is not free, so it counts.
-    """
     engine = get_engine()
     t0 = time.perf_counter()
     decision = engine.decide(req.party_id, req.event)
     assessment = governance.assess(engine, decision)
     latency_ms = (time.perf_counter() - t0) * 1000.0
     record = governance.build_record(decision, assessment, req.channel, latency_ms)
-    audit.write(record)  # exactly one audit row per decision
+    audit.write(record)
+    winner = decision['winner']
+    attrs = decision['attrs']
+    _recent.appendleft({'party_id': req.party_id, 'action': winner['action_id'], 'ev': winner['expected_value'], 'latency_ms': round(latency_ms, 2), 'fairness': record['fairness_flag'], 'region': attrs.get('region', ''), 'ts_label': time.strftime('%H:%M:%S')})
+    return {'decision_id': record['decision_id'], 'action': winner['action_id'], 'action_detail': winner['action'], 'score': winner['expected_value'], 'reason_codes': record['reason_codes'], 'fairness_flag': record['fairness_flag'], 'latency_ms': round(latency_ms, 3), 'slo_ms': config.LATENCY_SLO_MS, 'within_slo': latency_ms < config.LATENCY_SLO_MS, 'model_scores': {k: round(v, 4) for k, v in decision['model_scores'].items()}, 'model_versions': decision['model_versions'], 'attrs': {k: attrs.get(k) for k in ('domain', 'journey_stage', 'region', 'currency', 'risk_band')}, 'ranked': [{'action_id': r['action_id'], 'expected_value': r['expected_value'], 'signal': r['signal'], 'signal_value': r['signal_value']} for r in decision['ranked']], 'rejected': decision['rejected']}
 
-    winner = decision["winner"]
-    return {
-        "decision_id": record["decision_id"],
-        "action": winner["action_id"],
-        "action_detail": winner["action"],
-        "score": winner["expected_value"],
-        "reason_codes": record["reason_codes"],
-        "fairness_flag": record["fairness_flag"],
-        "latency_ms": round(latency_ms, 3),
-        "slo_ms": config.LATENCY_SLO_MS,
-        "within_slo": latency_ms < config.LATENCY_SLO_MS,
-        "model_scores": {k: round(v, 4) for k, v in decision["model_scores"].items()},
-        "model_versions": decision["model_versions"],
-        "ranked": [
-            {"action_id": r["action_id"], "expected_value": r["expected_value"],
-             "signal": r["signal"], "signal_value": r["signal_value"]}
-            for r in decision["ranked"]
-        ],
-        "rejected": decision["rejected"],
-    }
-
-
-@app.post("/agent")
+@app.post('/agent')
 def run_agent(req: AgentRequest):
-    """Stream the perceive→reason→act→observe loop as SSE."""
 
     def gen():
         for ev in agent.run_stream(req.party_id, req.goal):
-            yield f"data: {json.dumps(ev)}\n\n"
+            yield f'data: {json.dumps(ev)}\n\n'
+    return StreamingResponse(gen(), media_type='text/event-stream')
 
-    return StreamingResponse(gen(), media_type="text/event-stream")
+@app.get('/personas')
+def personas(limit: int=12, domain: str='', region: str=''):
+    where, params = ([], [])
+    if domain:
+        where.append('domain = ?')
+        params.append(domain)
+    if region:
+        where.append('region = ?')
+        params.append(region)
+    clause = ' WHERE ' + ' AND '.join(where) if where else ''
+    params.append(limit)
+    rows = db.fetchall(f'SELECT party_id, domain, journey_stage, region, currency, risk_band, tenure_months FROM party{clause} LIMIT ?', tuple(params))
+    return [{'party_id': p, 'domain': d, 'domain_label': config.DOMAIN_LABELS.get(d, d), 'journey_stage': s, 'region': rg, 'currency': cur, 'risk_band': rb, 'tenure_months': tn} for p, d, s, rg, cur, rb, tn in rows]
 
+@app.get('/party/{party_id}')
+def party_snapshot(party_id: str):
+    attrs = feature_store.get_online_attrs(party_id)
+    feats = feature_store.get_online_features(party_id)
+    if not attrs:
+        return {'error': 'not found'}
+    attrs['domain_label'] = config.DOMAIN_LABELS.get(attrs.get('domain', ''), attrs.get('domain', ''))
+    return {'party_id': party_id, 'attrs': attrs, 'features': feats}
 
-@app.get("/personas")
-def personas(limit: int = 12):
-    rows = db.fetchall(
-        "SELECT party_id, domain, journey_stage, risk_band FROM party LIMIT ?",
-        (limit,),
-    )
-    # Non-PII only.
-    return [
-        {"party_id": p, "domain": d, "journey_stage": s, "risk_band": r}
-        for p, d, s, r in rows
-    ]
-
-
-@app.get("/audit/{decision_id}")
+@app.get('/audit/{decision_id}')
 def get_audit(decision_id: str):
-    row = audit.get(decision_id)
-    return row or {"error": "not found"}
+    return audit.get(decision_id) or {'error': 'not found'}
 
-
-@app.get("/governance")
+@app.get('/governance')
 def governance_snapshot():
-    return {
-        "drift": governance.drift_snapshot(),
-        "fairness": fairness.snapshot(),
-        "audit_rows": audit.count(),
-        "human_queue": (db.fetchone("SELECT COUNT(*) FROM human_queue") or [0])[0],
-    }
+    return {'drift': governance.drift_snapshot(), 'fairness': fairness.snapshot(), 'audit_rows': audit.count(), 'human_queue': (db.fetchone('SELECT COUNT(*) FROM human_queue') or [0])[0]}
 
+@app.get('/stats')
+def stats():
+    lat = [r[0] for r in db.fetchall('SELECT latency_ms FROM audit_log ORDER BY ts DESC LIMIT 2000')]
+    lat_sorted = sorted(lat)
 
-@app.get("/health")
+    def pct(p):
+        if not lat_sorted:
+            return 0.0
+        k = max(0, min(len(lat_sorted) - 1, int(round(p / 100 * (len(lat_sorted) - 1)))))
+        return round(lat_sorted[k], 2)
+    by_action = db.fetchall('SELECT action_id, COUNT(*) FROM audit_log GROUP BY action_id ORDER BY 2 DESC')
+    by_use = db.fetchall('SELECT use_case, COUNT(*) FROM audit_log GROUP BY use_case ORDER BY 2 DESC')
+    by_region = db.fetchall('SELECT p.region, COUNT(*) FROM audit_log a JOIN party p ON a.party_id = p.party_id GROUP BY p.region ORDER BY 2 DESC')
+    ev = db.fetchone('SELECT COALESCE(SUM(score),0), COALESCE(AVG(score),0) FROM audit_log')
+    return {'decisions': audit.count(), 'parties': (db.fetchone('SELECT COUNT(*) FROM party') or [0])[0], 'latency': {'avg': round(sum(lat) / len(lat), 2) if lat else 0.0, 'p50': pct(50), 'p95': pct(95), 'p99': pct(99)}, 'value_captured': round(ev[0], 0), 'avg_value': round(ev[1], 2), 'by_action': [{'action': a, 'count': c} for a, c in by_action], 'by_use_case': [{'use_case': u, 'count': c} for u, c in by_use], 'by_region': [{'region': rg, 'count': c} for rg, c in by_region]}
+
+@app.get('/stream')
+def stream():
+    return {'events': list(_events)[:24], 'decisions': list(_recent)[:24]}
+
+@app.get('/health')
 def health():
-    return {
-        "status": "ok",
-        "backends": db.backends(),
-        "parties": (db.fetchone("SELECT COUNT(*) FROM party") or [0])[0],
-        "audit_rows": audit.count(),
-        "agent_engine": "langgraph" if agent._HAS_LANGGRAPH else "hand-rolled",
-    }
+    return {'status': 'ok', 'backends': db.backends(), 'parties': (db.fetchone('SELECT COUNT(*) FROM party') or [0])[0], 'audit_rows': audit.count(), 'agent_engine': 'langgraph' if agent._HAS_LANGGRAPH else 'hand-rolled'}
