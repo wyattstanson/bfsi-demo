@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8"/>
 <meta name="viewport" content="width=device-width, initial-scale=1"/>
-<title>Aria, BFSI Personalization Platform</title>
+<title>Aria by Tredence, BFSI Personalization Platform</title>
 <style>
 :root{
   --bg:#FFFFFF;--soft:#FAFAF8;--panel:#FFFFFF;--ink:#141619;--muted:#6B7180;--line:#E9E8E3;
@@ -33,15 +33,24 @@ svg.i{width:20px;height:20px;stroke:currentColor;fill:none;stroke-width:1.7;stro
 .tgl{width:38px;height:38px;border-radius:10px;border:1px solid var(--line);background:var(--panel);color:var(--ink);cursor:pointer;display:grid;place-items:center}
 .tgl:hover{border-color:var(--ink)}
 
+.tlogo{display:flex;align-items:center;gap:11px}
+.tmark{overflow:visible}
+.tmark .bar{transform-origin:14px 28px;animation:barin .7s cubic-bezier(.2,.8,.2,1) both}
+.tmark .stem{transform-origin:49px 40px;animation:stemin .55s .35s cubic-bezier(.2,.8,.2,1) both}
+@keyframes barin{from{transform:scaleX(0);opacity:0}to{transform:scaleX(1);opacity:1}}
+@keyframes stemin{from{transform:scaleY(0);opacity:0}to{transform:scaleY(1);opacity:1}}
+.tlogo .wm{font-weight:800;font-size:20px;letter-spacing:-.02em;opacity:0;animation:fadein .5s .55s both}
+@keyframes fadein{to{opacity:1}}
+.herologo{display:flex;align-items:center;gap:14px;margin-bottom:8px}
+.herologo .tmark{width:64px;height:64px}
+.herologo .by{font-size:13px;color:var(--muted);font-weight:600}
+
 #landing{min-height:100vh;background:radial-gradient(1100px 500px at 88% -8%,var(--orange-50),transparent 60%),var(--bg)}
 .nav{display:flex;align-items:center;justify-content:space-between;padding:22px 0}
-.logo{display:flex;align-items:center;gap:10px;font-weight:800;letter-spacing:-.02em;font-size:19px}
-.logo .m{width:30px;height:30px;border-radius:8px;background:var(--dark);color:#fff;display:grid;place-items:center;font-weight:800;font-size:15px}
-.logo .m b{color:var(--orange)}
 .nav .r{display:flex;gap:12px;align-items:center;font-size:14px;color:var(--muted)}
-.hero{padding:52px 0 30px}
+.hero{padding:44px 0 30px}
 .eyebrow{display:inline-flex;align-items:center;gap:8px;font-size:12.5px;font-weight:700;color:var(--orange);background:var(--orange-50);padding:6px 12px;border-radius:999px;letter-spacing:.02em}
-.hero h1{font-size:clamp(34px,5vw,56px);line-height:1.05;letter-spacing:-.03em;margin:20px 0 0;max-width:16ch;font-weight:800}
+.hero h1{font-size:clamp(34px,5vw,56px);line-height:1.05;letter-spacing:-.03em;margin:18px 0 0;max-width:16ch;font-weight:800}
 .hero h1 span{color:var(--orange)}
 .hero p{font-size:18px;color:var(--muted);max-width:56ch;margin:20px 0 0}
 .cta{display:flex;gap:12px;margin-top:30px;flex-wrap:wrap}
@@ -50,7 +59,7 @@ svg.i{width:20px;height:20px;stroke:currentColor;fill:none;stroke-width:1.7;stro
 .stat .v{font-size:26px;font-weight:800;letter-spacing:-.02em}.stat .l{font-size:12.5px;color:var(--muted);margin-top:4px}
 .logos{display:flex;gap:26px;flex-wrap:wrap;align-items:center;color:var(--muted);font-size:13px;padding:26px 0 60px;border-top:1px solid var(--line);margin-top:36px}
 .logos b{color:var(--ink)}
-.modes{padding:8px 0 70px}
+.modes{padding:8px 0 40px}
 .modes h2{font-size:30px;letter-spacing:-.02em;margin:0 0 6px;font-weight:800}
 .modes .sub{color:var(--muted);margin:0 0 26px}
 .mgrid{display:grid;grid-template-columns:repeat(auto-fit,minmax(210px,1fr));gap:16px}
@@ -62,6 +71,11 @@ svg.i{width:20px;height:20px;stroke:currentColor;fill:none;stroke-width:1.7;stro
 .mcard p{margin:8px 0 0;color:var(--muted);font-size:13.5px}
 .mcard .lock{position:absolute;top:16px;right:16px;color:var(--muted)}
 .mcard.locked .ic{color:var(--muted)}
+.research{padding:10px 0 70px}
+.research h3{font-size:13px;text-transform:uppercase;letter-spacing:.07em;color:var(--muted);font-weight:700;margin-bottom:12px}
+.rgrid{display:grid;grid-template-columns:repeat(auto-fit,minmax(230px,1fr));gap:12px}
+.rc{background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:14px}
+.rc b{color:var(--orange-600)}.rc .t{font-weight:700;margin-bottom:3px}.rc .d{font-size:12.5px;color:var(--muted)}
 
 #app{min-height:100vh;background:var(--soft)}
 .appbar{position:sticky;top:0;z-index:20;background:var(--panel);border-bottom:1px solid var(--line)}
@@ -100,7 +114,14 @@ h2.pt{font-size:19px;font-weight:800;letter-spacing:-.01em;margin:2px 0 3px}
 .cmsg{font-size:16px;margin-top:8px}
 .cwhy{margin-top:14px;background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:14px}
 .cwhy .h{font-size:11px;text-transform:uppercase;letter-spacing:.06em;color:var(--muted);font-weight:700;margin-bottom:6px}
-.cact{margin-top:16px;display:flex;gap:10px;flex-wrap:wrap}
+.cact{margin-top:16px;display:flex;gap:10px;flex-wrap:wrap;align-items:center}
+.audiobtn{display:inline-flex;align-items:center;gap:7px;border:1px solid var(--line);background:var(--panel);color:var(--ink);border-radius:9px;padding:9px 13px;font:inherit;font-size:12.5px;font-weight:600;cursor:pointer}
+.audiobtn:hover,.audiobtn.playing{border-color:var(--orange);color:var(--orange-600)}
+.audiobtn .wave{display:inline-flex;gap:2px;align-items:flex-end;height:14px}
+.audiobtn .wave i{width:2.5px;background:currentColor;border-radius:2px;height:5px}
+.audiobtn.playing .wave i{animation:eq .8s infinite ease-in-out}
+.audiobtn.playing .wave i:nth-child(2){animation-delay:.15s}.audiobtn.playing .wave i:nth-child(3){animation-delay:.3s}.audiobtn.playing .wave i:nth-child(4){animation-delay:.45s}
+@keyframes eq{0%,100%{height:4px}50%{height:14px}}
 .thread{display:flex;flex-direction:column;gap:11px;max-height:360px;overflow:auto;padding:6px 2px}
 .msg{display:flex;gap:9px;max-width:90%}
 .msg .av{width:28px;height:28px;flex:0 0 auto;border-radius:50%;background:var(--dark);color:#fff;display:grid;place-items:center;font-size:12px;font-weight:800}
@@ -108,7 +129,6 @@ h2.pt{font-size:19px;font-weight:800;letter-spacing:-.01em;margin:2px 0 3px}
 .bubble{padding:10px 13px;border-radius:13px;font-size:13.5px;line-height:1.5}
 .msg.bot .bubble{background:var(--soft);border:1px solid var(--line);border-top-left-radius:4px}
 .msg.user{align-self:flex-end}.msg.user .bubble{background:var(--dark-2);color:#fff;border-top-right-radius:4px}
-:root[data-theme="dark"] .msg.user .bubble{background:var(--dark-2)}
 .steps{display:flex;flex-direction:column;gap:6px;margin-top:8px}
 .stp{display:flex;gap:9px;align-items:center;font-size:12.5px;color:var(--muted)}
 .stp .si{width:19px;height:19px;border-radius:5px;background:var(--panel);border:1px solid var(--line);display:grid;place-items:center;color:var(--orange);flex:0 0 auto}
@@ -136,6 +156,17 @@ h2.pt{font-size:19px;font-weight:800;letter-spacing:-.01em;margin:2px 0 3px}
 .frow .tg{font-size:11px;color:var(--muted);width:64px;flex:0 0 auto}.frow .ev{font-weight:600}.frow .rg{margin-left:auto;font-size:11.5px;color:var(--muted)}
 .reason{display:flex;justify-content:space-between;padding:8px 0;border-bottom:1px solid var(--line);font-size:13px}
 .reason .up{color:var(--good);font-weight:600}.reason .down{color:var(--bad);font-weight:600}
+.wf{margin-top:6px}
+.wfhead{display:flex;justify-content:space-between;font-size:11px;color:var(--muted);padding:0 60px 4px 172px}
+.wfrow{display:flex;align-items:center;gap:10px;margin:5px 0;font-size:12.5px}
+.wfrow .wl{width:162px;color:var(--muted);text-align:right}
+.wftrack{flex:1;height:18px;position:relative;background:var(--soft);border:1px solid var(--line);border-radius:5px}
+.wfmid{position:absolute;left:50%;top:0;bottom:0;width:1px;background:var(--line)}
+.wfseg{position:absolute;top:2px;bottom:2px;border-radius:3px}
+.wfseg.pos{background:var(--good)}.wfseg.neg{background:var(--bad)}
+.wfrow .wv{width:56px;text-align:right;font-weight:700}
+.formula{margin-top:12px;background:var(--soft);border:1px solid var(--line);border-radius:10px;padding:12px;font-size:12.5px;color:var(--muted)}
+.formula b{color:var(--ink)}
 .tbl{width:100%;border-collapse:collapse;font-size:12.5px}
 .tbl td{padding:7px 8px;border-bottom:1px solid var(--line);vertical-align:top}
 .tbl td:first-child{color:var(--muted);white-space:nowrap;width:150px}
@@ -151,14 +182,21 @@ pre{background:var(--dark);color:#D7DCE5;border-radius:11px;padding:14px;overflo
 <section id="landing" class="view on">
   <div class="wrap">
     <div class="nav">
-      <div class="logo"><span class="m">A<b>.</b></span> Aria</div>
-      <div class="r"><span>BFSI Personalization Platform</span>
-        <button class="tgl" id="themeBtn" onclick="toggleTheme()" title="Toggle theme"></button></div>
+      <div class="tlogo">
+        <svg class="tmark" width="34" height="34" viewBox="0 0 100 100"><polygon class="bar" fill="#F1592A" points="14,40 70,40 86,16 30,16"/><polygon class="stem" fill="#F1592A" points="40,40 58,40 58,86 40,86"/></svg>
+        <span class="wm">Tredence</span>
+      </div>
+      <div class="r"><span>Aria Personalization Platform</span>
+        <button class="tgl" onclick="toggleTheme()" title="Toggle theme"></button></div>
     </div>
     <div class="hero">
+      <div class="herologo">
+        <svg class="tmark" width="64" height="64" viewBox="0 0 100 100"><polygon class="bar" fill="#F1592A" points="14,40 70,40 86,16 30,16"/><polygon class="stem" fill="#F1592A" points="40,40 58,40 58,86 40,86"/></svg>
+        <span class="by">Aria, a Tredence BFSI platform</span>
+      </div>
       <span class="eyebrow">Real-time, explainable, agentic</span>
       <h1>Know every customer like you have<span> served them for years.</span></h1>
-      <p>Aria decides the next-best-action for every interaction, explains it in plain language, keeps a regulator-ready audit trail, and hands the hard calls to a human. One platform, five points of view.</p>
+      <p>Aria decides the next-best-action for every interaction, explains it in plain language, keeps a regulator-ready audit trail, and speaks the reasoning aloud. One platform, five points of view.</p>
       <div class="cta">
         <button class="btn" onclick="enter()">Explore the platform <svg class="i" viewBox="0 0 24 24" style="width:18px;height:18px"><path d="M5 12h14M13 6l6 6-6 6"/></svg></button>
         <button class="btn ghost" onclick="document.getElementById('modepick').scrollIntoView({behavior:'smooth'})">Choose a view</button>
@@ -170,7 +208,7 @@ pre{background:var(--dark);color:#D7DCE5;border-radius:11px;padding:14px;overflo
         <div class="stat"><div class="v" data-c="16">0</div><div class="l">Audit fields per decision</div></div>
       </div>
       <div class="logos"><span>Patterned on the platforms that set the bar:</span>
-        <span><b>BofA Erica</b> sub-44ms</span><span><b>BlackRock Aladdin</b> 23T AUM</span>
+        <span><b>BofA Erica</b> sub-44ms voice</span><span><b>BlackRock Aladdin</b> auto-commentary</span>
         <span><b>Lemonade</b> 3-second claims</span><span><b>Bajaj FINAI</b> 800+ agents</span></div>
     </div>
     <div class="modes" id="modepick">
@@ -178,15 +216,27 @@ pre{background:var(--dark);color:#D7DCE5;border-radius:11px;padding:14px;overflo
       <p class="sub">The same decision engine, seen through the eyes of everyone it touches.</p>
       <div class="mgrid" id="mgrid"></div>
     </div>
-    <div class="foot">Aria is a structural reference platform. Synthetic data, illustrative scores. The architecture, latency and audit trail are real.</div>
+    <div class="research">
+      <h3>Grounded in the research</h3>
+      <div class="rgrid">
+        <div class="rc"><div class="t">Universal architecture</div><div class="d"><b>5 layers</b> and a <b>10-step flow</b> that hold across all 10 BFSI sub-verticals, end to end under the 98ms budget.</div></div>
+        <div class="rc"><div class="t">SHAP on every decision</div><div class="d">Game-theoretic attributions cached per decision for the adverse-action notice and audit. Regulator-defensible.</div></div>
+        <div class="rc"><div class="t">Agentic, with a human stop</div><div class="d">A perceive-reason-act-observe loop over MCP-style tools that escalates on low confidence or high stakes.</div></div>
+        <div class="rc"><div class="t">6-stage journey</div><div class="d">Discover, originate, engage, cross-sell, service, retain. Uplift, bandits and grounded LLMs per stage.</div></div>
+      </div>
+    </div>
+    <div class="foot">Aria is a structural reference platform by Tredence. Synthetic data, illustrative scores. The architecture, latency and audit trail are real.</div>
   </div>
 </section>
 
 <section id="app" class="view">
   <div class="appbar"><div class="wrap in">
-    <div class="logo" style="font-size:16px;cursor:pointer" onclick="home()"><span class="m">A<b>.</b></span> Aria</div>
+    <div class="tlogo" style="cursor:pointer" onclick="home()">
+      <svg class="tmark" width="26" height="26" viewBox="0 0 100 100"><polygon class="bar" fill="#F1592A" points="14,40 70,40 86,16 30,16"/><polygon class="stem" fill="#F1592A" points="40,40 58,40 58,86 40,86"/></svg>
+      <span class="wm" style="font-size:16px">Aria</span></div>
     <div class="seg" id="seg"></div>
     <div class="live"><span class="pdot"></span><span id="livetxt">live</span>
+      <button class="tgl" id="audioTgl" onclick="toggleAudio()" title="Audio commentary"></button>
       <button class="tgl" onclick="toggleTheme()" title="Toggle theme"></button></div>
   </div></div>
   <div class="wrap content">
@@ -200,17 +250,20 @@ pre{background:var(--dark);color:#D7DCE5;border-radius:11px;padding:14px;overflo
 
 <script>
 const $=s=>document.querySelector(s), el=(h)=>{const d=document.createElement('div');d.innerHTML=h;return d.firstElementChild};
+function esc(s){return (s==null?'':String(s)).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));}
 const api={async get(u){const r=await fetch(u);return r.json()},async post(u,b){const r=await fetch(u,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(b)});return r.json()}};
-let META={}, PERSONAS=[], MODE='customer', DEV_OK=false, streamTimer=null;
+let META={}, PERSONAS=[], MODE='customer', DEV_OK=false, streamTimer=null, AUDIO_ON=true;
 
 const SUN='<path d="M12 4V2M12 22v-2M4 12H2M22 12h-2M6 6L4.5 4.5M18 18l1.5 1.5M6 18l-1.5 1.5M18 6l1.5-1.5"/><circle cx="12" cy="12" r="4"/>';
 const MOON='<path d="M21 12.8A9 9 0 1111.2 3a7 7 0 009.8 9.8z"/>';
+const SPK_ON='<path d="M4 9v6h4l5 4V5L8 9H4z"/><path d="M16 8a5 5 0 010 8M18.5 5.5a9 9 0 010 13"/>';
+const SPK_OFF='<path d="M4 9v6h4l5 4V5L8 9H4z"/><path d="M17 9l5 6M22 9l-5 6"/>';
 const LOCK='<rect x="5" y="11" width="14" height="9" rx="2"/><path d="M8 11V8a4 4 0 018 0v3"/>';
 const MODES=[
   {id:'customer',name:'Concierge',role:'Customer',ic:'M12 12a4 4 0 100-8 4 4 0 000 8zM4 20c0-4 4-6 8-6s8 2 8 6',desc:'What your customer feels. Friendly, personal, no jargon.'},
-  {id:'advisor',name:'Co-pilot',role:'Advisor',ic:'M4 19V5l8 4 8-4v14M8 21V11',desc:'The relationship co-pilot. Briefs, opportunities, talking points.'},
+  {id:'advisor',name:'Co-pilot',role:'Advisor',ic:'M4 19V5l8 4 8-4v14M8 21V11',desc:'The relationship co-pilot. Spoken briefs and talking points.'},
   {id:'executive',name:'Control Tower',role:'Executive',ic:'M4 19h16M7 16V9M12 16V5M17 16v-4',desc:'The book of decisions. Value, latency, fairness, at a glance.'},
-  {id:'regulator',name:'Assurance',role:'Regulator',ic:'M12 3l8 4v5c0 4-3 7-8 9-5-2-8-5-8-9V7l8-4z',desc:'Every decision, explained. SHAP, fairness, replayable audit.'},
+  {id:'regulator',name:'Assurance',role:'Regulator',ic:'M12 3l8 4v5c0 4-3 7-8 9-5-2-8-5-8-9V7l8-4z',desc:'Every decision, explained. SHAP force plot and audit.'},
   {id:'developer',name:'Engine Room',role:'AI engineer',ic:'M8 9l-4 3 4 3M16 9l4 3-4 3M13 6l-2 12',desc:'Under the hood. Architecture, latency, agentic internals.',locked:true},
 ];
 function modeName(id){const m=MODES.find(x=>x.id===id);return m?m.name:id}
@@ -227,16 +280,25 @@ const FRIENDLY={
 };
 function friendly(a){return FRIENDLY[a]||{t:"Here is something for you",m:"A personalised suggestion based on your recent activity.",cta:"Tell me more",why:"Tailored to you."}}
 function pretty(id){return (id||'').replace(/_/g,' ').replace(/\b\w/g,c=>c.toUpperCase())}
-const FALLBACK=[{party_id:'P000000',domain:'retail',domain_label:'Retail Banking',journey_stage:'discover',region:'North America',currency:'USD',risk_band:'high'},
- {party_id:'P000023',domain:'nbfc',domain_label:'NBFC',journey_stage:'originate',region:'India',currency:'INR',risk_band:'low'},
- {party_id:'P000009',domain:'wealth',domain_label:'Wealth',journey_stage:'cross_sell',region:'Europe',currency:'EUR',risk_band:'low'}];
+const FALLBACK=[{party_id:'P000000',domain_label:'Retail Banking',region:'North America',risk_band:'high'},
+ {party_id:'P000023',domain_label:'NBFC',region:'India',risk_band:'low'},
+ {party_id:'P000009',domain_label:'Wealth',region:'Europe',risk_band:'low'}];
 
 function applyTheme(t){document.documentElement.setAttribute('data-theme',t);localStorage.setItem('aria-theme',t);
-  const ico=t==='dark'?SUN:MOON;document.querySelectorAll('.tgl').forEach(b=>b.innerHTML=`<svg class="i" viewBox="0 0 24 24" style="width:17px;height:17px">${ico}</svg>`);}
+  const ico=t==='dark'?SUN:MOON;document.querySelectorAll('.tgl:not(#audioTgl)').forEach(b=>b.innerHTML=`<svg class="i" viewBox="0 0 24 24" style="width:17px;height:17px">${ico}</svg>`);}
 function toggleTheme(){applyTheme(document.documentElement.getAttribute('data-theme')==='dark'?'light':'dark')}
+function paintAudio(){const b=$('#audioTgl');if(b)b.innerHTML=`<svg class="i" viewBox="0 0 24 24" style="width:17px;height:17px">${AUDIO_ON?SPK_ON:SPK_OFF}</svg>`;}
+function toggleAudio(){AUDIO_ON=!AUDIO_ON;localStorage.setItem('aria-audio',AUDIO_ON?'1':'0');if(!AUDIO_ON)stopSpeak();paintAudio();}
+function speak(text,btn){if(!('speechSynthesis'in window))return;window.speechSynthesis.cancel();
+  const u=new SpeechSynthesisUtterance(text);u.rate=1.02;u.pitch=1.0;
+  if(btn){btn.classList.add('playing');u.onend=u.onerror=()=>btn.classList.remove('playing');}
+  window.speechSynthesis.speak(u);}
+function stopSpeak(){if('speechSynthesis'in window)window.speechSynthesis.cancel();document.querySelectorAll('.audiobtn.playing').forEach(b=>b.classList.remove('playing'));}
+function audioBtn(label,idAttr){return `<button class="audiobtn" ${idAttr||''}><span class="wave"><i></i><i></i><i></i><i></i></span>${label}</button>`}
 
 async function boot(){
-  applyTheme(localStorage.getItem('aria-theme')|| (matchMedia('(prefers-color-scheme: dark)').matches?'dark':'light'));
+  applyTheme(localStorage.getItem('aria-theme')||(matchMedia('(prefers-color-scheme: dark)').matches?'dark':'light'));
+  AUDIO_ON=localStorage.getItem('aria-audio')!=='0';paintAudio();
   try{META=await api.get('/meta');PERSONAS=await api.get('/personas?limit=40');}
   catch(e){META={references:{}};PERSONAS=FALLBACK;}
   $('#mgrid').innerHTML=MODES.map(m=>`<div class="mcard ${m.locked?'locked':''}" onclick="pick('${m.id}')">
@@ -250,10 +312,10 @@ function countUp(){document.querySelectorAll('#lstats .v').forEach(n=>{const to=
   const step=()=>{i+=Math.ceil(to/24);if(i>=to){n.textContent=to+suf}else{n.textContent=i+suf;setTimeout(step,26)}};setTimeout(step,60);})}
 
 function enter(){pick('customer')}
-function home(){$('#app').classList.remove('on');$('#landing').classList.add('on');window.scrollTo(0,0);stopStream();}
+function home(){stopSpeak();$('#app').classList.remove('on');$('#landing').classList.add('on');window.scrollTo(0,0);stopStream();}
 function pick(id){const m=MODES.find(x=>x.id===id);if(m.locked&&!DEV_OK){openApp(id);renderLock();return;}openApp(id);}
 function openApp(id){
-  MODE=id;$('#landing').classList.remove('on');$('#app').classList.add('on');window.scrollTo(0,0);
+  MODE=id;stopSpeak();$('#landing').classList.remove('on');$('#app').classList.add('on');window.scrollTo(0,0);
   document.querySelectorAll('#seg button').forEach(b=>b.classList.toggle('on',b.dataset.m===id));
   document.querySelectorAll('.pane').forEach(p=>p.classList.remove('on'));
   const pane=$('#pane-'+id);pane.classList.add('on');stopStream();
@@ -263,7 +325,7 @@ function openApp(id){
   else if(id==='regulator')renderRegulator(pane);
   else if(id==='developer'){DEV_OK?renderDeveloper(pane):renderLock();}
 }
-function personaOptions(){return PERSONAS.map(p=>`<option value="${p.party_id}">${p.party_id} · ${p.domain_label} · ${p.region} · ${p.risk_band} risk</option>`).join('')}
+function personaOptions(){return PERSONAS.map(p=>`<option value="${esc(p.party_id)}">${esc(p.party_id)} · ${esc(p.domain_label)} · ${esc(p.region)} · ${esc(p.risk_band)} risk</option>`).join('')}
 function head(id,title){return `<div class="eyebrow2">${modeName(id)} · ${modeRole(id)} view</div><h2 class="pt">${title}</h2>`}
 
 function renderCustomer(pane){
@@ -290,20 +352,22 @@ function renderCustomer(pane){
 async function custDecide(){
   const pid=$('#cust').value,out=$('#cout');out.innerHTML='<div class="hint">Personalising…</div>';
   let d;try{d=await api.post('/decide',{party_id:pid,channel:'app',event:{event_type:'session_start'}});}catch(e){out.innerHTML='<div class="err">Could not reach the service.</div>';return;}
-  const f=friendly(d.action);
-  out.innerHTML=`<div class="ccard"><div class="ctitle">${f.t}</div><div class="cmsg">${f.m}</div>
-    <div class="cwhy"><div class="h">Why you are seeing this</div>${f.why}</div>
-    <div class="cact"><button class="btn">${f.cta}</button><button class="btn ghost">Not now</button></div>
+  const f=friendly(d.action);const line=f.t+'. '+f.m;
+  out.innerHTML=`<div class="ccard"><div class="ctitle">${esc(f.t)}</div><div class="cmsg">${esc(f.m)}</div>
+    <div class="cwhy"><div class="h">Why you are seeing this</div>${esc(f.why)}</div>
+    <div class="cact"><button class="btn">${esc(f.cta)}</button>${audioBtn('Hear it','id="csp"')}</div>
     <div style="margin-top:12px;font-size:11.5px;color:var(--muted)">Decided in ${d.latency_ms} ms. You can ask us why, any time.</div></div>`;
+  $('#csp').onclick=function(){speak(line,this)};
+  if(AUDIO_ON)speak(line,$('#csp'));
 }
-function cbubble(t,who){const d=el(`<div class="msg ${who}">${who==='bot'?'<span class="av">A<b>.</b></span>':''}<div class="bubble">${t}</div></div>`);$('#cthread').appendChild(d);$('#cthread').scrollTop=1e9;return d}
+function cbubble(t,who){const d=el(`<div class="msg ${who}">${who==='bot'?'<span class="av">A<b>.</b></span>':''}<div class="bubble">${esc(t)}</div></div>`);$('#cthread').appendChild(d);$('#cthread').scrollTop=1e9;return d}
 function cgreet(){$('#cthread').innerHTML='';cbubble("Hi, I am Ava. Ask me anything about your account and I will sort it, or bring in a specialist if it needs a human touch.",'bot')}
 function cquick(e){$('#cgoal').value=e.textContent;cAgent()}
 function cAgent(){agentRun($('#cust').value,$('#cgoal').value,'#cthread',()=>{$('#cgoal').value=''},true)}
 
 function renderAdvisor(pane){
   pane.innerHTML=`<div class="panel pad">${head('advisor','Relationship co-pilot')}
-    <p class="hint">A ready-to-use brief for your next conversation, drafted the way Aladdin Auto-Commentary drafts for wealth advisors.</p>
+    <p class="hint">A ready-to-use brief for your next conversation, drafted and spoken the way Aladdin Auto-Commentary briefs wealth advisors.</p>
     <label>Client</label><select id="adv" onchange="advBrief()">${personaOptions()}</select>
     <div id="aout" style="margin-top:16px"></div></div>`;
   advBrief();
@@ -312,18 +376,22 @@ async function advBrief(){
   const pid=$('#adv').value,out=$('#aout');out.innerHTML='<div class="hint">Preparing brief…</div>';
   let d;try{d=await api.post('/decide',{party_id:pid,channel:'branch',event:{event_type:'session_start'}});}catch(e){out.innerHTML='<div class="err">Service unavailable.</div>';return;}
   const a=d.attrs,top=d.reason_codes[0];
-  out.innerHTML=`<div class="row two">
+  const commentary=`Auto-commentary. The recommended next best action for this ${a.domain} client is ${pretty(d.action)}, with an expected value of ${d.score}. The primary driver is ${top?top.label:'recent activity'}. The client is in the ${a.journey_stage} stage with a ${a.risk_band} risk profile. Suitability and audit are handled automatically. Decided in ${d.latency_ms} milliseconds.`;
+  out.innerHTML=`<div style="margin-bottom:12px">${audioBtn('Play commentary','id="asp"')}</div>
+    <div class="row two">
     <div class="panel pad" style="box-shadow:none"><div class="eyebrow2">Recommended next best action</div>
-      <div style="font-size:20px;font-weight:800;margin:4px 0">${pretty(d.action)}</div>
-      ${d.reason_codes.map(r=>`<div class="reason"><span>${r.label}</span><span class="${r.direction==='increases'?'up':'down'}">${r.direction}</span></div>`).join('')}
-      <div style="margin-top:12px"><span class="pill n">expected value ${d.score}</span><span class="pill ok">${a.region} · ${a.currency}</span><span class="pill ${d.within_slo?'ok':'slow'}">${d.latency_ms} ms</span></div></div>
+      <div style="font-size:20px;font-weight:800;margin:4px 0">${esc(pretty(d.action))}</div>
+      ${d.reason_codes.map(r=>`<div class="reason"><span>${esc(r.label)}</span><span class="${r.direction==='increases'?'up':'down'}">${esc(r.direction)}</span></div>`).join('')}
+      <div style="margin-top:12px"><span class="pill n">expected value ${d.score}</span><span class="pill ok">${esc(a.region)} · ${esc(a.currency)}</span><span class="pill ${d.within_slo?'ok':'slow'}">${d.latency_ms} ms</span></div></div>
     <div class="panel pad" style="box-shadow:none"><div class="eyebrow2">Talking points</div>
       <ul style="padding-left:18px;margin:8px 0;line-height:1.7">
-        <li>Lead with the <b>${pretty(d.action).toLowerCase()}</b>, it is the highest-value action for this ${a.domain} client.</li>
-        <li>Anchor on the driver: <b>${top?top.label:'recent activity'}</b>.</li>
-        <li>Client is in the <b>${a.journey_stage}</b> stage with a <b>${a.risk_band}</b> risk profile, tailor tone accordingly.</li>
+        <li>Lead with the <b>${esc(pretty(d.action).toLowerCase())}</b>, the highest-value action for this ${esc(a.domain)} client.</li>
+        <li>Anchor on the driver: <b>${esc(top?top.label:'recent activity')}</b>.</li>
+        <li>Client is in the <b>${esc(a.journey_stage)}</b> stage with a <b>${esc(a.risk_band)}</b> risk profile, tailor tone accordingly.</li>
         <li>Suitability and audit are handled automatically, this action is logged and explainable.</li></ul>
       <button class="btn">Prepare outreach</button></div></div>`;
+  $('#asp').onclick=function(){speak(commentary,this)};
+  if(AUDIO_ON)speak(commentary,$('#asp'));
 }
 
 function renderExecutive(pane){
@@ -346,16 +414,16 @@ async function refreshExec(feedOnly){
       ['Customers',s.parties.toLocaleString(),'under management'],
     ].map(k=>`<div class="kpi"><div class="v">${k[1]}</div><div class="l">${k[0]}</div><div class="d">${k[2]}</div></div>`).join('');
     const max=Math.max(1,...s.by_action.map(x=>x.count));
-    $('#exact').innerHTML=s.by_action.slice(0,6).map(x=>`<div class="bar"><span class="bl">${pretty(x.action)}</span><div class="tk"><div class="fl" style="width:${x.count/max*100}%"></div></div><span class="bv">${x.count}</span></div>`).join('')||'<div class="hint">No decisions yet.</div>';
+    $('#exact').innerHTML=s.by_action.slice(0,6).map(x=>`<div class="bar"><span class="bl">${esc(pretty(x.action))}</span><div class="tk"><div class="fl" style="width:${x.count/max*100}%"></div></div><span class="bv">${x.count}</span></div>`).join('')||'<div class="hint">No decisions yet.</div>';
     const rmax=Math.max(1,...s.by_region.map(x=>x.count));
-    $('#exreg').innerHTML=s.by_region.map(x=>`<div class="bar"><span class="bl">${x.region||'—'}</span><div class="tk"><div class="fl" style="width:${x.count/rmax*100}%"></div></div><span class="bv">${x.count}</span></div>`).join('')||'<div class="hint">No decisions yet.</div>';
+    $('#exreg').innerHTML=s.by_region.map(x=>`<div class="bar"><span class="bl">${esc(x.region||'—')}</span><div class="tk"><div class="fl" style="width:${x.count/rmax*100}%"></div></div><span class="bv">${x.count}</span></div>`).join('')||'<div class="hint">No decisions yet.</div>';
   }
-  $('#exfeed').innerHTML=st.decisions.map(d=>`<div class="frow"><span class="tg">${d.ts_label}</span><span class="ev">${pretty(d.action)}</span><span class="rg">${d.region} · ${d.latency_ms} ms</span></div>`).join('')||'<div class="hint">Make a decision to see it here.</div>';
+  $('#exfeed').innerHTML=st.decisions.map(d=>`<div class="frow"><span class="tg">${esc(d.ts_label)}</span><span class="ev">${esc(pretty(d.action))}</span><span class="rg">${esc(d.region)} · ${d.latency_ms} ms</span></div>`).join('')||'<div class="hint">Make a decision to see it here.</div>';
 }
 
 function renderRegulator(pane){
   pane.innerHTML=`<div class="panel pad">${head('regulator','Every consequential decision, explained')}
-    <p class="hint">SHAP-grounded reason codes, a fairness signal, and a replayable 16-field audit record. The standard for EU AI Act, ECOA and NAIC.</p>
+    <p class="hint">SHAP force plot, a fairness signal, and a replayable 16-field audit record. The standard for EU AI Act, ECOA and NAIC.</p>
     <label>Subject</label><select id="reg">${personaOptions()}</select>
     <div style="margin-top:12px"><button class="btn" onclick="regDecide()">Produce an explained decision</button></div>
     <div id="rout" style="margin-top:18px"></div></div>`;
@@ -364,14 +432,23 @@ async function regDecide(){
   const pid=$('#reg').value,out=$('#rout');out.innerHTML='<div class="hint">Deciding and explaining…</div>';
   let d;try{d=await api.post('/decide',{party_id:pid,channel:'web',event:{event_type:'large_transfer_attempt',amount:4000}});}catch(e){out.innerHTML='<div class="err">Service unavailable.</div>';return;}
   let row={};try{row=await api.get('/audit/'+d.decision_id);}catch(e){}
-  out.innerHTML=`<div class="row two">
-    <div class="panel pad" style="box-shadow:none"><div class="eyebrow2">SHAP reason codes</div>
-      ${d.reason_codes.map(r=>`<div class="reason"><span>${r.label}</span><span class="${r.direction==='increases'?'up':'down'}">${r.direction} · ${r.contribution>0?'+':''}${r.contribution}</span></div>`).join('')}
-      <div style="margin-top:12px"><span class="pill ${d.fairness_flag==='adverse_impact'?'warn':'ok'}">fairness · ${d.fairness_flag}</span><span class="pill n">action · ${pretty(d.action)}</span></div>
-      <div class="hint" style="margin-top:10px">Adverse-impact ratio (four-fifths rule) monitored across protected groups. The protected attribute is used only here, never as a model input.</div></div>
+  const rc=d.reason_codes;const maxAbs=Math.max(...rc.map(r=>Math.abs(r.contribution)),0.0001);
+  const wf=rc.map(r=>{const w=Math.abs(r.contribution)/maxAbs*50;const pos=r.contribution>=0;
+    return `<div class="wfrow"><span class="wl">${esc(r.label)}</span><div class="wftrack"><div class="wfmid"></div>
+      <div class="wfseg ${pos?'pos':'neg'}" style="${pos?`left:50%;width:${w}%`:`right:50%;width:${w}%`}"></div></div>
+      <span class="wv ${pos?'up':'down'}" style="color:${pos?'var(--good)':'var(--bad)'}">${r.contribution>0?'+':''}${r.contribution}</span></div>`}).join('');
+  const spoken=`Explaining the decision. The chosen action is ${pretty(d.action)}. ${rc.map(r=>`${r.label} ${r.direction} the score`).join('. ')}. The fairness check reads ${d.fairness_flag.replace('_',' ')}.`;
+  out.innerHTML=`<div style="margin-bottom:12px">${audioBtn('Read explanation','id="rsp"')}</div>
+    <div class="row two">
+    <div class="panel pad" style="box-shadow:none"><div class="eyebrow2">SHAP force plot</div>
+      <div class="wf"><div class="wfhead"><span>pulls away</span><span>pushes toward action</span></div>${wf}</div>
+      <div class="formula"><b>output = base value + Σ SHAP(feature)</b>. Green pushes the model toward the action, red pulls away. Each value is cached with the decision for the adverse-action notice and audit.</div>
+      <div style="margin-top:10px"><span class="pill ${d.fairness_flag==='adverse_impact'?'warn':'ok'}">fairness · ${esc(d.fairness_flag)}</span><span class="pill n">action · ${esc(pretty(d.action))}</span></div></div>
     <div class="panel pad" style="box-shadow:none"><div class="eyebrow2">Audit record, 16 fields</div>
-      <table class="tbl">${['decision_id','party_id','channel','use_case','action_id','fairness_flag','mode','latency_ms','consent_ref','human_reviewed'].map(k=>`<tr><td>${k}</td><td>${row[k]!==undefined?row[k]:'—'}</td></tr>`).join('')}</table>
+      <table class="tbl">${['decision_id','party_id','channel','use_case','action_id','fairness_flag','mode','latency_ms','consent_ref','human_reviewed'].map(k=>`<tr><td>${k}</td><td>${esc(row[k]!==undefined?row[k]:'—')}</td></tr>`).join('')}</table>
       <div class="hint" style="margin-top:8px">Append-only. Replayable. Satisfies SR 11-7, EU AI Act, ECOA, NAIC simultaneously.</div></div></div>`;
+  $('#rsp').onclick=function(){speak(spoken,this)};
+  if(AUDIO_ON)speak(spoken,$('#rsp'));
 }
 
 function renderLock(){
@@ -383,9 +460,9 @@ function renderLock(){
     <div class="err" id="perr"></div><div style="margin-top:10px"><button class="btn" onclick="unlock()">Unlock</button></div></div>`;
 }
 async function unlock(){
-  const p=$('#pass').value;let ok=false;
-  try{ok=(await api.post('/dev-auth',{passcode:p})).ok;}catch(e){ok=(p==='Aryansh@Tredence');}
-  if(ok){DEV_OK=true;openApp('developer');}else{$('#perr').textContent='Incorrect passcode.';}
+  const p=$('#pass').value;
+  try{const r=await api.post('/dev-auth',{passcode:p});if(r.ok){DEV_OK=true;openApp('developer');}else{$('#perr').textContent='Incorrect passcode.';}}
+  catch(e){$('#perr').textContent='Service unavailable.';}
 }
 async function renderDeveloper(pane){
   pane.innerHTML=`${head('developer','Under the hood')}
@@ -397,7 +474,7 @@ async function renderDeveloper(pane){
     <div class="row two" style="margin-top:18px">
       <div class="panel pad"><div class="eyebrow2">Latency, warm</div><div id="dlat" style="margin-top:10px"></div>
         <div class="eyebrow2" style="margin-top:14px">Model registry</div><div id="dmodels" style="margin-top:8px"></div>
-        <div class="eyebrow2" style="margin-top:14px">Backends</div><div id="dback" style="margin-top:8px"></div></div>
+        <div class="eyebrow2" style="margin-top:14px">Backends and security</div><div id="dback" style="margin-top:8px"></div></div>
       <div class="panel pad"><div style="display:flex;align-items:center;gap:8px"><span class="pdot"></span><div class="eyebrow2">Real-time CDC event stream</div></div>
         <div class="feed" id="dfeed" style="margin-top:8px"></div></div></div>
     <div class="panel pad" style="margin-top:18px"><div class="eyebrow2">Agentic loop, raw trace</div>
@@ -410,7 +487,7 @@ async function renderDeveloper(pane){
 }
 async function devMeta(){
   let h={},s={};try{[h,s]=await Promise.all([api.get('/health'),api.get('/stats')]);}catch(e){return;}
-  $('#dback').innerHTML=`<span class="pill n">ledger · ${h.backends.ledger}</span><span class="pill n">hot store · ${h.backends.online_store}</span><span class="pill n">agent · ${h.agent_engine}</span><span class="pill ok">${(h.parties||0).toLocaleString()} parties</span>`;
+  $('#dback').innerHTML=`<span class="pill n">ledger · ${esc(h.backends.ledger)}</span><span class="pill n">hot store · ${esc(h.backends.online_store)}</span><span class="pill n">agent · ${esc(h.agent_engine)}</span><span class="pill ok">${(h.parties||0).toLocaleString()} parties</span><span class="pill ok">CSP + no-PII enforced</span>`;
   $('#dlat').innerHTML=['p50','p95','p99'].map(k=>`<div class="bar"><span class="bl">${k}</span><div class="tk"><div class="fl" style="width:${Math.min(100,s.latency[k]/(META.slo_ms||98)*100)}%"></div></div><span class="bv">${s.latency[k]} ms</span></div>`).join('');
 }
 async function devDecide(){
@@ -418,16 +495,16 @@ async function devDecide(){
   for(let i=0;i<nodes.length;i++){await new Promise(r=>setTimeout(r,130));if(i)nodes[i-1].classList.add('done');nodes[i].classList.add('active');}
   nodes[nodes.length-1].classList.remove('active');nodes[nodes.length-1].classList.add('done');
   let d;try{d=await api.post('/decide',{party_id:pid,event:{event_type:'large_transfer_attempt',amount:4000}});}catch(e){return;}
-  $('#dmodels').innerHTML=Object.entries(d.model_versions).map(([k,v])=>`<div style="font-size:12.5px;color:var(--muted)"><b style="color:var(--ink)">${k}</b> · ${v}</div>`).join('');
-  $('#dpout').innerHTML=`<pre>${JSON.stringify({action:d.action,expected_value:d.score,latency_ms:d.latency_ms,within_slo:d.within_slo,model_scores:d.model_scores,reason_codes:d.reason_codes},null,2)}</pre>`;
+  $('#dmodels').innerHTML=Object.entries(d.model_versions).map(([k,v])=>`<div style="font-size:12.5px;color:var(--muted)"><b style="color:var(--ink)">${esc(k)}</b> · ${esc(v)}</div>`).join('');
+  $('#dpout').innerHTML=`<pre>${esc(JSON.stringify({action:d.action,expected_value:d.score,latency_ms:d.latency_ms,within_slo:d.within_slo,model_scores:d.model_scores,reason_codes:d.reason_codes},null,2))}</pre>`;
 }
 async function devFeed(){let st;try{st=await api.get('/stream');}catch(e){return;}
-  $('#dfeed').innerHTML=st.events.map(e=>`<div class="frow"><span class="tg">${e.ts_label||''}</span><span class="ev">${e.event_type}</span><span class="rg">${e.party_id}${e.amount?' · '+Math.round(e.amount):''}</span></div>`).join('')||'<div class="hint">waiting for events…</div>';}
+  $('#dfeed').innerHTML=st.events.map(e=>`<div class="frow"><span class="tg">${esc(e.ts_label||'')}</span><span class="ev">${esc(e.event_type)}</span><span class="rg">${esc(e.party_id)}${e.amount?' · '+Math.round(e.amount):''}</span></div>`).join('')||'<div class="hint">waiting for events…</div>';}
 function dAgent(){agentRun($('#dparty').value,$('#dgoal').value,'#dthread',null,false)}
 
 async function agentRun(pid,goal,threadSel,after,friendlyMode){
   goal=(goal||'').trim();if(!goal)return;const thread=$(threadSel);
-  thread.appendChild(el(`<div class="msg user"><div class="bubble">${goal}</div></div>`));if(after)after();
+  thread.appendChild(el(`<div class="msg user"><div class="bubble">${esc(goal)}</div></div>`));if(after)after();
   const turn=el(`<div class="msg bot"><span class="av">A<b>.</b></span><div class="bubble"><div class="typing"><span></span><span></span><span></span></div><div class="steps" style="display:none"></div></div></div>`);
   thread.appendChild(turn);thread.scrollTop=1e9;
   const typing=turn.querySelector('.typing'),steps=turn.querySelector('.steps'),bub=turn.querySelector('.bubble');
@@ -437,11 +514,12 @@ async function agentRun(pid,goal,threadSel,after,friendlyMode){
     while(true){const{value,done}=await rd.read();if(done)break;buf+=dec.decode(value,{stream:true});let i;
       while((i=buf.indexOf('\n\n'))>=0){const line=buf.slice(0,i).replace(/^data: /,'');buf=buf.slice(i+2);if(!line)continue;const ev=JSON.parse(line);
         if(ev.type==='final'){typing.remove();
-          const ans=friendlyMode?friendlyAns(ev):ev.answer;
-          bub.insertAdjacentHTML('beforeend',ev.escalated?`<div class="banner esc">${friendlyMode?'A specialist will take it from here. ':'Handed to a human specialist. '}${friendlyMode?'':ev.answer.replace('Escalated to human review: ','')}</div>`:`<div class="banner ok">${ans}</div>`);
-          if(!friendlyMode)bub.insertAdjacentHTML('beforeend',`<div style="font-size:11.5px;color:var(--muted);margin-top:7px">confidence ${ev.confidence} · ${ev.engine}</div>`);
+          const ans=friendlyMode?friendlyAns(ev):esc(ev.answer);
+          bub.insertAdjacentHTML('beforeend',ev.escalated?`<div class="banner esc">${friendlyMode?'A specialist will take it from here. ':'Handed to a human specialist. '}${friendlyMode?'':esc(ev.answer.replace('Escalated to human review: ',''))}</div>`:`<div class="banner ok">${ans}</div>`);
+          if(!friendlyMode)bub.insertAdjacentHTML('beforeend',`<div style="font-size:11.5px;color:var(--muted);margin-top:7px">confidence ${esc(ev.confidence)} · ${esc(ev.engine)}</div>`);
+          if(friendlyMode&&AUDIO_ON)speak(typeof ans==='string'?ans:'');
         }else{if(friendlyMode)continue;if(!shown){typing.style.display='none';steps.style.display='flex';shown=true;}
-          const esc=ev.node==='escalate';steps.appendChild(el(`<div class="stp ${esc?'esc':''}"><span class="si">${esc?'!':'•'}</span><span><b>${ev.node}</b> · ${ev.detail}</span></div>`));thread.scrollTop=1e9;}
+          const escd=ev.node==='escalate';steps.appendChild(el(`<div class="stp ${escd?'esc':''}"><span class="si">${escd?'!':'•'}</span><span><b>${esc(ev.node)}</b> · ${esc(ev.detail)}</span></div>`));thread.scrollTop=1e9;}
       }}
     if(friendlyMode&&typing.parentNode)typing.remove();
   }catch(e){typing.remove();bub.insertAdjacentHTML('beforeend','<div class="banner esc">Could not reach the assistant.</div>');}

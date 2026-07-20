@@ -1,14 +1,16 @@
 from __future__ import annotations
+import hmac
 import json
 import random
+import re
 import threading
 import time
 from collections import deque
 from contextlib import asynccontextmanager
 from pathlib import Path
-from fastapi import FastAPI
+from fastapi import FastAPI, HTTPException, Request
 from fastapi.responses import FileResponse, StreamingResponse
-from pydantic import BaseModel
+from pydantic import BaseModel, field_validator
 from app import bootstrap, config
 from app.agent import agent
 from app.layer1_data import cdc_stub, db
@@ -41,14 +43,53 @@ async def lifespan(app: FastAPI):
     _stop.set()
 app = FastAPI(title='BFSI personalization platform', lifespan=lifespan)
 
+_CSP = ("default-src 'self'; script-src 'self' 'unsafe-inline'; "
+        "style-src 'self' 'unsafe-inline'; img-src 'self' data:; connect-src 'self'; "
+        "base-uri 'none'; frame-ancestors 'none'; object-src 'none'; form-action 'self'")
+
+
+@app.middleware('http')
+async def security_headers(request: Request, call_next):
+    resp = await call_next(request)
+    resp.headers['Content-Security-Policy'] = _CSP
+    resp.headers['X-Content-Type-Options'] = 'nosniff'
+    resp.headers['X-Frame-Options'] = 'DENY'
+    resp.headers['Referrer-Policy'] = 'no-referrer'
+    resp.headers['Permissions-Policy'] = 'geolocation=(), camera=(), microphone=(self)'
+    return resp
+
+
+_ID_RE = re.compile(r'^[A-Za-z0-9_-]{1,40}$')
+
+
 class DecideRequest(BaseModel):
     party_id: str
     event: dict | None = None
     channel: str = 'app'
 
+    @field_validator('party_id')
+    @classmethod
+    def _pid(cls, v):
+        if not _ID_RE.match(v):
+            raise ValueError('invalid party_id')
+        return v
+
+
 class AgentRequest(BaseModel):
     party_id: str
     goal: str
+
+    @field_validator('party_id')
+    @classmethod
+    def _pid(cls, v):
+        if not _ID_RE.match(v):
+            raise ValueError('invalid party_id')
+        return v
+
+    @field_validator('goal')
+    @classmethod
+    def _goal(cls, v):
+        return v[:280]
 
 class DevAuth(BaseModel):
     passcode: str
@@ -63,7 +104,8 @@ def meta():
 
 @app.post('/dev-auth')
 def dev_auth(req: DevAuth):
-    return {'ok': req.passcode == config.DEV_PASSCODE}
+    ok = hmac.compare_digest(req.passcode.encode(), config.DEV_PASSCODE.encode())
+    return {'ok': ok}
 
 @app.post('/decide')
 def decide(req: DecideRequest):
