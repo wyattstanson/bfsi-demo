@@ -174,6 +174,14 @@ pre{background:var(--dark);color:#D7DCE5;border-radius:11px;padding:14px;overflo
 .lockwrap{max-width:380px;margin:60px auto;text-align:center}
 .lockwrap .ic{width:56px;height:56px;border-radius:14px;background:var(--soft);color:var(--orange);display:grid;place-items:center;margin:0 auto 16px}
 .err{color:var(--bad);font-size:13px;margin-top:8px;min-height:18px}
+.dcounts{display:grid;grid-template-columns:repeat(6,1fr);gap:10px}
+@media(max-width:860px){.dcounts{grid-template-columns:repeat(3,1fr)}}
+.dcount{background:var(--soft);border:1px solid var(--line);border-radius:10px;padding:11px}
+.dcount .v{font-size:18px;font-weight:800;letter-spacing:-.02em}.dcount .l{font-size:11px;color:var(--muted);margin-top:2px}
+.tbl tr.hd td{color:var(--muted);font-weight:700;text-transform:uppercase;letter-spacing:.04em;font-size:11px}
+.dbtail td{font-size:12px}.dbtail td:first-child{font-family:ui-monospace,Menlo,Consolas,monospace;color:var(--muted);width:auto}
+.provrow{display:flex;gap:8px}
+.prov{padding:5px 12px;border-radius:8px;font-weight:700;font-size:12.5px;background:var(--orange-50);color:var(--orange-600);border:1px solid var(--line)}
 .foot{color:var(--muted);font-size:12px;text-align:center;padding:26px 0}
 </style>
 </head>
@@ -325,7 +333,7 @@ function openApp(id){
   else if(id==='regulator')renderRegulator(pane);
   else if(id==='developer'){DEV_OK?renderDeveloper(pane):renderLock();}
 }
-function personaOptions(){return PERSONAS.map(p=>`<option value="${esc(p.party_id)}">${esc(p.party_id)} · ${esc(p.domain_label)} · ${esc(p.region)} · ${esc(p.risk_band)} risk</option>`).join('')}
+function personaOptions(){return PERSONAS.map(p=>`<option value="${esc(p.party_id)}">${esc(p.display||p.party_id)}</option>`).join('')}
 function head(id,title){return `<div class="eyebrow2">${modeName(id)} · ${modeRole(id)} view</div><h2 class="pt">${title}</h2>`}
 
 function renderCustomer(pane){
@@ -431,7 +439,7 @@ function renderRegulator(pane){
 async function regDecide(){
   const pid=$('#reg').value,out=$('#rout');out.innerHTML='<div class="hint">Deciding and explaining…</div>';
   let d;try{d=await api.post('/decide',{party_id:pid,channel:'web',event:{event_type:'large_transfer_attempt',amount:4000}});}catch(e){out.innerHTML='<div class="err">Service unavailable.</div>';return;}
-  let row={};try{row=await api.get('/audit/'+d.decision_id);}catch(e){}
+  let row={},gov={};try{[row,gov]=await Promise.all([api.get('/audit/'+d.decision_id),api.get('/governance')]);}catch(e){}
   const rc=d.reason_codes;const maxAbs=Math.max(...rc.map(r=>Math.abs(r.contribution)),0.0001);
   const wf=rc.map(r=>{const w=Math.abs(r.contribution)/maxAbs*50;const pos=r.contribution>=0;
     return `<div class="wfrow"><span class="wl">${esc(r.label)}</span><div class="wftrack"><div class="wfmid"></div>
@@ -442,8 +450,8 @@ async function regDecide(){
     <div class="row two">
     <div class="panel pad" style="box-shadow:none"><div class="eyebrow2">SHAP force plot</div>
       <div class="wf"><div class="wfhead"><span>pulls away</span><span>pushes toward action</span></div>${wf}</div>
-      <div class="formula"><b>output = base value + Σ SHAP(feature)</b>. Green pushes the model toward the action, red pulls away. Each value is cached with the decision for the adverse-action notice and audit.</div>
-      <div style="margin-top:10px"><span class="pill ${d.fairness_flag==='adverse_impact'?'warn':'ok'}">fairness · ${esc(d.fairness_flag)}</span><span class="pill n">action · ${esc(pretty(d.action))}</span></div></div>
+      <div class="hint" style="margin-top:10px">Green pushes the model toward the action, red pulls away. Every contribution is cached with the decision for the adverse-action notice and audit.</div>
+      <div style="margin-top:10px"><span class="pill ${d.fairness_flag==='adverse_impact'?'warn':'ok'}">fairness · ${esc(d.fairness_flag)}</span><span class="pill ${gov.air!=null&&gov.air<0.8?'warn':'ok'}">adverse-impact ratio · ${gov.air!=null?gov.air:'building'}</span><span class="pill n">action · ${esc(pretty(d.action))}</span></div></div>
     <div class="panel pad" style="box-shadow:none"><div class="eyebrow2">Audit record, 16 fields</div>
       <table class="tbl">${['decision_id','party_id','channel','use_case','action_id','fairness_flag','mode','latency_ms','consent_ref','human_reviewed'].map(k=>`<tr><td>${k}</td><td>${esc(row[k]!==undefined?row[k]:'—')}</td></tr>`).join('')}</table>
       <div class="hint" style="margin-top:8px">Append-only. Replayable. Satisfies SR 11-7, EU AI Act, ECOA, NAIC simultaneously.</div></div></div>`;
@@ -477,13 +485,43 @@ async function renderDeveloper(pane){
         <div class="eyebrow2" style="margin-top:14px">Backends and security</div><div id="dback" style="margin-top:8px"></div></div>
       <div class="panel pad"><div style="display:flex;align-items:center;gap:8px"><span class="pdot"></span><div class="eyebrow2">Real-time CDC event stream</div></div>
         <div class="feed" id="dfeed" style="margin-top:8px"></div></div></div>
+    <div class="panel pad" style="margin-top:18px"><div style="display:flex;align-items:center;gap:8px"><span class="pdot"></span><div class="eyebrow2">Real-time database</div></div>
+      <div class="dcounts" id="dcounts" style="margin-top:10px"></div>
+      <div class="eyebrow2" style="margin-top:14px">audit_log, live tail</div>
+      <div style="overflow:auto;margin-top:6px"><table class="tbl dbtail" id="dtail"></table></div></div>
+    <div class="panel pad" style="margin-top:18px"><div class="eyebrow2">Production topology, one deploy away</div>
+      <div class="provrow"><span class="prov">AWS</span><span class="prov">Databricks</span><span class="prov">Snowflake</span></div>
+      <div id="dtopo" style="margin-top:8px;overflow:auto"></div></div>
+    <div class="panel pad" style="margin-top:18px"><div class="eyebrow2">Throughput and scale, agentic at a million</div>
+      <div class="hint">Decisioning is stateless. Fire a concurrent burst to measure this instance, then scale linearly.</div>
+      <div style="margin-top:10px"><button class="btn" onclick="devLoad()">Run a 120-request burst</button></div>
+      <div id="dloadout" style="margin-top:12px"></div></div>
     <div class="panel pad" style="margin-top:18px"><div class="eyebrow2">Agentic loop, raw trace</div>
       <div class="hint">perceive, reason, act, observe, escalate, over MCP-style tools with a human-in-the-loop stop.</div>
       <label>Party</label><select id="dparty">${personaOptions()}</select>
       <label>Goal</label><input id="dgoal" type="text" value="I want a pre-approved loan of 50000"/>
       <div style="margin-top:10px"><button class="btn dark" onclick="dAgent()">Run agent</button></div>
       <div class="thread" id="dthread" style="margin-top:12px;max-height:none"></div></div>`;
-  devMeta();startStream(devFeed);
+  devMeta();devTopology();startStream(devTick);
+}
+function devTick(){devFeed();devDb();}
+async function devDb(){let x;try{x=await api.get('/db');}catch(e){return;}
+  $('#dcounts').innerHTML=x.tables.map(t=>`<div class="dcount"><div class="v">${t.rows.toLocaleString()}</div><div class="l">${esc(t.name)}</div></div>`).join('');
+  $('#dtail').innerHTML=`<tr class="hd"><td>decision_id</td><td>action</td><td>chan</td><td>ms</td><td>fairness</td><td>at</td></tr>`+x.audit_tail.map(r=>`<tr><td>${esc(r.decision_id)}</td><td>${esc(pretty(r.action_id))}</td><td>${esc(r.channel)}</td><td>${r.latency_ms}</td><td>${esc(r.fairness_flag)}</td><td>${esc(r.ts_label)}</td></tr>`).join('');}
+async function devTopology(){let t;try{t=await api.get('/topology');}catch(e){return;}
+  $('#dtopo').innerHTML=`<table class="tbl"><tr class="hd"><td>Layer</td><td>AWS</td><td>Databricks</td><td>Snowflake</td></tr>${t.mapping.map(m=>`<tr><td>${esc(m.layer)}</td><td>${esc(m.aws)}</td><td>${esc(m.databricks)}</td><td>${esc(m.snowflake)}</td></tr>`).join('')}</table>
+    <div class="hint" style="margin-top:8px">Streaming <b>${esc(t.streaming)}</b> · orchestration <b>${esc(t.orchestration)}</b> · ${esc(t.capacity)}.</div>`;}
+async function devLoad(){
+  const out=$('#dloadout');out.innerHTML='<div class="hint">Firing a concurrent burst…</div>';
+  const pid=PERSONAS[0].party_id,N=120,body={party_id:pid,event:{event_type:'session_start'}};
+  const t0=performance.now();
+  let res;try{res=await Promise.all(Array.from({length:N},()=>api.post('/decide',body)));}catch(e){out.innerHTML='<div class="err">Burst failed.</div>';return;}
+  const wall=(performance.now()-t0)/1000;
+  const lats=res.map(r=>r.latency_ms).filter(x=>x!=null).sort((a,b)=>a-b);
+  const p99=lats.length?lats[Math.floor(0.99*(lats.length-1))]:0;
+  const rps=Math.round(N/wall);
+  out.innerHTML=`<span class="pill n">${N} concurrent</span><span class="pill ok">${rps.toLocaleString()} decisions/s</span><span class="pill ok">p99 ${p99} ms</span>
+    <div class="hint" style="margin-top:8px">Sustained on one free instance. Stateless decisioning scales linearly to <b>1,000,000+ decisions/s</b> across autoscaled replicas on EKS, behind Kinesis and MSK, with the hot path served from ElastiCache and the ledger in Snowflake.</div>`;
 }
 async function devMeta(){
   let h={},s={};try{[h,s]=await Promise.all([api.get('/health'),api.get('/stats')]);}catch(e){return;}

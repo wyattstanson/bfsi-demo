@@ -1,4 +1,5 @@
 from __future__ import annotations
+import hashlib
 import hmac
 import json
 import random
@@ -129,6 +130,27 @@ def run_agent(req: AgentRequest):
             yield f'data: {json.dumps(ev)}\n\n'
     return StreamingResponse(gen(), media_type='text/event-stream')
 
+_SEGMENTS = {
+    'retail': ['Priority Banking', 'Everyday Checking', 'Salary Account', 'Youth Saver'],
+    'corporate': ['Treasury Client', 'Trade Finance', 'Cash Management', 'Payroll Client'],
+    'wealth': ['Private Wealth', 'HNW Portfolio', 'Managed Advisory', 'Goals Portfolio'],
+    'asset_mgmt': ['Direct Indexing SMA', 'Model Portfolio', 'Index Mandate', 'ESG Sleeve'],
+    'payments': ['Platinum Card', 'Rewards Card', 'Business Card', 'Travel Card'],
+    'capital_markets': ['Institutional Desk', 'Prime Brokerage', 'Research Access', 'Execution Client'],
+    'nbfc': ['Consumer Loan', 'EMI Card', 'Two-Wheeler Loan', 'Gold Loan'],
+    'personal_ins': ['Term Life', 'Health Cover', 'Motor Policy', 'Wellness Plan'],
+    'general_ins': ['Home Cover', 'Travel Policy', 'Motor Fleet', 'Pet Cover'],
+    'commercial_ins': ['Cyber Policy', 'Property Cover', 'Liability Policy', 'Marine Cargo'],
+}
+
+
+def _display(pid: str, domain: str, region: str) -> str:
+    h = int(hashlib.md5(pid.encode()).hexdigest(), 16)
+    segs = _SEGMENTS.get(domain, ['Client'])
+    seg = segs[h % len(segs)]
+    return f"{seg} · {region} · ••{h % 10000:04d}"
+
+
 @app.get('/personas')
 def personas(limit: int=12, domain: str='', region: str=''):
     where, params = ([], [])
@@ -141,7 +163,7 @@ def personas(limit: int=12, domain: str='', region: str=''):
     clause = ' WHERE ' + ' AND '.join(where) if where else ''
     params.append(limit)
     rows = db.fetchall(f'SELECT party_id, domain, journey_stage, region, currency, risk_band, tenure_months FROM party{clause} LIMIT ?', tuple(params))
-    return [{'party_id': p, 'domain': d, 'domain_label': config.DOMAIN_LABELS.get(d, d), 'journey_stage': s, 'region': rg, 'currency': cur, 'risk_band': rb, 'tenure_months': tn} for p, d, s, rg, cur, rb, tn in rows]
+    return [{'party_id': p, 'domain': d, 'domain_label': config.DOMAIN_LABELS.get(d, d), 'display': _display(p, d, rg), 'journey_stage': s, 'region': rg, 'currency': cur, 'risk_band': rb, 'tenure_months': tn} for p, d, s, rg, cur, rb, tn in rows]
 
 @app.get('/party/{party_id}')
 def party_snapshot(party_id: str):
@@ -158,7 +180,53 @@ def get_audit(decision_id: str):
 
 @app.get('/governance')
 def governance_snapshot():
-    return {'drift': governance.drift_snapshot(), 'fairness': fairness.snapshot(), 'audit_rows': audit.count(), 'human_queue': (db.fetchone('SELECT COUNT(*) FROM human_queue') or [0])[0]}
+    fair = fairness.snapshot()
+    rates = [g['rate'] for g in fair.values() if g['total'] >= 20]
+    air = round(min(rates) / max(rates), 3) if len(rates) >= 2 and max(rates) > 0 else None
+    return {'drift': governance.drift_snapshot(), 'fairness': fair, 'air': air,
+            'audit_rows': audit.count(),
+            'human_queue': (db.fetchone('SELECT COUNT(*) FROM human_queue') or [0])[0]}
+
+
+_CLOUD = [
+    {'layer': 'L1 Data', 'aws': 'Kinesis, MSK', 'databricks': 'Delta Lake', 'snowflake': 'Warehouse'},
+    {'layer': 'L2 Features', 'aws': 'ElastiCache, DynamoDB', 'databricks': 'Feature Store', 'snowflake': 'Feature Views'},
+    {'layer': 'L3 Models', 'aws': 'SageMaker', 'databricks': 'Model Serving', 'snowflake': 'Snowpark ML'},
+    {'layer': 'L4 Decisioning', 'aws': 'EKS, Lambda', 'databricks': 'Jobs', 'snowflake': 'Streamlit in SF'},
+    {'layer': 'L5 Governance', 'aws': 'CloudTrail', 'databricks': 'Unity Catalog', 'snowflake': 'Access History'},
+]
+
+
+@app.get('/topology')
+def topology():
+    return {'providers': ['AWS', 'Databricks', 'Snowflake'], 'mapping': _CLOUD,
+            'streaming': 'Kafka / MSK + Flink', 'orchestration': 'LangGraph on EKS',
+            'capacity': 'stateless decisioning, horizontally autoscaled'}
+
+
+@app.get('/db')
+def db_view():
+    def cnt(t):
+        return (db.fetchone(f'SELECT COUNT(*) FROM {t}') or [0])[0]
+    recent = db.fetchall(
+        'SELECT decision_id, action_id, channel, latency_ms, fairness_flag, ts '
+        'FROM audit_log ORDER BY ts DESC LIMIT 12')
+    return {
+        'tables': [
+            {'name': 'party', 'rows': cnt('party')},
+            {'name': 'txn', 'rows': cnt('txn')},
+            {'name': 'feature_offline', 'rows': cnt('feature_offline')},
+            {'name': 'audit_log', 'rows': cnt('audit_log')},
+            {'name': 'agent_memory', 'rows': cnt('agent_memory')},
+            {'name': 'human_queue', 'rows': cnt('human_queue')},
+        ],
+        'audit_tail': [
+            {'decision_id': d[:14], 'action_id': a, 'channel': ch,
+             'latency_ms': round(lm, 2), 'fairness_flag': ff,
+             'ts_label': time.strftime('%H:%M:%S', time.localtime(ts))}
+            for d, a, ch, lm, ff, ts in recent
+        ],
+    }
 
 @app.get('/stats')
 def stats():
