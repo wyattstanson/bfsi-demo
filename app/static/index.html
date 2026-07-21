@@ -180,12 +180,33 @@ pre{background:var(--dark);color:#D7DCE5;border-radius:11px;padding:14px;overflo
 .dcount .v{font-size:18px;font-weight:800;letter-spacing:-.02em}.dcount .l{font-size:11px;color:var(--muted);margin-top:2px}
 .tbl tr.hd td{color:var(--muted);font-weight:700;text-transform:uppercase;letter-spacing:.04em;font-size:11px}
 .dbtail td{font-size:12px}.dbtail td:first-child{font-family:ui-monospace,Menlo,Consolas,monospace;color:var(--muted);width:auto}
+.maturity{display:flex;gap:8px;flex-wrap:wrap;align-items:center;margin:6px 0 2px}
+.maturity .st{display:inline-flex;align-items:center;gap:8px;padding:6px 12px;border-radius:8px;border:1px solid var(--line);font-size:12.5px;font-weight:600;color:var(--muted);background:var(--panel)}
+.maturity .st.cur{color:var(--orange-600);border-color:var(--orange);background:var(--orange-50)}
+.maturity .arw{color:var(--line)}
+.strap{color:var(--muted);font-size:13px;margin:2px 0 6px}
 .provrow{display:flex;gap:8px}
 .prov{padding:5px 12px;border-radius:8px;font-weight:700;font-size:12.5px;background:var(--orange-50);color:var(--orange-600);border:1px solid var(--line)}
+#splash{position:fixed;inset:0;z-index:1000;background:var(--bg);display:grid;place-items:center;transition:opacity .6s ease}
+#splash.done{opacity:0;pointer-events:none}
+#splash .si{text-align:center}
+#splash .tmark{filter:drop-shadow(0 10px 24px rgba(241,89,42,.28))}
+#splash .swm{font-size:34px;font-weight:800;letter-spacing:-.03em;margin-top:16px;opacity:0;animation:fadein .5s .7s both}
+#splash .stag{font-size:13px;color:var(--muted);letter-spacing:.16em;text-transform:uppercase;margin-top:8px;opacity:0;animation:fadein .5s 1s both}
+#splash .sload{width:120px;height:3px;border-radius:3px;background:var(--line);margin:22px auto 0;overflow:hidden;opacity:0;animation:fadein .4s 1.1s both}
+#splash .sload span{display:block;height:100%;width:0;background:var(--orange);animation:load 1s 1.1s ease forwards}
+@keyframes load{to{width:100%}}
 .foot{color:var(--muted);font-size:12px;text-align:center;padding:26px 0}
 </style>
 </head>
 <body>
+
+<div id="splash"><div class="si">
+  <svg class="tmark" width="92" height="92" viewBox="0 0 100 100"><polygon class="bar" fill="#F1592A" points="14,40 70,40 86,16 30,16"/><polygon class="stem" fill="#F1592A" points="40,40 58,40 58,86 40,86"/></svg>
+  <div class="swm">Tredence</div>
+  <div class="stag">Aria Personalization Platform</div>
+  <div class="sload"><span></span></div>
+</div></div>
 
 <section id="landing" class="view on">
   <div class="wrap">
@@ -202,7 +223,7 @@ pre{background:var(--dark);color:#D7DCE5;border-radius:11px;padding:14px;overflo
         <svg class="tmark" width="64" height="64" viewBox="0 0 100 100"><polygon class="bar" fill="#F1592A" points="14,40 70,40 86,16 30,16"/><polygon class="stem" fill="#F1592A" points="40,40 58,40 58,86 40,86"/></svg>
         <span class="by">Aria, a Tredence BFSI platform</span>
       </div>
-      <span class="eyebrow">Real-time, explainable, agentic</span>
+      <span class="eyebrow">One to one, finally at production scale</span>
       <h1>Know every customer like you have<span> served them for years.</span></h1>
       <p>Aria decides the next-best-action for every interaction, explains it in plain language, keeps a regulator-ready audit trail, and speaks the reasoning aloud. One platform, five points of view.</p>
       <div class="cta">
@@ -288,6 +309,11 @@ const FRIENDLY={
 };
 function friendly(a){return FRIENDLY[a]||{t:"Here is something for you",m:"A personalised suggestion based on your recent activity.",cta:"Tell me more",why:"Tailored to you."}}
 function pretty(id){return (id||'').replace(/_/g,' ').replace(/\b\w/g,c=>c.toUpperCase())}
+const ACTION_LABELS={payments_fraud_stepup_auth:'Step-up verification',retail_cross_sell_credit_card:'Rewards card upgrade',wealth_advisory_upgrade:'Portfolio review invitation',nbfc_preapproved_loan:'Pre-approved credit offer',retain_retention_offer:'Loyalty retention offer',service_proactive_support:'Proactive service outreach',engage_financial_tip:'Personalized money tip'};
+const USE_CASE_LABELS={cross_sell:'Cross-sell',originate:'Origination',service:'Servicing',retain:'Retention',engage:'Engagement',discover:'Discovery'};
+function actionLabel(id){return ACTION_LABELS[id]||pretty(id)}
+function useCaseLabel(u){return USE_CASE_LABELS[u]||pretty(u)}
+function maskId(id){id=String(id||'');return id.length>4?'••'+id.slice(-4):id}
 const FALLBACK=[{party_id:'P000000',domain_label:'Retail Banking',region:'North America',risk_band:'high'},
  {party_id:'P000023',domain_label:'NBFC',region:'India',risk_band:'low'},
  {party_id:'P000009',domain_label:'Wealth',region:'Europe',risk_band:'low'}];
@@ -306,6 +332,7 @@ function audioBtn(label,idAttr){return `<button class="audiobtn" ${idAttr||''}><
 
 async function boot(){
   applyTheme(localStorage.getItem('aria-theme')||(matchMedia('(prefers-color-scheme: dark)').matches?'dark':'light'));
+  setTimeout(()=>{const s=$('#splash');if(s){s.classList.add('done');setTimeout(()=>s.remove(),650);}},2300);
   AUDIO_ON=localStorage.getItem('aria-audio')!=='0';paintAudio();
   try{META=await api.get('/meta');PERSONAS=await api.get('/personas?limit=40');}
   catch(e){META={references:{}};PERSONAS=FALLBACK;}
@@ -384,16 +411,16 @@ async function advBrief(){
   const pid=$('#adv').value,out=$('#aout');out.innerHTML='<div class="hint">Preparing brief…</div>';
   let d;try{d=await api.post('/decide',{party_id:pid,channel:'branch',event:{event_type:'session_start'}});}catch(e){out.innerHTML='<div class="err">Service unavailable.</div>';return;}
   const a=d.attrs,top=d.reason_codes[0];
-  const commentary=`Auto-commentary. The recommended next best action for this ${a.domain} client is ${pretty(d.action)}, with an expected value of ${d.score}. The primary driver is ${top?top.label:'recent activity'}. The client is in the ${a.journey_stage} stage with a ${a.risk_band} risk profile. Suitability and audit are handled automatically. Decided in ${d.latency_ms} milliseconds.`;
+  const commentary=`Auto-commentary. The recommended next best action for this ${a.domain} client is ${actionLabel(d.action)}, with an expected value of ${d.score}. The primary driver is ${top?top.label:'recent activity'}. The client is in the ${a.journey_stage} stage with a ${a.risk_band} risk profile. Suitability and audit are handled automatically. Decided in ${d.latency_ms} milliseconds.`;
   out.innerHTML=`<div style="margin-bottom:12px">${audioBtn('Play commentary','id="asp"')}</div>
     <div class="row two">
     <div class="panel pad" style="box-shadow:none"><div class="eyebrow2">Recommended next best action</div>
-      <div style="font-size:20px;font-weight:800;margin:4px 0">${esc(pretty(d.action))}</div>
+      <div style="font-size:20px;font-weight:800;margin:4px 0">${esc(actionLabel(d.action))}</div>
       ${d.reason_codes.map(r=>`<div class="reason"><span>${esc(r.label)}</span><span class="${r.direction==='increases'?'up':'down'}">${esc(r.direction)}</span></div>`).join('')}
       <div style="margin-top:12px"><span class="pill n">expected value ${d.score}</span><span class="pill ok">${esc(a.region)} · ${esc(a.currency)}</span><span class="pill ${d.within_slo?'ok':'slow'}">${d.latency_ms} ms</span></div></div>
     <div class="panel pad" style="box-shadow:none"><div class="eyebrow2">Talking points</div>
       <ul style="padding-left:18px;margin:8px 0;line-height:1.7">
-        <li>Lead with the <b>${esc(pretty(d.action).toLowerCase())}</b>, the highest-value action for this ${esc(a.domain)} client.</li>
+        <li>Lead with the <b>${esc(actionLabel(d.action).toLowerCase())}</b>, the highest-value action for this ${esc(a.domain)} client.</li>
         <li>Anchor on the driver: <b>${esc(top?top.label:'recent activity')}</b>.</li>
         <li>Client is in the <b>${esc(a.journey_stage)}</b> stage with a <b>${esc(a.risk_band)}</b> risk profile, tailor tone accordingly.</li>
         <li>Suitability and audit are handled automatically, this action is logged and explainable.</li></ul>
@@ -404,6 +431,8 @@ async function advBrief(){
 
 function renderExecutive(pane){
   pane.innerHTML=`${head('executive','The book of decisions')}
+    <div class="strap">A 200 million to 1 billion dollar P&amp;L lever, run one to one at production scale.</div>
+    <div class="maturity"><span class="st">Rules</span><span class="arw">›</span><span class="st">Batch ML</span><span class="arw">›</span><span class="st">Real-time</span><span class="arw">›</span><span class="st cur">Agentic · you are here</span></div>
     <div class="kpis" id="exk" style="margin-top:14px"></div>
     <div class="row two" style="margin-top:18px">
       <div class="panel pad"><div class="eyebrow2">Decisions by action</div><div id="exact" style="margin-top:10px"></div></div>
@@ -422,11 +451,11 @@ async function refreshExec(feedOnly){
       ['Customers',s.parties.toLocaleString(),'under management'],
     ].map(k=>`<div class="kpi"><div class="v">${k[1]}</div><div class="l">${k[0]}</div><div class="d">${k[2]}</div></div>`).join('');
     const max=Math.max(1,...s.by_action.map(x=>x.count));
-    $('#exact').innerHTML=s.by_action.slice(0,6).map(x=>`<div class="bar"><span class="bl">${esc(pretty(x.action))}</span><div class="tk"><div class="fl" style="width:${x.count/max*100}%"></div></div><span class="bv">${x.count}</span></div>`).join('')||'<div class="hint">No decisions yet.</div>';
+    $('#exact').innerHTML=s.by_action.slice(0,6).map(x=>`<div class="bar"><span class="bl">${esc(actionLabel(x.action))}</span><div class="tk"><div class="fl" style="width:${x.count/max*100}%"></div></div><span class="bv">${x.count}</span></div>`).join('')||'<div class="hint">No decisions yet.</div>';
     const rmax=Math.max(1,...s.by_region.map(x=>x.count));
     $('#exreg').innerHTML=s.by_region.map(x=>`<div class="bar"><span class="bl">${esc(x.region||'—')}</span><div class="tk"><div class="fl" style="width:${x.count/rmax*100}%"></div></div><span class="bv">${x.count}</span></div>`).join('')||'<div class="hint">No decisions yet.</div>';
   }
-  $('#exfeed').innerHTML=st.decisions.map(d=>`<div class="frow"><span class="tg">${esc(d.ts_label)}</span><span class="ev">${esc(pretty(d.action))}</span><span class="rg">${esc(d.region)} · ${d.latency_ms} ms</span></div>`).join('')||'<div class="hint">Make a decision to see it here.</div>';
+  $('#exfeed').innerHTML=st.decisions.map(d=>`<div class="frow"><span class="tg">${esc(d.ts_label)}</span><span class="ev">${esc(actionLabel(d.action))}</span><span class="rg">${esc(d.region)} · ${d.latency_ms} ms</span></div>`).join('')||'<div class="hint">Make a decision to see it here.</div>';
 }
 
 function renderRegulator(pane){
@@ -445,15 +474,15 @@ async function regDecide(){
     return `<div class="wfrow"><span class="wl">${esc(r.label)}</span><div class="wftrack"><div class="wfmid"></div>
       <div class="wfseg ${pos?'pos':'neg'}" style="${pos?`left:50%;width:${w}%`:`right:50%;width:${w}%`}"></div></div>
       <span class="wv ${pos?'up':'down'}" style="color:${pos?'var(--good)':'var(--bad)'}">${r.contribution>0?'+':''}${r.contribution}</span></div>`}).join('');
-  const spoken=`Explaining the decision. The chosen action is ${pretty(d.action)}. ${rc.map(r=>`${r.label} ${r.direction} the score`).join('. ')}. The fairness check reads ${d.fairness_flag.replace('_',' ')}.`;
+  const spoken=`Explaining the decision. The chosen action is ${actionLabel(d.action)}. ${rc.map(r=>`${r.label} ${r.direction} the score`).join('. ')}. The fairness check reads ${d.fairness_flag.replace('_',' ')}.`;
   out.innerHTML=`<div style="margin-bottom:12px">${audioBtn('Read explanation','id="rsp"')}</div>
     <div class="row two">
     <div class="panel pad" style="box-shadow:none"><div class="eyebrow2">SHAP force plot</div>
       <div class="wf"><div class="wfhead"><span>pulls away</span><span>pushes toward action</span></div>${wf}</div>
       <div class="hint" style="margin-top:10px">Green pushes the model toward the action, red pulls away. Every contribution is cached with the decision for the adverse-action notice and audit.</div>
-      <div style="margin-top:10px"><span class="pill ${d.fairness_flag==='adverse_impact'?'warn':'ok'}">fairness · ${esc(d.fairness_flag)}</span><span class="pill ${gov.air!=null&&gov.air<0.8?'warn':'ok'}">adverse-impact ratio · ${gov.air!=null?gov.air:'building'}</span><span class="pill n">action · ${esc(pretty(d.action))}</span></div></div>
+      <div style="margin-top:10px"><span class="pill ${d.fairness_flag==='adverse_impact'?'warn':'ok'}">fairness · ${esc(d.fairness_flag)}</span><span class="pill ${gov.air!=null&&gov.air<0.8?'warn':'ok'}">adverse-impact ratio · ${gov.air!=null?gov.air:'building'}</span><span class="pill n">action · ${esc(actionLabel(d.action))}</span></div></div>
     <div class="panel pad" style="box-shadow:none"><div class="eyebrow2">Audit record, 16 fields</div>
-      <table class="tbl">${['decision_id','party_id','channel','use_case','action_id','fairness_flag','mode','latency_ms','consent_ref','human_reviewed'].map(k=>`<tr><td>${k}</td><td>${esc(row[k]!==undefined?row[k]:'—')}</td></tr>`).join('')}</table>
+      <table class="tbl">${[['decision_id','Decision reference',row.decision_id],['party_id','Customer reference',maskId(row.party_id)],['channel','Channel',row.channel],['use_case','Use case',useCaseLabel(row.use_case)],['action_id','Action',actionLabel(row.action_id)],['fairness_flag','Fairness flag',row.fairness_flag],['mode','Mode',row.mode],['latency_ms','Latency (ms)',row.latency_ms],['consent_ref','Consent reference',row.consent_ref],['human_reviewed','Human reviewed',row.human_reviewed]].map(r=>`<tr><td>${r[1]}</td><td>${esc(r[2]!==undefined&&r[2]!==null?r[2]:'—')}</td></tr>`).join('')}</table>
       <div class="hint" style="margin-top:8px">Append-only. Replayable. Satisfies SR 11-7, EU AI Act, ECOA, NAIC simultaneously.</div></div></div>`;
   $('#rsp').onclick=function(){speak(spoken,this)};
   if(AUDIO_ON)speak(spoken,$('#rsp'));
@@ -507,7 +536,7 @@ async function renderDeveloper(pane){
 function devTick(){devFeed();devDb();}
 async function devDb(){let x;try{x=await api.get('/db');}catch(e){return;}
   $('#dcounts').innerHTML=x.tables.map(t=>`<div class="dcount"><div class="v">${t.rows.toLocaleString()}</div><div class="l">${esc(t.name)}</div></div>`).join('');
-  $('#dtail').innerHTML=`<tr class="hd"><td>decision_id</td><td>action</td><td>chan</td><td>ms</td><td>fairness</td><td>at</td></tr>`+x.audit_tail.map(r=>`<tr><td>${esc(r.decision_id)}</td><td>${esc(pretty(r.action_id))}</td><td>${esc(r.channel)}</td><td>${r.latency_ms}</td><td>${esc(r.fairness_flag)}</td><td>${esc(r.ts_label)}</td></tr>`).join('');}
+  $('#dtail').innerHTML=`<tr class="hd"><td>decision</td><td>action</td><td>channel</td><td>ms</td><td>fairness</td><td>at</td></tr>`+x.audit_tail.map(r=>`<tr><td>${esc(r.decision_id)}</td><td>${esc(actionLabel(r.action_id))}</td><td>${esc(r.channel)}</td><td>${r.latency_ms}</td><td>${esc(r.fairness_flag)}</td><td>${esc(r.ts_label)}</td></tr>`).join('');}
 async function devTopology(){let t;try{t=await api.get('/topology');}catch(e){return;}
   $('#dtopo').innerHTML=`<table class="tbl"><tr class="hd"><td>Layer</td><td>AWS</td><td>Databricks</td><td>Snowflake</td></tr>${t.mapping.map(m=>`<tr><td>${esc(m.layer)}</td><td>${esc(m.aws)}</td><td>${esc(m.databricks)}</td><td>${esc(m.snowflake)}</td></tr>`).join('')}</table>
     <div class="hint" style="margin-top:8px">Streaming <b>${esc(t.streaming)}</b> · orchestration <b>${esc(t.orchestration)}</b> · ${esc(t.capacity)}.</div>`;}
