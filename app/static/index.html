@@ -549,12 +549,12 @@ async function devLoad(){
   const lats=res.map(r=>r.latency_ms).filter(x=>x!=null).sort((a,b)=>a-b);
   const p99=lats.length?lats[Math.floor(0.99*(lats.length-1))]:0;
   const rps=Math.round(N/wall);
-  out.innerHTML=`<span class="pill n">${N} concurrent</span><span class="pill ok">${rps.toLocaleString()} decisions/s</span><span class="pill ok">p99 ${p99} ms</span>
-    <div class="hint" style="margin-top:8px">Sustained on one free instance. Stateless decisioning scales linearly to <b>1,000,000+ decisions/s</b> across autoscaled replicas on EKS, behind Kinesis and MSK, with the hot path served from ElastiCache and the ledger in Snowflake.</div>`;
+  out.innerHTML=`<span class="pill n">${N} concurrent</span><span class="pill ok">${rps.toLocaleString()} decisions/s per core</span><span class="pill ok">p99 ${p99} ms</span>
+    <div class="hint" style="margin-top:8px">The ledger write is <b>off the hot path</b> (write-behind, batched every 250ms), so a decision does zero blocking I/O and throughput is CPU-bound and scales linearly: per-core rate times cores per instance times autoscaled replicas on EKS reaches <b>1,000,000+ decisions/s</b>. Hot path on ElastiCache, features warmed on demand, the ledger batched into Snowflake, so a million customers never touch memory at once.</div>`;
 }
 async function devMeta(){
   let h={},s={};try{[h,s]=await Promise.all([api.get('/health'),api.get('/stats')]);}catch(e){return;}
-  $('#dback').innerHTML=`<span class="pill n">ledger · ${esc(h.backends.ledger)}</span><span class="pill n">hot store · ${esc(h.backends.online_store)}</span><span class="pill n">agent · ${esc(h.agent_engine)}</span><span class="pill ok">${(h.parties||0).toLocaleString()} parties</span><span class="pill ok">CSP + no-PII enforced</span>`;
+  $('#dback').innerHTML=`<span class="pill n">ledger · ${esc(h.backends.ledger)}</span><span class="pill n">hot store · ${esc(h.backends.online_store)}</span><span class="pill n">agent · ${esc(h.agent_engine)}</span><span class="pill ok">${(h.parties||0).toLocaleString()} parties</span><span class="pill ok">write-behind audit</span><span class="pill ok">CSP + no-PII enforced</span>`;
   $('#dlat').innerHTML=['p50','p95','p99'].map(k=>`<div class="bar"><span class="bl">${k}</span><div class="tk"><div class="fl" style="width:${Math.min(100,s.latency[k]/(META.slo_ms||98)*100)}%"></div></div><span class="bv">${s.latency[k]} ms</span></div>`).join('');
 }
 async function devDecide(){

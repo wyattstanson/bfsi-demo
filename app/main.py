@@ -32,16 +32,23 @@ def _stream_loop():
             _events.appendleft(ev)
         time.sleep(0.7)
 
+
+def _flush_loop():
+    while not _stop.is_set():
+        audit.flush()
+        time.sleep(0.25)
+
 @asynccontextmanager
 async def lifespan(app: FastAPI):
     bootstrap.ensure()
     get_engine()
     global _party_ids
     _party_ids = [r[0] for r in db.fetchall('SELECT party_id FROM party LIMIT 800')]
-    t = threading.Thread(target=_stream_loop, daemon=True)
-    t.start()
+    threading.Thread(target=_stream_loop, daemon=True).start()
+    threading.Thread(target=_flush_loop, daemon=True).start()
     yield
     _stop.set()
+    audit.flush()
 app = FastAPI(title='BFSI personalization platform', lifespan=lifespan)
 
 _CSP = ("default-src 'self'; script-src 'self' 'unsafe-inline'; "
