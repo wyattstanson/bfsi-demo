@@ -185,7 +185,8 @@ pre{background:var(--dark);color:#D7DCE5;border-radius:11px;padding:14px;overflo
 .tbl tr.hd td{color:var(--muted);font-weight:700;text-transform:uppercase;letter-spacing:.04em;font-size:11px}
 .dbtail td{font-size:12px}.dbtail td:first-child{font-family:ui-monospace,Menlo,Consolas,monospace;color:var(--muted);width:auto}
 .ovl{position:fixed;inset:0;z-index:900;background:rgba(10,11,14,.55);display:none;place-items:center;padding:24px}
-.ovl.on{display:grid;animation:fade .3s ease both}
+.ovl.on{display:grid;animation:fade .3s ease both;cursor:pointer}
+.ovlbox{cursor:default}
 .ovlbox{background:var(--panel);border:1px solid var(--line);border-radius:16px;max-width:520px;width:100%;padding:26px;position:relative;box-shadow:var(--shadow);max-height:88vh;overflow:auto}
 .ovlbox h2{margin:0 0 4px;font-size:20px;font-weight:800}
 .ovlx{position:absolute;top:12px;right:16px;border:0;background:none;font-size:24px;color:var(--muted);cursor:pointer;line-height:1}
@@ -291,7 +292,7 @@ pre{background:var(--dark);color:#D7DCE5;border-radius:11px;padding:14px;overflo
   </div>
 </section>
 
-<div id="guide" class="ovl"><div class="ovlbox">
+<div id="guide" class="ovl" onclick="if(event.target===this)this.classList.remove('on')"><div class="ovlbox">
   <button class="ovlx" onclick="closeGuide()">&times;</button>
   <h2>How to use Aria</h2>
   <p class="hint">One decision engine, five points of view. Switch views from the top bar at any time.</p>
@@ -306,7 +307,7 @@ pre{background:var(--dark);color:#D7DCE5;border-radius:11px;padding:14px;overflo
   <button class="btn" onclick="closeGuide()">Got it</button>
 </div></div>
 
-<div id="login" class="ovl"><div class="ovlbox">
+<div id="login" class="ovl" onclick="if(event.target===this)this.classList.remove('on')"><div class="ovlbox">
   <div class="tlogo" style="justify-content:center;margin-bottom:8px"><svg class="tmark" width="30" height="30" viewBox="0 0 100 100"><polygon fill="#F1592A" points="14,40 70,40 86,16 30,16"/><polygon fill="#F1592A" points="40,40 58,40 58,86 40,86"/></svg><span class="wm" style="font-size:17px">Aria</span></div>
   <h2 style="text-align:center">Your money, made simple</h2>
   <p class="hint" style="text-align:center" id="loginsub">Sign in to continue, or try a few questions as a guest.</p>
@@ -433,7 +434,7 @@ async function submitLogin(){const u=($('#lu').value||'').trim(),p=$('#lp').valu
   if(ok){closeLogin();onAuthChanged();}else{$('#lerr').textContent='That did not match. For this demo, the username and password are both Aryansh.';}}
 function continueGuest(){CUST.domain=$('#ld').value||CUST.domain;saveCust();closeLogin();onAuthChanged();}
 function triesLeft(){return Math.max(0,GUEST_TRIES-guestUsed)}
-function updateTriesBadge(){const b=$('#triesBadge');if(!b)return;if(CUST.loggedIn){b.textContent='Signed in as '+CUST.username;}else{b.textContent=triesLeft()+' free question'+(triesLeft()===1?'':'s')+' left';}}
+function updateTriesBadge(){const b=$('#triesBadge');if(!b)return;if(CUST.loggedIn){b.textContent='Signed in as '+CUST.username;}else{const l=triesLeft();b.textContent=l>0?(l+' free question'+(l===1?'':'s')+' left'):'Guest';}}
 function onAuthChanged(){const d=$('#custDomain');if(d)d.value=CUST.domain||'';updateTriesBadge();
   if($('#cthread')){const who=CUST.loggedIn?(' '+CUST.username):'';const area=CUST.domain?(' I see you are interested in '+(DOMAINS_LIST.find(x=>x.id===CUST.domain)||{}).label+'. '):' ';
     $('#cthread').innerHTML='';cbubble('Welcome back'+who+'. '+area+'Ask me anything, from budgeting and credit to investing, insurance, or a payment. What is on your mind?','bot');}}
@@ -505,9 +506,9 @@ function cquick(e){$('#cgoal').value=e.textContent;cSend()}
 function cAgent(){cSend()}
 async function cSend(){
   const msg=($('#cgoal').value||'').trim();if(!msg)return;
-  if(!CUST.loggedIn && guestUsed>=GUEST_TRIES){openLogin(true);return;}
   $('#cgoal').value='';
-  if(!CUST.loggedIn){guestUsed++;localStorage.setItem('aria-guest-used',guestUsed);updateTriesBadge();}
+  if(!CUST.loggedIn){guestUsed++;localStorage.setItem('aria-guest-used',guestUsed);updateTriesBadge();
+    if(guestUsed>GUEST_TRIES && !localStorage.getItem('aria-nudged')){localStorage.setItem('aria-nudged','1');setTimeout(()=>openLogin(false),500);}}
   if(ACTION_RE.test(msg)){agentRun($('#cust').value,msg,'#cthread',null,true);return;}
   cbubble(msg,'user');
   const turn=el('<div class="msg bot"><span class="av">A<b>.</b></span><div class="bubble"><div class="typing"><span></span><span></span><span></span></div></div></div>');

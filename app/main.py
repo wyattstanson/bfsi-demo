@@ -104,7 +104,7 @@ class DevAuth(BaseModel):
 
 @app.get('/')
 def index():
-    return FileResponse(_STATIC / 'index.html')
+    return FileResponse(_STATIC / 'index.html', headers={'Cache-Control': 'no-cache, must-revalidate'})
 
 @app.get('/meta')
 def meta():
