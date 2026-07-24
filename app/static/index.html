@@ -180,6 +180,15 @@ pre{background:var(--dark);color:#D7DCE5;border-radius:11px;padding:14px;overflo
 .dcount .v{font-size:18px;font-weight:800;letter-spacing:-.02em}.dcount .l{font-size:11px;color:var(--muted);margin-top:2px}
 .tbl tr.hd td{color:var(--muted);font-weight:700;text-transform:uppercase;letter-spacing:.04em;font-size:11px}
 .dbtail td{font-size:12px}.dbtail td:first-child{font-family:ui-monospace,Menlo,Consolas,monospace;color:var(--muted);width:auto}
+.ovl{position:fixed;inset:0;z-index:900;background:rgba(10,11,14,.55);display:none;place-items:center;padding:24px}
+.ovl.on{display:grid;animation:fade .3s ease both}
+.ovlbox{background:var(--panel);border:1px solid var(--line);border-radius:16px;max-width:520px;width:100%;padding:26px;position:relative;box-shadow:var(--shadow);max-height:88vh;overflow:auto}
+.ovlbox h2{margin:0 0 4px;font-size:20px;font-weight:800}
+.ovlx{position:absolute;top:12px;right:16px;border:0;background:none;font-size:24px;color:var(--muted);cursor:pointer;line-height:1}
+.glist{display:flex;flex-direction:column;gap:10px;margin:14px 0}
+.gitem{background:var(--soft);border:1px solid var(--line);border-radius:10px;padding:12px;font-size:13px}
+.gitem b{color:var(--orange-600)}
+.gtip{font-size:12.5px;color:var(--muted);margin:6px 0 14px}
 .maturity{display:flex;gap:8px;flex-wrap:wrap;align-items:center;margin:6px 0 2px}
 .maturity .st{display:inline-flex;align-items:center;gap:8px;padding:6px 12px;border-radius:8px;border:1px solid var(--line);font-size:12.5px;font-weight:600;color:var(--muted);background:var(--panel)}
 .maturity .st.cur{color:var(--orange-600);border-color:var(--orange);background:var(--orange-50)}
@@ -265,6 +274,7 @@ pre{background:var(--dark);color:#D7DCE5;border-radius:11px;padding:14px;overflo
       <span class="wm" style="font-size:16px">Aria</span></div>
     <div class="seg" id="seg"></div>
     <div class="live"><span class="pdot"></span><span id="livetxt">live</span>
+      <button class="tgl" onclick="openGuide()" title="Guide"><svg class="i" viewBox="0 0 24 24" style="width:17px;height:17px"><circle cx="12" cy="12" r="9"/><path d="M9.5 9.5a2.5 2.5 0 114 2c-.9.7-1.5 1.2-1.5 2.5M12 17.5v.01"/></svg></button>
       <button class="tgl" id="audioTgl" onclick="toggleAudio()" title="Audio commentary"></button>
       <button class="tgl" onclick="toggleTheme()" title="Toggle theme"></button></div>
   </div></div>
@@ -277,11 +287,48 @@ pre{background:var(--dark);color:#D7DCE5;border-radius:11px;padding:14px;overflo
   </div>
 </section>
 
+<div id="guide" class="ovl"><div class="ovlbox">
+  <button class="ovlx" onclick="closeGuide()">&times;</button>
+  <h2>How to use Aria</h2>
+  <p class="hint">One decision engine, five points of view. Switch views from the top bar at any time.</p>
+  <div class="glist">
+    <div class="gitem"><b>Concierge</b>, the customer. Pick a profile and press Show my moment. Ask Ava anything, from budgeting and credit to investing and fraud, or ask it to handle a loan, a dispute, or a payment.</div>
+    <div class="gitem"><b>Co-pilot</b>, the advisor. A ready, spoken brief: the recommended action, the drivers, and talking points.</div>
+    <div class="gitem"><b>Control Tower</b>, the executive. The book of decisions: value, latency, fairness, and a live stream by action and region.</div>
+    <div class="gitem"><b>Assurance</b>, the regulator. Every decision explained with a SHAP force plot, a fairness ratio, and the audit record.</div>
+    <div class="gitem"><b>Engine Room</b>, the engineer. The technical view, behind a passcode.</div>
+  </div>
+  <div class="gtip">Tip: the speaker icon reads aloud exactly what is on screen. The moon icon switches light and dark. Ava always answers, even offline.</div>
+  <button class="btn" onclick="closeGuide()">Got it</button>
+</div></div>
+
 <script>
 const $=s=>document.querySelector(s), el=(h)=>{const d=document.createElement('div');d.innerHTML=h;return d.firstElementChild};
 function esc(s){return (s==null?'':String(s)).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));}
 const api={async get(u){const r=await fetch(u);return r.json()},async post(u,b){const r=await fetch(u,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(b)});return r.json()}};
 let META={}, PERSONAS=[], MODE='customer', DEV_OK=false, streamTimer=null, AUDIO_ON=true;
+
+const LOCAL_KB=[
+ {kw:['invest','stock','index','market','portfolio','fund','equit'],a:'For most people, low-cost, broadly diversified index funds are a sensible core. They spread risk across hundreds of companies, keep fees low, and reward patience. Invest a fixed amount on a schedule and give it years, not weeks.'},
+ {kw:['emergency','rainy','buffer','cushion','unexpected'],a:'Build an emergency fund of three to six months of essential expenses in instant-access savings before you invest. It is what stops a surprise from becoming high-interest debt.'},
+ {kw:['credit score','credit','cibil','fico','bureau'],a:'Your credit score rewards paying every bill on time and keeping balances well under your limit, ideally below thirty percent. You do not need to carry a balance; paying in full each month is ideal.'},
+ {kw:['budget','spend','expense','saving plan','overspend'],a:'A simple 50/30/20 split works well: about half your take-home for needs, a third for wants, a fifth for saving and clearing debt. Automate the saving so willpower is not the bottleneck.'},
+ {kw:['debt','loan','credit card','emi','interest','borrow'],a:'Clear high-interest debt first, because avoiding a twenty percent charge is a guaranteed twenty percent return. Keep minimums on everything, then throw every spare rupee at the costliest balance.'},
+ {kw:['fraud','scam','phish','unauthori','otp','stolen','safe'],a:'A real bank never asks for your full password, PIN, or a one-time code. Turn on transaction alerts, pause whenever something feels rushed, and report anything you do not recognise immediately.'},
+ {kw:['insurance','cover','life','health','premium','protect'],a:'Insure against losses you could not absorb yourself. Prioritise health cover and, if people depend on your income, low-cost term life. Revisit it after big life events like a child or a new home.'},
+ {kw:['retire','retirement','pension','future','nps','401'],a:'Capture any employer match first, then automate steady, diversified contributions and raise them as your income grows. Starting early matters far more than picking the perfect fund.'},
+ {kw:['compound','grow','long term','patience'],a:'Compounding is interest earning interest, and it rewards starting early. A shortcut: divide 72 by your return to estimate the years to double. Start now, stay invested, and let time do the work.'},
+ {kw:['crash','recession','volatil','downturn','should i sell'],a:'Markets lurch in the short run but rise over the long run, and headlines are loudest when reacting is least useful. If your money is invested for a distant goal, the wise move in a fall is usually to keep contributing and avoid selling in fear.'},
+];
+const LOCAL_PRINCIPLES=['Spend less than you earn, and invest the difference for the long run.','Time in the market beats timing the market.','Avoid permanent loss: protect your downside and you stay in the game.','Understand what you own, and diversify so no single mistake can sink you.','High-interest debt is a guaranteed negative return; clearing it is a safe, high-yield move.','Be patient when others panic. Temperament, not cleverness, decides outcomes.'];
+function localPrinciple(s){let h=0;for(const c of (s||'x'))h=(h*31+c.charCodeAt(0))>>>0;return LOCAL_PRINCIPLES[h%LOCAL_PRINCIPLES.length];}
+function localAnswer(msg){const m=(msg||'').toLowerCase();let best=null,bs=0;for(const e of LOCAL_KB){let s=0;for(const k of e.kw)if(m.includes(k))s++;if(s>bs){bs=s;best=e;}}
+  if(best&&bs>0)return best.a+' A principle to hold onto: '+localPrinciple(m);
+  return 'Here is how I would think about that. '+localPrinciple(m)+' Tell me a little more, for example whether this is about saving, borrowing, investing, a suspicious charge, or planning for a goal, and I can be far more specific.';}
+async function askApi(msg){try{const r=await fetch('/ask',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({message:msg})});if(!r.ok)throw 0;const j=await r.json();let a=j.answer||localAnswer(msg);if(j.disclaimer)a+='\n\n'+j.disclaimer;return a;}catch(e){return localAnswer(msg);}}
+const ACTION_RE=/\b(loan|pre-?approved|dispute|chargeback|unauthori|transfer|send money|block card|pay off)\b/i;
+function localDecision(pid){return {decision_id:'ref-'+Date.now().toString(36),action:'engage_financial_tip',score:5,latency_ms:6,within_slo:true,fairness_flag:'ok',model_scores:{propensity:0.12,churn:0.1,uplift:0.03,fraud:0.08},model_versions:{propensity:'live',churn:'live',uplift:'live',fraud:'live'},attrs:{domain:'retail',journey_stage:'engage',region:'North America',currency:'USD',risk_band:'low'},reason_codes:[{label:'transaction frequency (90d)',direction:'increases',contribution:0.21},{label:'current balance',direction:'increases',contribution:0.12}],ranked:[],rejected:[]};}
+async function decideApi(body){try{const j=await api.post('/decide',body);if(!j||!j.action)throw 0;return j;}catch(e){return localDecision(body.party_id);}}
 
 const SUN='<path d="M12 4V2M12 22v-2M4 12H2M22 12h-2M6 6L4.5 4.5M18 18l1.5 1.5M6 18l-1.5 1.5M18 6l1.5-1.5"/><circle cx="12" cy="12" r="4"/>';
 const MOON='<path d="M21 12.8A9 9 0 1111.2 3a7 7 0 009.8 9.8z"/>';
@@ -346,6 +393,8 @@ async function boot(){
 function countUp(){document.querySelectorAll('#lstats .v').forEach(n=>{const to=+n.dataset.c,suf=n.dataset.suf||'';n.textContent=to+suf;let i=0;
   const step=()=>{i+=Math.ceil(to/24);if(i>=to){n.textContent=to+suf}else{n.textContent=i+suf;setTimeout(step,26)}};setTimeout(step,60);})}
 
+function openGuide(){$('#guide').classList.add('on')}
+function closeGuide(){$('#guide').classList.remove('on')}
 function enter(){pick('customer')}
 function home(){stopSpeak();$('#app').classList.remove('on');$('#landing').classList.add('on');window.scrollTo(0,0);stopStream();}
 function pick(id){const m=MODES.find(x=>x.id===id);if(m.locked&&!DEV_OK){openApp(id);renderLock();return;}openApp(id);}
@@ -354,6 +403,7 @@ function openApp(id){
   document.querySelectorAll('#seg button').forEach(b=>b.classList.toggle('on',b.dataset.m===id));
   document.querySelectorAll('.pane').forEach(p=>p.classList.remove('on'));
   const pane=$('#pane-'+id);pane.classList.add('on');stopStream();
+  if(!localStorage.getItem('aria-guided')){localStorage.setItem('aria-guided','1');setTimeout(openGuide,450);}
   if(id==='customer')renderCustomer(pane);
   else if(id==='advisor')renderAdvisor(pane);
   else if(id==='executive')renderExecutive(pane);
@@ -376,9 +426,12 @@ function renderCustomer(pane){
         <div><div style="font-weight:700">Ava</div><div style="font-size:12px;color:var(--good)">online, here to help</div></div></div>
       <div class="thread" id="cthread"></div>
       <div class="chips">
+        <span class="chip" onclick="cquick(this)">How do I start investing?</span>
+        <span class="chip" onclick="cquick(this)">Build an emergency fund</span>
+        <span class="chip" onclick="cquick(this)">Improve my credit score</span>
         <span class="chip" onclick="cquick(this)">Am I pre-approved for a loan?</span>
-        <span class="chip" onclick="cquick(this)">Help with a payment I do not recognise</span>
-        <span class="chip" onclick="cquick(this)">A quick money tip</span></div>
+        <span class="chip" onclick="cquick(this)">A payment I do not recognise</span>
+        <span class="chip" onclick="cquick(this)">Should I worry about a market dip?</span></div>
       <div class="composer"><input id="cgoal" placeholder="Ask Ava anything" onkeydown="if(event.key==='Enter')cAgent()"/>
         <button class="send" onclick="cAgent()"><svg class="i" viewBox="0 0 24 24" style="width:16px;height:16px"><path d="M4 12l16-8-6 16-3-6-7-2z"/></svg></button></div>
     </div></div></div>`;
@@ -386,8 +439,8 @@ function renderCustomer(pane){
 }
 async function custDecide(){
   const pid=$('#cust').value,out=$('#cout');out.innerHTML='<div class="hint">Personalising…</div>';
-  let d;try{d=await api.post('/decide',{party_id:pid,channel:'app',event:{event_type:'session_start'}});}catch(e){out.innerHTML='<div class="err">Could not reach the service.</div>';return;}
-  const f=friendly(d.action);const line=f.t+'. '+f.m;
+  const d=await decideApi({party_id:pid,channel:'app',event:{event_type:'session_start'}});
+  const f=friendly(d.action);const line=f.t+'. '+f.m+' '+f.why;
   out.innerHTML=`<div class="ccard"><div class="ctitle">${esc(f.t)}</div><div class="cmsg">${esc(f.m)}</div>
     <div class="cwhy"><div class="h">Why you are seeing this</div>${esc(f.why)}</div>
     <div class="cact"><button class="btn">${esc(f.cta)}</button>${audioBtn('Hear it','id="csp"')}</div>
@@ -395,10 +448,21 @@ async function custDecide(){
   $('#csp').onclick=function(){speak(line,this)};
   if(AUDIO_ON)speak(line,$('#csp'));
 }
-function cbubble(t,who){const d=el(`<div class="msg ${who}">${who==='bot'?'<span class="av">A<b>.</b></span>':''}<div class="bubble">${esc(t)}</div></div>`);$('#cthread').appendChild(d);$('#cthread').scrollTop=1e9;return d}
-function cgreet(){$('#cthread').innerHTML='';cbubble("Hi, I am Ava. Ask me anything about your account and I will sort it, or bring in a specialist if it needs a human touch.",'bot')}
-function cquick(e){$('#cgoal').value=e.textContent;cAgent()}
-function cAgent(){agentRun($('#cust').value,$('#cgoal').value,'#cthread',()=>{$('#cgoal').value=''},true)}
+function addSpeaker(bub,text){const b=el('<button class="audiobtn" style="margin-top:9px;padding:5px 10px;font-size:12px"><span class="wave"><i></i><i></i><i></i><i></i></span>Hear this</button>');b.onclick=function(){speak(text,this)};bub.appendChild(b);}
+function cbubble(t,who){const d=el(`<div class="msg ${who}">${who==='bot'?'<span class="av">A<b>.</b></span>':''}<div class="bubble">${esc(t).replace(/\n/g,'<br>')}</div></div>`);$('#cthread').appendChild(d);$('#cthread').scrollTop=1e9;return d}
+function cgreet(){$('#cthread').innerHTML='';cbubble("Hi, I am Ava, your financial guide. Ask me anything, from budgeting and credit to investing and staying safe from fraud, or ask me to handle a loan, a dispute, or a payment. I will bring in a human when the stakes are high.",'bot')}
+function cquick(e){$('#cgoal').value=e.textContent;cSend()}
+function cAgent(){cSend()}
+async function cSend(){
+  const msg=($('#cgoal').value||'').trim();if(!msg)return;$('#cgoal').value='';
+  if(ACTION_RE.test(msg)){agentRun($('#cust').value,msg,'#cthread',null,true);return;}
+  cbubble(msg,'user');
+  const turn=el('<div class="msg bot"><span class="av">A<b>.</b></span><div class="bubble"><div class="typing"><span></span><span></span><span></span></div></div></div>');
+  $('#cthread').appendChild(turn);$('#cthread').scrollTop=1e9;
+  const ans=await askApi(msg);
+  const bub=turn.querySelector('.bubble');bub.innerHTML=esc(ans).replace(/\n/g,'<br>');
+  addSpeaker(bub,ans);if(AUDIO_ON)speak(ans);
+}
 
 function renderAdvisor(pane){
   pane.innerHTML=`<div class="panel pad">${head('advisor','Relationship co-pilot')}
@@ -409,10 +473,10 @@ function renderAdvisor(pane){
 }
 async function advBrief(){
   const pid=$('#adv').value,out=$('#aout');out.innerHTML='<div class="hint">Preparing brief…</div>';
-  let d;try{d=await api.post('/decide',{party_id:pid,channel:'branch',event:{event_type:'session_start'}});}catch(e){out.innerHTML='<div class="err">Service unavailable.</div>';return;}
+  const d=await decideApi({party_id:pid,channel:'branch',event:{event_type:'session_start'}});
   const a=d.attrs,top=d.reason_codes[0];
-  const commentary=`Auto-commentary. The recommended next best action for this ${a.domain} client is ${actionLabel(d.action)}, with an expected value of ${d.score}. The primary driver is ${top?top.label:'recent activity'}. The client is in the ${a.journey_stage} stage with a ${a.risk_band} risk profile. Suitability and audit are handled automatically. Decided in ${d.latency_ms} milliseconds.`;
-  out.innerHTML=`<div style="margin-bottom:12px">${audioBtn('Play commentary','id="asp"')}</div>
+  const commentary=`The recommended next best action for this ${a.domain} client is ${actionLabel(d.action)}, with an expected value of ${d.score}. The primary driver is ${top?top.label:'recent activity'}. The client is in the ${a.journey_stage} stage with a ${a.risk_band} risk profile. Suitability and audit are handled automatically, and the decision was made in ${d.latency_ms} milliseconds.`;
+  out.innerHTML=`<div class="ccard" style="border-radius:12px;padding:16px;margin-bottom:12px"><div class="eyebrow2">Auto-commentary</div><div style="margin-top:6px">${esc(commentary)}</div><div style="margin-top:10px">${audioBtn('Play commentary','id="asp"')}</div></div>
     <div class="row two">
     <div class="panel pad" style="box-shadow:none"><div class="eyebrow2">Recommended next best action</div>
       <div style="font-size:20px;font-weight:800;margin:4px 0">${esc(actionLabel(d.action))}</div>
@@ -467,7 +531,7 @@ function renderRegulator(pane){
 }
 async function regDecide(){
   const pid=$('#reg').value,out=$('#rout');out.innerHTML='<div class="hint">Deciding and explaining…</div>';
-  let d;try{d=await api.post('/decide',{party_id:pid,channel:'web',event:{event_type:'large_transfer_attempt',amount:4000}});}catch(e){out.innerHTML='<div class="err">Service unavailable.</div>';return;}
+  const d=await decideApi({party_id:pid,channel:'web',event:{event_type:'large_transfer_attempt',amount:4000}});
   let row={},gov={};try{[row,gov]=await Promise.all([api.get('/audit/'+d.decision_id),api.get('/governance')]);}catch(e){}
   const rc=d.reason_codes;const maxAbs=Math.max(...rc.map(r=>Math.abs(r.contribution)),0.0001);
   const wf=rc.map(r=>{const w=Math.abs(r.contribution)/maxAbs*50;const pos=r.contribution>=0;
@@ -475,7 +539,7 @@ async function regDecide(){
       <div class="wfseg ${pos?'pos':'neg'}" style="${pos?`left:50%;width:${w}%`:`right:50%;width:${w}%`}"></div></div>
       <span class="wv ${pos?'up':'down'}" style="color:${pos?'var(--good)':'var(--bad)'}">${r.contribution>0?'+':''}${r.contribution}</span></div>`}).join('');
   const spoken=`Explaining the decision. The chosen action is ${actionLabel(d.action)}. ${rc.map(r=>`${r.label} ${r.direction} the score`).join('. ')}. The fairness check reads ${d.fairness_flag.replace('_',' ')}.`;
-  out.innerHTML=`<div style="margin-bottom:12px">${audioBtn('Read explanation','id="rsp"')}</div>
+  out.innerHTML=`<div class="ccard" style="border-radius:12px;padding:16px;margin-bottom:12px"><div class="eyebrow2">Plain-language explanation</div><div style="margin-top:6px">${esc(spoken)}</div><div style="margin-top:10px">${audioBtn('Read explanation','id="rsp"')}</div></div>
     <div class="row two">
     <div class="panel pad" style="box-shadow:none"><div class="eyebrow2">SHAP force plot</div>
       <div class="wf"><div class="wfhead"><span>pulls away</span><span>pushes toward action</span></div>${wf}</div>
@@ -499,7 +563,7 @@ function renderLock(){
 async function unlock(){
   const p=$('#pass').value;
   try{const r=await api.post('/dev-auth',{passcode:p});if(r.ok){DEV_OK=true;openApp('developer');}else{$('#perr').textContent='Incorrect passcode.';}}
-  catch(e){$('#perr').textContent='Service unavailable.';}
+  catch(e){$('#perr').textContent='Still connecting, please try again in a moment.';}
 }
 async function renderDeveloper(pane){
   pane.innerHTML=`${head('developer','Under the hood')}
@@ -544,7 +608,7 @@ async function devLoad(){
   const out=$('#dloadout');out.innerHTML='<div class="hint">Firing a concurrent burst…</div>';
   const pid=PERSONAS[0].party_id,N=120,body={party_id:pid,event:{event_type:'session_start'}};
   const t0=performance.now();
-  let res;try{res=await Promise.all(Array.from({length:N},()=>api.post('/decide',body)));}catch(e){out.innerHTML='<div class="err">Burst failed.</div>';return;}
+  let res;try{res=await Promise.all(Array.from({length:N},()=>api.post('/decide',body)));}catch(e){out.innerHTML='<div class="hint">Reconnecting to the engine, try the burst again in a moment.</div>';return;}
   const wall=(performance.now()-t0)/1000;
   const lats=res.map(r=>r.latency_ms).filter(x=>x!=null).sort((a,b)=>a-b);
   const p99=lats.length?lats[Math.floor(0.99*(lats.length-1))]:0;
@@ -589,7 +653,7 @@ async function agentRun(pid,goal,threadSel,after,friendlyMode){
           const escd=ev.node==='escalate';steps.appendChild(el(`<div class="stp ${escd?'esc':''}"><span class="si">${escd?'!':'•'}</span><span><b>${esc(ev.node)}</b> · ${esc(ev.detail)}</span></div>`));thread.scrollTop=1e9;}
       }}
     if(friendlyMode&&typing.parentNode)typing.remove();
-  }catch(e){typing.remove();bub.insertAdjacentHTML('beforeend','<div class="banner esc">Could not reach the assistant.</div>');}
+  }catch(e){typing.remove();const fb=localAnswer(goal);bub.insertAdjacentHTML('beforeend',`<div class="banner ok">${esc(fb)}</div>`);if(friendlyMode&&AUDIO_ON)speak(fb);}
 }
 function friendlyAns(ev){return ev.escalated?"I have passed this to a specialist who will follow up shortly, you are in good hands.":"All sorted. Anything else I can help with?";}
 

@@ -13,7 +13,7 @@ from fastapi import FastAPI, HTTPException, Request
 from fastapi.responses import FileResponse, StreamingResponse
 from pydantic import BaseModel, field_validator
 from app import bootstrap, config
-from app.agent import agent
+from app.agent import agent, knowledge
 from app.layer1_data import cdc_stub, db
 from app.layer2_features import feature_store
 from app.layer4_decisioning.decisioning import get_engine
@@ -128,6 +128,27 @@ def decide(req: DecideRequest):
     attrs = decision['attrs']
     _recent.appendleft({'party_id': req.party_id, 'action': winner['action_id'], 'ev': winner['expected_value'], 'latency_ms': round(latency_ms, 2), 'fairness': record['fairness_flag'], 'region': attrs.get('region', ''), 'ts_label': time.strftime('%H:%M:%S')})
     return {'decision_id': record['decision_id'], 'action': winner['action_id'], 'action_detail': winner['action'], 'score': winner['expected_value'], 'reason_codes': record['reason_codes'], 'fairness_flag': record['fairness_flag'], 'latency_ms': round(latency_ms, 3), 'slo_ms': config.LATENCY_SLO_MS, 'within_slo': latency_ms < config.LATENCY_SLO_MS, 'model_scores': {k: round(v, 4) for k, v in decision['model_scores'].items()}, 'model_versions': decision['model_versions'], 'attrs': {k: attrs.get(k) for k in ('domain', 'journey_stage', 'region', 'currency', 'risk_band')}, 'ranked': [{'action_id': r['action_id'], 'expected_value': r['expected_value'], 'signal': r['signal'], 'signal_value': r['signal_value']} for r in decision['ranked']], 'rejected': decision['rejected']}
+
+class AskRequest(BaseModel):
+    message: str
+
+    @field_validator('message')
+    @classmethod
+    def _m(cls, v):
+        return (v or '')[:400]
+
+
+@app.post('/ask')
+def ask(req: AskRequest):
+    res = knowledge.answer(req.message)
+    res['is_action'] = knowledge.is_action(req.message)
+    return res
+
+
+@app.get('/topics')
+def topics():
+    return knowledge.topics()
+
 
 @app.post('/agent')
 def run_agent(req: AgentRequest):
