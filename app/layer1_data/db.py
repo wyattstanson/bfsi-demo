@@ -72,6 +72,7 @@ def init_schema() -> None:
     execute(f'\n        CREATE TABLE IF NOT EXISTS agent_memory (\n            id       {_PK},\n            party_id TEXT,\n            kind     TEXT,\n            text     TEXT,\n            embedding {_JSON},\n            ts       REAL\n        )\n        ')
     execute(f'\n        CREATE TABLE IF NOT EXISTS audit_log (\n            decision_id       TEXT PRIMARY KEY,\n            party_id          TEXT,\n            channel           TEXT,\n            use_case          TEXT,\n            action_id         TEXT,\n            features_snapshot {_JSON},\n            model_versions    {_JSON},\n            score             REAL,\n            reason_codes      {_JSON},\n            fairness_flag     TEXT,\n            mode              TEXT,\n            latency_ms        REAL,\n            consent_ref       TEXT,\n            ts                REAL,\n            human_reviewed    INTEGER,\n            override          TEXT\n        )\n        ')
     execute(f'\n        CREATE TABLE IF NOT EXISTS human_queue (\n            id        {_PK},\n            party_id  TEXT,\n            goal      TEXT,\n            reason    TEXT,\n            context   {_JSON},\n            ts        REAL,\n            resolved  INTEGER\n        )\n        ')
+    execute('\n        CREATE TABLE IF NOT EXISTS customer_user (\n            username    TEXT PRIMARY KEY,\n            domain      TEXT,\n            logins      INTEGER,\n            first_seen  REAL,\n            last_seen   REAL\n        )\n        ')
 
 class InMemoryStore:
 

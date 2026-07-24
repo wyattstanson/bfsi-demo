@@ -122,7 +122,11 @@ h2.pt{font-size:19px;font-weight:800;letter-spacing:-.01em;margin:2px 0 3px}
 .audiobtn.playing .wave i{animation:eq .8s infinite ease-in-out}
 .audiobtn.playing .wave i:nth-child(2){animation-delay:.15s}.audiobtn.playing .wave i:nth-child(3){animation-delay:.3s}.audiobtn.playing .wave i:nth-child(4){animation-delay:.45s}
 @keyframes eq{0%,100%{height:4px}50%{height:14px}}
-.thread{display:flex;flex-direction:column;gap:11px;max-height:360px;overflow:auto;padding:6px 2px}
+.chathdr{display:flex;align-items:center;gap:11px;border-bottom:1px solid var(--line);padding-bottom:12px}
+.avatar-lg{width:40px;height:40px;flex:0 0 auto;border-radius:12px;background:linear-gradient(135deg,var(--dark),#2a3040);color:#fff;display:grid;place-items:center;font-weight:800;font-size:16px}
+.avatar-lg b{color:var(--orange)}
+.tries{font-size:11.5px;font-weight:600;color:var(--muted);background:var(--soft);border:1px solid var(--line);padding:5px 10px;border-radius:999px;white-space:nowrap}
+.thread{display:flex;flex-direction:column;gap:11px;max-height:400px;overflow:auto;padding:10px 2px}
 .msg{display:flex;gap:9px;max-width:90%}
 .msg .av{width:28px;height:28px;flex:0 0 auto;border-radius:50%;background:var(--dark);color:#fff;display:grid;place-items:center;font-size:12px;font-weight:800}
 .msg .av b{color:var(--orange)}
@@ -302,11 +306,32 @@ pre{background:var(--dark);color:#D7DCE5;border-radius:11px;padding:14px;overflo
   <button class="btn" onclick="closeGuide()">Got it</button>
 </div></div>
 
+<div id="login" class="ovl"><div class="ovlbox">
+  <div class="tlogo" style="justify-content:center;margin-bottom:8px"><svg class="tmark" width="30" height="30" viewBox="0 0 100 100"><polygon fill="#F1592A" points="14,40 70,40 86,16 30,16"/><polygon fill="#F1592A" points="40,40 58,40 58,86 40,86"/></svg><span class="wm" style="font-size:17px">Aria</span></div>
+  <h2 style="text-align:center">Your money, made simple</h2>
+  <p class="hint" style="text-align:center" id="loginsub">Sign in to continue, or try a few questions as a guest.</p>
+  <label>Username</label><input id="lu" type="text" placeholder="Username" autocomplete="off"/>
+  <label>Password</label><input id="lp" type="password" placeholder="Password" autocomplete="off" onkeydown="if(event.key==='Enter')submitLogin()"/>
+  <label>Which area can we help you with?</label><select id="ld"></select>
+  <div class="err" id="lerr"></div>
+  <button class="btn" style="width:100%;justify-content:center;margin-top:14px" onclick="submitLogin()">Sign in</button>
+  <button class="btn ghost" style="width:100%;justify-content:center;margin-top:8px" id="guestbtn" onclick="continueGuest()">Continue as guest</button>
+  <div class="gtip" style="text-align:center;margin-top:12px">Your questions stay private. We never sell your data, and personal details never reach a model.</div>
+</div></div>
+
 <script>
 const $=s=>document.querySelector(s), el=(h)=>{const d=document.createElement('div');d.innerHTML=h;return d.firstElementChild};
 function esc(s){return (s==null?'':String(s)).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));}
 const api={async get(u){const r=await fetch(u);return r.json()},async post(u,b){const r=await fetch(u,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(b)});return r.json()}};
 let META={}, PERSONAS=[], MODE='customer', DEV_OK=false, streamTimer=null, AUDIO_ON=true;
+
+let GUEST_TRIES=3, guestUsed=+(localStorage.getItem('aria-guest-used')||0);
+let CUST={username:null,domain:null,loggedIn:false};
+try{const s=JSON.parse(localStorage.getItem('aria-cust'));if(s)CUST=s;}catch(e){}
+let DOMAINS_LIST=[{id:'retail',label:'Retail Banking'},{id:'corporate',label:'Corporate Banking'},{id:'wealth',label:'Wealth'},{id:'asset_mgmt',label:'Asset Management'},{id:'payments',label:'Payments'},{id:'capital_markets',label:'Capital Markets'},{id:'nbfc',label:'NBFC'},{id:'personal_ins',label:'Personal Insurance'},{id:'general_ins',label:'General Insurance'},{id:'commercial_ins',label:'Commercial Insurance'}];
+function saveCust(){localStorage.setItem('aria-cust',JSON.stringify(CUST));}
+function domainOptions(sel){return '<option value="">Any area of finance</option>'+DOMAINS_LIST.map(d=>`<option value="${d.id}"${sel===d.id?' selected':''}>${d.label}</option>`).join('');}
+async function doLogin(u,p,dom){try{const r=await api.post('/login',{username:u,password:p,domain:dom});if(r&&r.ok){CUST={username:u,domain:dom,loggedIn:true};saveCust();return true;}if(r&&r.ok===false)return false;throw 0;}catch(e){if(u==='Aryansh'&&p==='Aryansh'){CUST={username:u,domain:dom,loggedIn:true};saveCust();return true;}return false;}}
 
 const LOCAL_KB=[
  {kw:['invest','stock','index','market','portfolio','fund','equit'],a:'For most people, low-cost, broadly diversified index funds are a sensible core. They spread risk across hundreds of companies, keep fees low, and reward patience. Invest a fixed amount on a schedule and give it years, not weeks.'},
@@ -325,7 +350,7 @@ function localPrinciple(s){let h=0;for(const c of (s||'x'))h=(h*31+c.charCodeAt(
 function localAnswer(msg){const m=(msg||'').toLowerCase();let best=null,bs=0;for(const e of LOCAL_KB){let s=0;for(const k of e.kw)if(m.includes(k))s++;if(s>bs){bs=s;best=e;}}
   if(best&&bs>0)return best.a+' A principle to hold onto: '+localPrinciple(m);
   return 'Here is how I would think about that. '+localPrinciple(m)+' Tell me a little more, for example whether this is about saving, borrowing, investing, a suspicious charge, or planning for a goal, and I can be far more specific.';}
-async function askApi(msg){try{const r=await fetch('/ask',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({message:msg})});if(!r.ok)throw 0;const j=await r.json();let a=j.answer||localAnswer(msg);if(j.disclaimer)a+='\n\n'+j.disclaimer;return a;}catch(e){return localAnswer(msg);}}
+async function askApi(msg){try{const r=await fetch('/ask',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({message:msg,domain:(CUST&&CUST.domain)||null})});if(!r.ok)throw 0;const j=await r.json();let a=j.answer||localAnswer(msg);if(j.disclaimer)a+='\n\n'+j.disclaimer;return a;}catch(e){return localAnswer(msg);}}
 const ACTION_RE=/\b(loan|pre-?approved|dispute|chargeback|unauthori|transfer|send money|block card|pay off)\b/i;
 function localDecision(pid){return {decision_id:'ref-'+Date.now().toString(36),action:'engage_financial_tip',score:5,latency_ms:6,within_slo:true,fairness_flag:'ok',model_scores:{propensity:0.12,churn:0.1,uplift:0.03,fraud:0.08},model_versions:{propensity:'live',churn:'live',uplift:'live',fraud:'live'},attrs:{domain:'retail',journey_stage:'engage',region:'North America',currency:'USD',risk_band:'low'},reason_codes:[{label:'transaction frequency (90d)',direction:'increases',contribution:0.21},{label:'current balance',direction:'increases',contribution:0.12}],ranked:[],rejected:[]};}
 async function decideApi(body){try{const j=await api.post('/decide',body);if(!j||!j.action)throw 0;return j;}catch(e){return localDecision(body.party_id);}}
@@ -383,6 +408,8 @@ async function boot(){
   AUDIO_ON=localStorage.getItem('aria-audio')!=='0';paintAudio();
   try{META=await api.get('/meta');PERSONAS=await api.get('/personas?limit=40');}
   catch(e){META={references:{}};PERSONAS=FALLBACK;}
+  try{const d=await api.get('/domains');if(d&&d.length)DOMAINS_LIST=d;}catch(e){}
+  try{const c=await api.get('/config');if(c&&c.guest_tries)GUEST_TRIES=c.guest_tries;}catch(e){}
   $('#mgrid').innerHTML=MODES.map(m=>`<div class="mcard ${m.locked?'locked':''}" onclick="pick('${m.id}')">
     ${m.locked?`<span class="lock"><svg class="i" viewBox="0 0 24 24" style="width:16px;height:16px">${LOCK}</svg></span>`:''}
     <div class="ic"><svg class="i" viewBox="0 0 24 24"><path d="${m.ic}"/></svg></div>
@@ -395,6 +422,21 @@ function countUp(){document.querySelectorAll('#lstats .v').forEach(n=>{const to=
 
 function openGuide(){$('#guide').classList.add('on')}
 function closeGuide(){$('#guide').classList.remove('on')}
+function openLogin(gate){$('#ld').innerHTML=domainOptions(CUST.domain);$('#lerr').textContent='';$('#lu').value=CUST.username||'';$('#lp').value='';
+  if(gate){$('#loginsub').textContent='You have used your free questions. Sign in to keep chatting.';$('#guestbtn').style.display='none';}
+  else{$('#loginsub').textContent='Sign in to continue, or try a few questions as a guest.';$('#guestbtn').style.display='';}
+  $('#login').classList.add('on');}
+function closeLogin(){$('#login').classList.remove('on')}
+async function submitLogin(){const u=($('#lu').value||'').trim(),p=$('#lp').value,dom=$('#ld').value;
+  if(!u||!p){$('#lerr').textContent='Please enter a username and password.';return;}
+  const ok=await doLogin(u,p,dom);
+  if(ok){closeLogin();onAuthChanged();}else{$('#lerr').textContent='That did not match. For this demo, the username and password are both Aryansh.';}}
+function continueGuest(){CUST.domain=$('#ld').value||CUST.domain;saveCust();closeLogin();onAuthChanged();}
+function triesLeft(){return Math.max(0,GUEST_TRIES-guestUsed)}
+function updateTriesBadge(){const b=$('#triesBadge');if(!b)return;if(CUST.loggedIn){b.textContent='Signed in as '+CUST.username;}else{b.textContent=triesLeft()+' free question'+(triesLeft()===1?'':'s')+' left';}}
+function onAuthChanged(){const d=$('#custDomain');if(d)d.value=CUST.domain||'';updateTriesBadge();
+  if($('#cthread')){const who=CUST.loggedIn?(' '+CUST.username):'';const area=CUST.domain?(' I see you are interested in '+(DOMAINS_LIST.find(x=>x.id===CUST.domain)||{}).label+'. '):' ';
+    $('#cthread').innerHTML='';cbubble('Welcome back'+who+'. '+area+'Ask me anything, from budgeting and credit to investing, insurance, or a payment. What is on your mind?','bot');}}
 function enter(){pick('customer')}
 function home(){stopSpeak();$('#app').classList.remove('on');$('#landing').classList.add('on');window.scrollTo(0,0);stopStream();}
 function pick(id){const m=MODES.find(x=>x.id===id);if(m.locked&&!DEV_OK){openApp(id);renderLock();return;}openApp(id);}
@@ -421,9 +463,14 @@ function renderCustomer(pane){
       <div style="margin-top:14px"><button class="btn" onclick="custDecide()">Show my moment</button></div>
       <div id="cout" style="margin-top:18px"></div></div></div>
     <div><div class="panel pad">
-      <div style="display:flex;align-items:center;gap:10px;border-bottom:1px solid var(--line);padding-bottom:12px;margin-bottom:6px">
-        <span class="msg"><span class="av">A<b>.</b></span></span>
-        <div><div style="font-weight:700">Ava</div><div style="font-size:12px;color:var(--good)">online, here to help</div></div></div>
+      <div class="chathdr">
+        <span class="avatar-lg">A<b>.</b></span>
+        <div style="flex:1"><div style="font-weight:800;font-size:15px">Ava, your financial guide</div><div style="font-size:12px;color:var(--good)">online · private · always answers</div></div>
+        <span class="tries" id="triesBadge"></span></div>
+      <div style="display:flex;gap:8px;align-items:center;margin:12px 0 6px">
+        <span style="font-size:12px;color:var(--muted);font-weight:600">Area</span>
+        <select id="custDomain" style="width:auto;padding:7px 11px" onchange="CUST.domain=this.value;saveCust();"></select>
+        <button class="chip" id="signinChip" style="margin-left:auto" onclick="openLogin(false)">Sign in</button></div>
       <div class="thread" id="cthread"></div>
       <div class="chips">
         <span class="chip" onclick="cquick(this)">How do I start investing?</span>
@@ -435,7 +482,10 @@ function renderCustomer(pane){
       <div class="composer"><input id="cgoal" placeholder="Ask Ava anything" onkeydown="if(event.key==='Enter')cAgent()"/>
         <button class="send" onclick="cAgent()"><svg class="i" viewBox="0 0 24 24" style="width:16px;height:16px"><path d="M4 12l16-8-6 16-3-6-7-2z"/></svg></button></div>
     </div></div></div>`;
-  cgreet();
+  $('#custDomain').innerHTML=domainOptions(CUST.domain);
+  $('#signinChip').textContent=CUST.loggedIn?('Hi, '+CUST.username):'Sign in';
+  cgreet();updateTriesBadge();
+  if(!CUST.loggedIn && !localStorage.getItem('aria-saw-login')){localStorage.setItem('aria-saw-login','1');setTimeout(()=>openLogin(false),500);}
 }
 async function custDecide(){
   const pid=$('#cust').value,out=$('#cout');out.innerHTML='<div class="hint">Personalising…</div>';
@@ -454,7 +504,10 @@ function cgreet(){$('#cthread').innerHTML='';cbubble("Hi, I am Ava, your financi
 function cquick(e){$('#cgoal').value=e.textContent;cSend()}
 function cAgent(){cSend()}
 async function cSend(){
-  const msg=($('#cgoal').value||'').trim();if(!msg)return;$('#cgoal').value='';
+  const msg=($('#cgoal').value||'').trim();if(!msg)return;
+  if(!CUST.loggedIn && guestUsed>=GUEST_TRIES){openLogin(true);return;}
+  $('#cgoal').value='';
+  if(!CUST.loggedIn){guestUsed++;localStorage.setItem('aria-guest-used',guestUsed);updateTriesBadge();}
   if(ACTION_RE.test(msg)){agentRun($('#cust').value,msg,'#cthread',null,true);return;}
   cbubble(msg,'user');
   const turn=el('<div class="msg bot"><span class="av">A<b>.</b></span><div class="bubble"><div class="typing"><span></span><span></span><span></span></div></div></div>');

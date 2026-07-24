@@ -131,6 +131,7 @@ def decide(req: DecideRequest):
 
 class AskRequest(BaseModel):
     message: str
+    domain: str | None = None
 
     @field_validator('message')
     @classmethod
@@ -140,14 +141,50 @@ class AskRequest(BaseModel):
 
 @app.post('/ask')
 def ask(req: AskRequest):
-    res = knowledge.answer(req.message)
-    res['is_action'] = knowledge.is_action(req.message)
-    return res
+    return knowledge.answer(req.message, req.domain)
 
 
 @app.get('/topics')
 def topics():
     return knowledge.topics()
+
+
+@app.get('/domains')
+def domains():
+    return knowledge.domains()
+
+
+class LoginRequest(BaseModel):
+    username: str
+    password: str
+    domain: str | None = None
+
+    @field_validator('username', 'password')
+    @classmethod
+    def _clip(cls, v):
+        return (v or '')[:64]
+
+
+@app.post('/login')
+def login(req: LoginRequest):
+    ok = (hmac.compare_digest(req.username, config.CUSTOMER_USER)
+          and hmac.compare_digest(req.password, config.CUSTOMER_PASS))
+    if not ok:
+        return {'ok': False}
+    now = time.time()
+    existing = db.fetchone('SELECT logins FROM customer_user WHERE username = ?', (req.username,))
+    if existing:
+        db.execute('UPDATE customer_user SET domain = ?, logins = ?, last_seen = ? WHERE username = ?',
+                   ((req.domain or ''), (existing[0] or 0) + 1, now, req.username))
+    else:
+        db.execute('INSERT INTO customer_user (username, domain, logins, first_seen, last_seen) VALUES (?,?,?,?,?)',
+                   (req.username, req.domain or '', 1, now, now))
+    return {'ok': True, 'username': req.username, 'domain': req.domain, 'guest_tries': config.GUEST_TRIES}
+
+
+@app.get('/config')
+def client_config():
+    return {'guest_tries': config.GUEST_TRIES}
 
 
 @app.post('/agent')
