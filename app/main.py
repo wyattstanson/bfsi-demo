@@ -132,6 +132,7 @@ def decide(req: DecideRequest):
 class AskRequest(BaseModel):
     message: str
     domain: str | None = None
+    tone: str | None = None
 
     @field_validator('message')
     @classmethod
@@ -141,7 +142,7 @@ class AskRequest(BaseModel):
 
 @app.post('/ask')
 def ask(req: AskRequest):
-    return knowledge.answer(req.message, req.domain)
+    return knowledge.answer(req.message, req.domain, req.tone)
 
 
 @app.get('/topics')

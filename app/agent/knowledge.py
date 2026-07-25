@@ -23,7 +23,7 @@ def _pick(seed: str, arr):
 
 DOMAIN_KW = {
     "retail": ["retail bank", "checking", "savings account", "debit card", "everyday bank", "mobile bank", "current account", "overdraft"],
-    "corporate": ["corporate bank", "treasury", "cash management", "business account", "sme ", "payroll", "working capital", "trade finance"],
+    "corporate": ["corporate bank", "cash management", "business account", "sme ", "payroll", "working capital", "trade finance"],
     "wealth": ["wealth", "portfolio", "financial advisor", "high net worth", "private bank", "financial plan", "estate", "advisory"],
     "asset_mgmt": ["asset management", "mutual fund", "etf", "fund manager", "index fund", "direct indexing", "separately managed"],
     "payments": ["payment", "card ", "upi", "transaction", "merchant", "wallet", "remittance", "point of sale", "pos "],
@@ -124,6 +124,70 @@ KB = [
 ]
 
 
+DOMAIN_KW.update({
+    "investment_banking": ["investment banking", "m&a", "mergers", "underwriting", "ipo", "capital raising", "deal advisory"],
+    "treasury": ["treasury", "liquidity", "forex", "interbank", "hedging", "asset liability"],
+    "brokerage": ["brokerage", "trading account", "stock broker", "demat", "commodities", "equity trading"],
+    "pension": ["pension", "retirement fund", "annuity", "superannuation"],
+    "microfinance": ["microfinance", "micro loan", "self help group", "joint liability"],
+    "credit_rating": ["credit rating", "rating agency", "risk advisory", "default risk"],
+    "reinsurance": ["reinsurance", "treaty", "cede", "catastrophe cover"],
+    "health_ins": ["health insurance", "mediclaim", "hospital cover", "cashless claim"],
+    "insurtech": ["insurtech", "digital insurance", "embedded insurance"],
+})
+DOMAIN_LABEL.update({
+    "investment_banking": "Investment Banking", "treasury": "Treasury Operations",
+    "brokerage": "Brokerage and Trading", "pension": "Pension Funds",
+    "microfinance": "Microfinance", "credit_rating": "Credit Rating and Risk Advisory",
+    "reinsurance": "Reinsurance", "health_ins": "Health Insurance", "insurtech": "Insurtech",
+})
+DOMAIN_ANSWER.update({
+    "investment_banking": "In investment banking, personalization is deal intelligence: comparable-company research, precedent transactions, and pitch material drafted in minutes, with AI screening for the right buyers and surfacing talking points. The human banker owns the relationship and the judgment; the model compresses the preparation.",
+    "treasury": "In treasury, the value is a live workstation: real-time cash and liquidity views, personalized payment routing, and forex and hedging insight, with reinforcement learning tuning routing decisions. Personalization here is about the corporate treasurer seeing exactly the exposures that matter to them.",
+    "brokerage": "In brokerage and trading, personalization is relevance: research feeds and trade ideas ranked to each client, RFQ pricing that reflects elasticity, and execution quality that wins order flow. The signal is a readership and interaction graph as much as a price.",
+    "pension": "For pension and retirement funds, personalization means goal-based glide paths, member-level nudges that lift contribution rates, and clear projections. The behavioral job is to make the far-off future feel concrete enough to act on today.",
+    "microfinance": "In microfinance, the frontier is inclusion at speed: alternative-data underwriting, vernacular voice servicing, and group-lending workflows that reach customers a traditional bureau never sees, responsibly and at low cost.",
+    "credit_rating": "In credit rating and risk advisory, AI reads filings, news, and market signals to flag deteriorating credits earlier and explain why, with every rating action carrying an auditable rationale.",
+    "reinsurance": "In reinsurance, personalization is portfolio construction: pricing treaties from catastrophe models and exposure data, and steering capital toward risks that diversify the book. It is underwriting at the level of whole portfolios.",
+    "health_ins": "In health insurance, wellness and claims data turn pricing into a feedback loop, with cashless, straight-through claims and proactive care nudges. Increasingly it is treated as its own vertical because the data and the customer relationship are distinct.",
+    "insurtech": "In insurtech, the whole experience is digital-first: instant quotes, embedded cover at the point of sale, and claims paid in seconds. Lemonade is the archetype, delightful, fast, and built on a machine-learning core.",
+})
+
+JOKES = [
+    "Why did the banker switch careers? He lost interest.",
+    "I told my money to grow up. Now it just compounds.",
+    "My portfolio and I have a lot in common: we are both just trying to stay balanced.",
+    "Diversification is the only free lunch in finance, and someone still charges you for the table.",
+    "I would tell you a joke about the stock market, but it might not land. Timing, you know.",
+]
+IDENTITY = [
+    (["are you ai", "are you a bot", "are you real", "are you human", "is this ai", "are you a robot"],
+     {"witty": "Yes, guilty as charged, I am an AI. A well-read one, I like to think, with a soft spot for compound interest and a healthy suspicion of get-rich-quick schemes. What can I do for you?",
+      "pro": "Yes, I am an AI assistant. How can I help you today?"}),
+    (["are you genz", "are you gen z", "you genz", "gen-z", "genz", "gen z"],
+     {"witty": "Nope, but I can absolutely talk like one if you want, no cap, it is giving helpful. Otherwise I keep it classy. Your call.",
+      "pro": "No. I can adjust my tone to be more casual if you prefer. How can I help?"}),
+    (["who made you", "who built you", "who created you", "your creator"],
+     {"witty": "I was built as a Tredence BFSI platform. Think of me as a very online finance nerd who reads RBI and SEBI circulars for fun so you do not have to.",
+      "pro": "I was built as a Tredence BFSI personalization platform."}),
+    (["do you have feelings", "are you conscious", "are you sentient", "do you love"],
+     {"witty": "I have strong opinions about high credit-card APRs and a genuine fondness for a well-funded emergency account. Beyond that, I am software with good manners.",
+      "pro": "I am a software assistant without feelings, though I aim to be genuinely helpful."}),
+    (["only finance", "just finance", "what can you talk about", "can you talk about anything"],
+     {"witty": "Money is my home turf, banking, markets, insurance, but I read widely. I can riff on how geopolitics, tech, or the news bends the markets, then bring it back to what it means for your wallet.",
+      "pro": "My focus is banking, financial services, and insurance, with awareness of the macro and geopolitical context that moves markets."}),
+]
+TONE_CONFIRM = {
+    "professional": "Understood. Professional register, on. How can I help?",
+    "witty": "You got it, keeping it light and sharp. What is on your mind?",
+    "genz": "Bet. Genz mode on, lowkey thrilled. What do you need, fr?",
+}
+MACRO_KW = ["geopolit", "war", "election", "president", "tariff", "sanction", "oil price", "inflation",
+            " fed ", "interest rate", "rbi policy", "recession", "china", "russia", "ukraine", "opec", "gdp", "trump"]
+MACRO_ANSWER = "Geopolitics and markets are joined at the hip. Wars, elections, tariffs, and central-bank moves ripple straight into oil, currencies, rates, and risk appetite. The practical takeaway is rarely to trade the headline. It is to stay diversified, keep a cash buffer, and let a long horizon absorb the noise."
+OFFTOPIC_KW = ["weather", "football", "cricket", "movie", "recipe", "cook", "dating", "sports", "music", "who won", "song"]
+
+
 def classify_domain(message: str) -> str | None:
     m = " " + message.lower() + " "
     best, best_s = None, 0
@@ -132,6 +196,32 @@ def classify_domain(message: str) -> str | None:
         if s > best_s:
             best, best_s = dom, s
     return best if best_s > 0 else None
+
+
+def detect_tone(m: str) -> str | None:
+    if any(k in m for k in ["be professional", "professional mode", "talk professionally", "be formal", "serious mode", "keep it formal"]):
+        return "professional"
+    if any(k in m for k in ["talk like genz", "be genz", "gen z mode", "talk genz", "be gen z"]):
+        return "genz"
+    if any(k in m for k in ["be funny", "be witty", "make it fun", "be casual", "be chill", "lighten up", "be normal", "no jokes", "stop joking"]):
+        return "witty"
+    return None
+
+
+def _close(m: str, tone: str) -> str:
+    p = _pick(m, PRINCIPLES)
+    if tone == "professional":
+        return f"A principle worth keeping: {p}"
+    if tone == "genz":
+        return f"Real talk, one principle to keep: {p}"
+    return f"A principle to hold onto: {p}"
+
+
+def _identity(m: str, tone: str):
+    for kws, rep in IDENTITY:
+        if any(k in m for k in kws):
+            return rep["pro"] if tone == "professional" else rep["witty"]
+    return None
 
 
 def _intent(m: str):
@@ -144,18 +234,35 @@ def _intent(m: str):
     return None, None
 
 
-def answer(message: str, domain: str | None = None) -> dict:
+def answer(message: str, domain: str | None = None, tone: str | None = None) -> dict:
     m = (message or "").lower().strip()
+    tone = tone if tone in ("witty", "professional", "genz") else "witty"
     if not m:
-        return {"answer": "I am here whenever you are ready. What would you like to talk about?", "title": "Ava", "domain": domain, "disclaimer": "", "matched": True}
+        return {"answer": "I am here whenever you are ready. What is on your mind?", "title": "Ava", "domain": domain, "disclaimer": "", "matched": True, "tone": tone}
+
+    new_tone = detect_tone(m)
+    if new_tone and len(m.split()) <= 6:
+        return {"answer": TONE_CONFIRM[new_tone], "title": "Ava", "domain": domain, "disclaimer": "", "matched": True, "tone": tone, "set_tone": new_tone}
+
+    ident = _identity(m, tone)
+    if ident:
+        return {"answer": ident, "title": "Ava", "domain": domain, "disclaimer": "", "matched": True, "tone": tone}
+
+    if any(k in m for k in ["joke", "make me laugh", "something funny"]):
+        return {"answer": _pick(m, JOKES) + " Now, want me to make your money less of a punchline?", "title": "On a lighter note", "domain": domain, "disclaimer": "", "matched": True, "tone": tone}
 
     kind, payload = _intent(m)
     if kind == "smalltalk":
-        return {"answer": _pick(m, payload), "title": "Ava", "domain": domain, "disclaimer": "", "matched": True}
+        return {"answer": _pick(m, payload), "title": "Ava", "domain": domain, "disclaimer": "", "matched": True, "tone": tone}
     if kind == "personal":
-        return {"answer": payload, "title": "A steadier footing", "domain": domain, "disclaimer": "", "matched": True}
+        return {"answer": payload, "title": "A steadier footing", "domain": domain, "disclaimer": "", "matched": True, "tone": tone}
 
+    if any(k in (" " + m + " ") for k in MACRO_KW):
+        return {"answer": f"{MACRO_ANSWER}\n\n{_close(m, tone)}", "title": "Markets and the wider world", "domain": domain, "disclaimer": "", "matched": True, "tone": tone}
+
+    _DISTINCTIVE = {"reinsurance", "microfinance", "insurtech", "brokerage", "annuity", "mediclaim", "nbfc", "treasury", "insurtech"}
     dom = classify_domain(m) or domain
+    strong_dom = bool(dom and dom in DOMAIN_ANSWER and any((" " in kw or kw in _DISTINCTIVE) and kw in m for kw in DOMAIN_KW.get(dom, [])))
     tokens = set(w.strip(".,!?") for w in m.split())
     best, best_s = None, 0
     for e in KB:
@@ -171,22 +278,22 @@ def answer(message: str, domain: str | None = None) -> dict:
         if s > best_s:
             best, best_s = e, s
 
-    advice = any(w in m for w in ("invest", "should i", "advice", "buy", "market", "stock", "portfolio", "fund"))
+    advice = any(w in m for w in ("invest", "should i", "advice", "buy", "stock", "portfolio", "fund"))
+    if strong_dom and best_s < 6:
+        return {"answer": f"{DOMAIN_ANSWER[dom]}\n\n{_close(m, tone)}", "title": DOMAIN_LABEL[dom], "domain": dom, "disclaimer": DISCLAIMER if advice else "", "matched": True, "tone": tone}
     if best and best_s >= 2:
         body = best["a"]
         if dom and dom in DOMAIN_ANSWER and best_s < 5:
             body += f"\n\nSince this touches {DOMAIN_LABEL[dom]}: {DOMAIN_ANSWER[dom]}"
-        text = f"{body}\n\nA principle to hold onto: {_pick(m, PRINCIPLES)}"
-        return {"answer": text, "title": best["title"], "domain": dom, "disclaimer": DISCLAIMER if advice else "", "matched": True}
+        return {"answer": f"{body}\n\n{_close(m, tone)}", "title": best["title"], "domain": dom, "disclaimer": DISCLAIMER if advice else "", "matched": True, "tone": tone}
 
     if dom and dom in DOMAIN_ANSWER:
-        text = f"{DOMAIN_ANSWER[dom]}\n\nA principle to hold onto: {_pick(m, PRINCIPLES)}"
-        return {"answer": text, "title": DOMAIN_LABEL[dom], "domain": dom, "disclaimer": DISCLAIMER if advice else "", "matched": True}
+        return {"answer": f"{DOMAIN_ANSWER[dom]}\n\n{_close(m, tone)}", "title": DOMAIN_LABEL[dom], "domain": dom, "disclaimer": DISCLAIMER if advice else "", "matched": True, "tone": tone}
 
-    return {
-        "answer": f"Good question, and I do not want to give you a generic non-answer. Here is a principle to anchor on: {_pick(m, PRINCIPLES)} If you tell me a little more, for example whether this is about saving, borrowing, investing, a suspicious charge, insurance, or a specific part of banking or markets, I will get specific fast.",
-        "title": "Let us dig in", "domain": dom, "disclaimer": DISCLAIMER, "matched": False,
-    }
+    if any(k in m for k in OFFTOPIC_KW):
+        return {"answer": "That one is a little outside my wheelhouse, I mostly think in balance sheets and basis points. But since you are here, want a two-minute money win? I am genuinely good at those.", "title": "Not quite my beat", "domain": dom, "disclaimer": "", "matched": False, "tone": tone}
+
+    return {"answer": f"Good question, and I would rather not hand you a generic non-answer. {_close(m, tone)} Tell me a bit more, saving, borrowing, investing, a suspicious charge, insurance, or a specific corner of banking or markets, and I will get precise fast.", "title": "Let us dig in", "domain": dom, "disclaimer": "", "matched": False, "tone": tone}
 
 
 def topics() -> list[dict]:

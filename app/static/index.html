@@ -76,6 +76,25 @@ svg.i{width:20px;height:20px;stroke:currentColor;fill:none;stroke-width:1.7;stro
 .rgrid{display:grid;grid-template-columns:repeat(auto-fit,minmax(230px,1fr));gap:12px}
 .rc{background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:14px}
 .rc b{color:var(--orange-600)}.rc .t{font-weight:700;margin-bottom:3px}.rc .d{font-size:12.5px;color:var(--muted)}
+.howto{padding:26px 0 8px}
+.howto h2,.bfsimap h2{font-size:26px;letter-spacing:-.02em;margin:0 0 4px;font-weight:800}
+.hsteps{display:grid;grid-template-columns:repeat(4,1fr);gap:14px;margin-top:20px}
+@media(max-width:860px){.hsteps{grid-template-columns:1fr 1fr}}
+.hstep{background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:16px}
+.hstep .hn{width:30px;height:30px;border-radius:9px;background:var(--orange-50);color:var(--orange-600);font-weight:800;display:grid;place-items:center;margin-bottom:10px}
+.hstep b{display:block;font-size:14.5px;margin-bottom:4px}
+.hstep span{font-size:12.5px;color:var(--muted);line-height:1.5}
+.bfsimap{padding:32px 0 18px}
+.bcols{display:grid;grid-template-columns:repeat(3,1fr);gap:14px;margin-top:18px}
+@media(max-width:860px){.bcols{grid-template-columns:1fr}}
+.bcol{background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:16px}
+.bcol .bh{font-weight:800;font-size:15px;color:var(--orange-600);margin-bottom:10px}
+.bcol ul{margin:0;padding:0;list-style:none}
+.bcol li{font-size:13px;color:var(--ink);padding:5px 0;border-bottom:1px solid var(--line)}
+.bcol li:last-child{border-bottom:0}
+.dims{margin-top:16px;background:var(--soft);border:1px solid var(--line);border-radius:12px;padding:14px}
+.dims .dh{font-size:11px;text-transform:uppercase;letter-spacing:.06em;color:var(--muted);font-weight:700}
+.dpills{margin-top:8px;font-size:13px;color:var(--ink);line-height:1.8}
 
 #app{min-height:100vh;background:var(--soft)}
 .appbar{position:sticky;top:0;z-index:20;background:var(--panel);border-bottom:1px solid var(--line)}
@@ -260,6 +279,28 @@ pre{background:var(--dark);color:#D7DCE5;border-radius:11px;padding:14px;overflo
       <p class="sub">The same decision engine, seen through the eyes of everyone it touches.</p>
       <div class="mgrid" id="mgrid"></div>
     </div>
+    <div class="howto">
+      <h2>How it works</h2>
+      <p class="sub">Four steps from a raw event to an explained, audited action.</p>
+      <div class="hsteps">
+        <div class="hstep"><div class="hn">1</div><b>Pick a view</b><span>Concierge for customers, Co-pilot for advisors, Control Tower for leaders, Assurance for regulators, Engine Room for engineers.</span></div>
+        <div class="hstep"><div class="hn">2</div><b>Meet the customer</b><span>Choose a profile or sign in. Ava greets you and can talk about anything, from budgeting to the wider markets.</span></div>
+        <div class="hstep"><div class="hn">3</div><b>Ask or act</b><span>Chat with Ava, or fire a live event and watch the engine pick the next best action in milliseconds.</span></div>
+        <div class="hstep"><div class="hn">4</div><b>See it explained</b><span>Every decision arrives with SHAP reasons, a fairness check, and an append-only audit record.</span></div>
+      </div>
+    </div>
+    <div class="bfsimap">
+      <h2>Across all of BFSI</h2>
+      <p class="sub">Three core domains, every subdomain, one platform.</p>
+      <div class="bcols">
+        <div class="bcol"><div class="bh">Banking</div><ul><li>Retail and Consumer</li><li>Corporate and Commercial</li><li>Investment Banking</li><li>Private and Wealth</li><li>Payments and Cards</li><li>Treasury Operations</li><li>Core Banking Operations</li></ul></div>
+        <div class="bcol"><div class="bh">Financial Services</div><ul><li>Asset Management</li><li>Brokerage and Trading</li><li>NBFCs</li><li>Fintech and Payments</li><li>Pension Funds</li><li>Microfinance</li><li>Credit Rating and Risk</li></ul></div>
+        <div class="bcol"><div class="bh">Insurance</div><ul><li>Life Insurance</li><li>General and Non-life</li><li>Health Insurance</li><li>Reinsurance</li><li>Insurtech</li><li>Actuarial and Underwriting</li></ul></div>
+      </div>
+      <div class="dims"><span class="dh">Modeled on the common BFSI dimensions</span>
+        <div class="dpills">Customer and Party · Account · Product · Branch and Channel · Time · Transaction · Employee and Agent · Geography · Risk · Currency · Regulatory and Compliance · Claims and Policy</div>
+      </div>
+    </div>
     <div class="research">
       <h3>Grounded in the research</h3>
       <div class="rgrid">
@@ -352,7 +393,8 @@ function localPrinciple(s){let h=0;for(const c of (s||'x'))h=(h*31+c.charCodeAt(
 function localAnswer(msg){const m=(msg||'').toLowerCase();let best=null,bs=0;for(const e of LOCAL_KB){let s=0;for(const k of e.kw)if(m.includes(k))s++;if(s>bs){bs=s;best=e;}}
   if(best&&bs>0)return best.a+' A principle to hold onto: '+localPrinciple(m);
   return 'Here is how I would think about that. '+localPrinciple(m)+' Tell me a little more, for example whether this is about saving, borrowing, investing, a suspicious charge, or planning for a goal, and I can be far more specific.';}
-async function askApi(msg){try{const r=await fetch('/ask',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({message:msg,domain:(CUST&&CUST.domain)||null})});if(!r.ok)throw 0;const j=await r.json();let a=j.answer||localAnswer(msg);if(j.disclaimer)a+='\n\n'+j.disclaimer;return a;}catch(e){return localAnswer(msg);}}
+let TONE=localStorage.getItem('aria-tone')||'witty';
+async function askApi(msg){try{const r=await fetch('/ask',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({message:msg,domain:(CUST&&CUST.domain)||null,tone:TONE})});if(!r.ok)throw 0;const j=await r.json();if(j.set_tone){TONE=j.set_tone;localStorage.setItem('aria-tone',TONE);}let a=j.answer||localAnswer(msg);if(j.disclaimer)a+='\n\n'+j.disclaimer;return a;}catch(e){return localAnswer(msg);}}
 const ACTION_RE=/\b(loan|pre-?approved|dispute|chargeback|unauthori|transfer|send money|block card|pay off)\b/i;
 function localDecision(pid){return {decision_id:'ref-'+Date.now().toString(36),action:'engage_financial_tip',score:5,latency_ms:6,within_slo:true,fairness_flag:'ok',model_scores:{propensity:0.12,churn:0.1,uplift:0.03,fraud:0.08},model_versions:{propensity:'live',churn:'live',uplift:'live',fraud:'live'},attrs:{domain:'retail',journey_stage:'engage',region:'North America',currency:'USD',risk_band:'low'},reason_codes:[{label:'transaction frequency (90d)',direction:'increases',contribution:0.21},{label:'current balance',direction:'increases',contribution:0.12}],ranked:[],rejected:[]};}
 async function decideApi(body){try{const j=await api.post('/decide',body);if(!j||!j.action)throw 0;return j;}catch(e){return localDecision(body.party_id);}}
