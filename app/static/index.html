@@ -394,7 +394,13 @@ function localAnswer(msg){const m=(msg||'').toLowerCase();let best=null,bs=0;for
   if(best&&bs>0)return best.a+' A principle to hold onto: '+localPrinciple(m);
   return 'Here is how I would think about that. '+localPrinciple(m)+' Tell me a little more, for example whether this is about saving, borrowing, investing, a suspicious charge, or planning for a goal, and I can be far more specific.';}
 let TONE=localStorage.getItem('aria-tone')||'witty';
-async function askApi(msg){try{const r=await fetch('/ask',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({message:msg,domain:(CUST&&CUST.domain)||null,tone:TONE})});if(!r.ok)throw 0;const j=await r.json();if(j.set_tone){TONE=j.set_tone;localStorage.setItem('aria-tone',TONE);}let a=j.answer||localAnswer(msg);if(j.disclaimer)a+='\n\n'+j.disclaimer;return a;}catch(e){return localAnswer(msg);}}
+let CHAT_HISTORY=[], LLM_LIVE=false;
+function clientTone(m){m=(m||'').toLowerCase();
+  if(/\b(be professional|professional mode|be formal|serious mode|keep it formal)\b/.test(m))return 'professional';
+  if(/\b(talk like genz|be genz|gen ?z mode|be gen ?z)\b/.test(m))return 'genz';
+  if(/\b(be funny|be witty|be casual|be chill|lighten up|be normal|stop joking|no jokes)\b/.test(m))return 'witty';
+  return null;}
+async function askApi(msg,history){try{const r=await fetch('/ask',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({message:msg,domain:(CUST&&CUST.domain)||null,tone:TONE,history:(history||[]).slice(-8)})});if(!r.ok)throw 0;const j=await r.json();if(j.set_tone){TONE=j.set_tone;localStorage.setItem('aria-tone',TONE);}let a=j.answer||localAnswer(msg);if(j.disclaimer)a+='\n\n'+j.disclaimer;return a;}catch(e){return localAnswer(msg);}}
 const ACTION_RE=/\b(loan|pre-?approved|dispute|chargeback|unauthori|transfer|send money|block card|pay off)\b/i;
 function localDecision(pid){return {decision_id:'ref-'+Date.now().toString(36),action:'engage_financial_tip',score:5,latency_ms:6,within_slo:true,fairness_flag:'ok',model_scores:{propensity:0.12,churn:0.1,uplift:0.03,fraud:0.08},model_versions:{propensity:'live',churn:'live',uplift:'live',fraud:'live'},attrs:{domain:'retail',journey_stage:'engage',region:'North America',currency:'USD',risk_band:'low'},reason_codes:[{label:'transaction frequency (90d)',direction:'increases',contribution:0.21},{label:'current balance',direction:'increases',contribution:0.12}],ranked:[],rejected:[]};}
 async function decideApi(body){try{const j=await api.post('/decide',body);if(!j||!j.action)throw 0;return j;}catch(e){return localDecision(body.party_id);}}
@@ -453,7 +459,7 @@ async function boot(){
   try{META=await api.get('/meta');PERSONAS=await api.get('/personas?limit=40');}
   catch(e){META={references:{}};PERSONAS=FALLBACK;}
   try{const d=await api.get('/domains');if(d&&d.length)DOMAINS_LIST=d;}catch(e){}
-  try{const c=await api.get('/config');if(c&&c.guest_tries)GUEST_TRIES=c.guest_tries;}catch(e){}
+  try{const c=await api.get('/config');if(c&&c.guest_tries)GUEST_TRIES=c.guest_tries;LLM_LIVE=!!(c&&c.llm);}catch(e){}
   $('#mgrid').innerHTML=MODES.map(m=>`<div class="mcard ${m.locked?'locked':''}" onclick="pick('${m.id}')">
     ${m.locked?`<span class="lock"><svg class="i" viewBox="0 0 24 24" style="width:16px;height:16px">${LOCK}</svg></span>`:''}
     <div class="ic"><svg class="i" viewBox="0 0 24 24"><path d="${m.ic}"/></svg></div>
@@ -509,7 +515,7 @@ function renderCustomer(pane){
     <div><div class="panel pad">
       <div class="chathdr">
         <span class="avatar-lg">A<b>.</b></span>
-        <div style="flex:1"><div style="font-weight:800;font-size:15px">Ava, your financial guide</div><div style="font-size:12px;color:var(--good)">online · private · always answers</div></div>
+        <div style="flex:1"><div style="font-weight:800;font-size:15px">Ava</div><div style="font-size:12px;color:var(--good)" id="avaStatus">online · here for anything</div></div>
         <span class="tries" id="triesBadge"></span></div>
       <div style="display:flex;gap:8px;align-items:center;margin:12px 0 6px">
         <span style="font-size:12px;color:var(--muted);font-weight:600">Area</span>
@@ -529,6 +535,7 @@ function renderCustomer(pane){
   $('#custDomain').innerHTML=domainOptions(CUST.domain);
   $('#signinChip').textContent=CUST.loggedIn?('Hi, '+CUST.username):'Sign in';
   cgreet();updateTriesBadge();
+  if($('#avaStatus'))$('#avaStatus').textContent=LLM_LIVE?'online · smart mode':'online · here for anything';
   if(!CUST.loggedIn && !localStorage.getItem('aria-saw-login')){localStorage.setItem('aria-saw-login','1');setTimeout(()=>openLogin(false),500);}
 }
 async function custDecide(){
@@ -544,21 +551,22 @@ async function custDecide(){
 }
 function addSpeaker(bub,text){const b=el('<button class="audiobtn" style="margin-top:9px;padding:5px 10px;font-size:12px"><span class="wave"><i></i><i></i><i></i><i></i></span>Hear this</button>');b.onclick=function(){speak(text,this)};bub.appendChild(b);}
 function cbubble(t,who){const d=el(`<div class="msg ${who}">${who==='bot'?'<span class="av">A<b>.</b></span>':''}<div class="bubble">${esc(t).replace(/\n/g,'<br>')}</div></div>`);$('#cthread').appendChild(d);$('#cthread').scrollTop=1e9;return d}
-function cgreet(){$('#cthread').innerHTML='';cbubble("Hi, I am Ava, your financial guide. Ask me anything, from budgeting and credit to investing and staying safe from fraud, or ask me to handle a loan, a dispute, or a payment. I will bring in a human when the stakes are high.",'bot')}
+function cgreet(){$('#cthread').innerHTML='';CHAT_HISTORY=[];cbubble("Hey, I am Ava. I am great with money, banking, insurance, all of it, but honestly I am happy to just talk too, history, tech, the news, whatever is on your mind. What is up?",'bot')}
 function cquick(e){$('#cgoal').value=e.textContent;cSend()}
 function cAgent(){cSend()}
 async function cSend(){
   const msg=($('#cgoal').value||'').trim();if(!msg)return;
   $('#cgoal').value='';
+  const t=clientTone(msg);if(t){TONE=t;localStorage.setItem('aria-tone',TONE);}
   if(!CUST.loggedIn){guestUsed++;localStorage.setItem('aria-guest-used',guestUsed);updateTriesBadge();
     if(guestUsed>GUEST_TRIES && !localStorage.getItem('aria-nudged')){localStorage.setItem('aria-nudged','1');setTimeout(()=>openLogin(false),500);}}
   if(ACTION_RE.test(msg)){agentRun($('#cust').value,msg,'#cthread',null,true);return;}
-  cbubble(msg,'user');
+  cbubble(msg,'user');CHAT_HISTORY.push({role:'user',text:msg});
   const turn=el('<div class="msg bot"><span class="av">A<b>.</b></span><div class="bubble"><div class="typing"><span></span><span></span><span></span></div></div></div>');
   $('#cthread').appendChild(turn);$('#cthread').scrollTop=1e9;
-  const ans=await askApi(msg);
+  const ans=await askApi(msg,CHAT_HISTORY);
   const bub=turn.querySelector('.bubble');bub.innerHTML=esc(ans).replace(/\n/g,'<br>');
-  addSpeaker(bub,ans);if(AUDIO_ON)speak(ans);
+  addSpeaker(bub,ans);if(AUDIO_ON)speak(ans);CHAT_HISTORY.push({role:'assistant',text:ans});
 }
 
 function renderAdvisor(pane){

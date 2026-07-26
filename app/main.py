@@ -14,6 +14,7 @@ from fastapi.responses import FileResponse, StreamingResponse
 from pydantic import BaseModel, field_validator
 from app import bootstrap, config
 from app.agent import agent, knowledge
+from app.layer3_models import llm
 from app.layer1_data import cdc_stub, db
 from app.layer2_features import feature_store
 from app.layer4_decisioning.decisioning import get_engine
@@ -133,6 +134,7 @@ class AskRequest(BaseModel):
     message: str
     domain: str | None = None
     tone: str | None = None
+    history: list | None = None
 
     @field_validator('message')
     @classmethod
@@ -142,7 +144,14 @@ class AskRequest(BaseModel):
 
 @app.post('/ask')
 def ask(req: AskRequest):
-    return knowledge.answer(req.message, req.domain, req.tone)
+    if config.ANTHROPIC_API_KEY:
+        reply = llm.ava_reply(req.message, req.tone or 'witty', req.history)
+        if reply:
+            return {'answer': reply, 'title': 'Ava', 'domain': req.domain,
+                    'tone': req.tone or 'witty', 'disclaimer': '', 'matched': True, 'llm': True}
+    res = knowledge.answer(req.message, req.domain, req.tone)
+    res['llm'] = False
+    return res
 
 
 @app.get('/topics')
@@ -185,7 +194,8 @@ def login(req: LoginRequest):
 
 @app.get('/config')
 def client_config():
-    return {'guest_tries': config.GUEST_TRIES}
+    return {'guest_tries': config.GUEST_TRIES, 'llm': bool(config.ANTHROPIC_API_KEY),
+            'model': config.LLM_MODEL if config.ANTHROPIC_API_KEY else 'knowledge base'}
 
 
 @app.post('/agent')

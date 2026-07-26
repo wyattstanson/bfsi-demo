@@ -74,6 +74,10 @@ PERSONAL = [
      "I am sorry, that is genuinely hard. The priorities right now are simple: protect cash, cut non-essential spending, contact lenders early because most will work with you, and check any benefits or emergency support you are entitled to. Keep the emergency fund for essentials only. If you tell me your biggest fixed cost, I can help you think it through."),
     (["broke", "no money", "paycheck to paycheck", "can't afford", "cant afford"],
      "Living close to the edge is exhausting, and it is more common than people admit. The way out usually starts small: find one recurring cost to cut, automate even a tiny weekly saving so a buffer starts to build, and clear the highest-interest debt first. Small, steady moves compound. What would help most, trimming spending or dealing with a debt?"),
+    (["i am happy", "i'm happy", "great news", "got a raise", "promoted", "promotion", "got the job", "new job", "so excited", "good news"],
+     "That is wonderful, I love hearing it, congratulations. If you feel like channeling a little of that good energy, this is the perfect moment to lock in a small habit, bump up your savings or clear a nagging balance while the momentum is there. But mostly, enjoy it."),
+    (["lonely", "i am bored", "i'm bored", "sad", "feeling down", "rough day", "not okay"],
+     "I am sorry you are feeling that way, and I am glad you are here. We do not have to talk money at all, sometimes it just helps to have someone to talk to. If you do want a tiny, satisfying win, I can find you a two-minute one. Otherwise, I am happy to just chat. How are you really doing?"),
 ]
 
 KB = [

@@ -27,6 +27,6 @@ xgboost>=2.0
 # ---- Optional / heavy (guarded imports, pure-Python fallbacks provided) ----
 # econml>=0.15          # uplift X-learner; falls back to sklearn T-learner
 # langgraph>=0.2        # agent graph; falls back to a hand-rolled state machine
-# anthropic>=0.40       # grounded LLM; falls back to deterministic offline stub
+anthropic>=0.40         # Ava's conversational brain when ANTHROPIC_API_KEY is set
 # shap>=0.44            # explanations; falls back to a linear SHAP-style attribution
 # torch-geometric       # GNN fraud score; falls back to networkx pagerank
