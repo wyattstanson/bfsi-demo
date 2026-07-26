@@ -149,7 +149,7 @@ def ask(req: AskRequest):
         if reply:
             return {'answer': reply, 'title': 'Ava', 'domain': req.domain,
                     'tone': req.tone or 'witty', 'disclaimer': '', 'matched': True, 'llm': True}
-    res = knowledge.answer(req.message, req.domain, req.tone)
+    res = knowledge.answer(req.message, req.domain, req.tone, req.history)
     res['llm'] = False
     return res
 

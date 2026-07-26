@@ -107,6 +107,14 @@ KB = [
      "a": "Give every goal a name, a number, and a date, then work backwards to a monthly amount. Keep anything you need within three years in safe cash-like savings so a market dip cannot derail you; let longer goals ride in diversified investments. Automating the transfer on payday turns a wish into a funded plan."},
     {"id": "market", "title": "Reading the market without panic", "kw": ["market crash", "volatility", "recession", "downturn", "should i sell", "market dip", "stocks falling"],
      "a": "Markets rise over the long run but lurch in the short run, and headlines are loudest when reacting is least useful. Downturns are the normal cost of higher long-term returns. If your money is invested for a distant goal, the wise move in a fall is usually to keep contributing and avoid selling in fear."},
+    {"id": "taxes", "title": "Being smart about taxes", "kw": ["tax", "taxes", "tax saving", "deduction", "refund", "80c", "hra"],
+     "a": "Tax planning is mostly about not leaving free money on the table. Use the tax-advantaged accounts and deductions you are entitled to, keep clean records, and think about the whole year rather than a last-minute scramble. The goal is not to obsess over every rupee saved, it is to make the easy, legitimate moves automatically so more of what you earn stays yours."},
+    {"id": "crypto", "title": "Thinking clearly about crypto", "kw": ["crypto", "bitcoin", "ethereum", "coin", "nft", "web3"],
+     "a": "Crypto is highly volatile and largely unregulated, so treat it as speculation, not a savings plan. If you are curious, a sensible rule is to only put in money you could lose entirely, never borrow to buy it, and get your emergency fund and high-interest debt sorted first. Understand what you are buying, and be extra alert to scams, which cluster around anything moving this fast."},
+    {"id": "bnpl", "title": "Buy now, pay later", "kw": ["buy now pay later", "bnpl", "pay in installments", "emi on purchase"],
+     "a": "Buy now, pay later feels free, and that is exactly the trap: splitting a purchase makes it easy to buy more than you would with cash, and missed payments can carry steep fees. Used deliberately for something you were going to buy anyway, at zero cost, it is fine. As a way to afford things you cannot, it quietly builds a pile of small debts."},
+    {"id": "side_income", "title": "Earning a little extra", "kw": ["side hustle", "extra income", "side income", "freelance", "make more money", "second job"],
+     "a": "A side income is one of the few levers that lifts both your savings rate and your resilience. The best ones build on a skill you already have, start small, and do not eat the time you need to rest. Whatever you earn, decide in advance where it goes, ideally straight into savings or clearing debt, so the extra effort actually moves the needle instead of quietly inflating your spending."},
     {"id": "erica", "title": "Bank of America Erica", "kw": ["erica", "bank of america", "bofa", "ask merrill"],
      "a": "Bank of America's Erica is a proprietary NLP and machine-learning assistant, deliberately not built on a large language model, a control-and-compliance-first design. It has served over two billion interactions with average responses in the tens of milliseconds. It sits at the narrower, rules-and-intent end of the spectrum, which is exactly why it is dependable at scale."},
     {"id": "jpmorgan", "title": "JPMorgan LLM Suite", "kw": ["jpmorgan", "jp morgan", "llm suite", "indexgpt", "coin", "loxm"],
@@ -238,11 +246,31 @@ def _intent(m: str):
     return None, None
 
 
-def answer(message: str, domain: str | None = None, tone: str | None = None) -> dict:
+_FOLLOW = {"tell me more", "more", "why", "how", "explain", "go on", "example", "and", "so",
+           "really", "details", "elaborate", "continue", "how so", "such as", "like what", "more please"}
+
+
+def answer(message: str, domain: str | None = None, tone: str | None = None,
+           history: list | None = None) -> dict:
     m = (message or "").lower().strip()
     tone = tone if tone in ("witty", "professional", "genz") else "witty"
     if not m:
         return {"answer": "I am here whenever you are ready. What is on your mind?", "title": "Ava", "domain": domain, "disclaimer": "", "matched": True, "tone": tone}
+
+    if history and (m.rstrip("?.! ") in _FOLLOW or (len(m.split()) <= 3 and any(w in m for w in _FOLLOW))):
+        prev = None
+        for h in reversed(history):
+            if h.get("role") == "user":
+                t = (h.get("text") or "").lower().strip()
+                if t and t != m and t.rstrip("?.! ") not in _FOLLOW and len(t.split()) > 2:
+                    prev = h.get("text")
+                    break
+        if prev:
+            base = answer(prev, domain, tone)
+            opener = {"professional": "To expand on that. ", "genz": "Okay so, more on that. "}.get(tone, "Happy to go a bit deeper. ")
+            base["answer"] = opener + base["answer"]
+            base["matched"] = True
+            return base
 
     new_tone = detect_tone(m)
     if new_tone and len(m.split()) <= 6:
@@ -297,7 +325,9 @@ def answer(message: str, domain: str | None = None, tone: str | None = None) -> 
     if any(k in m for k in OFFTOPIC_KW):
         return {"answer": "That one is a little outside my wheelhouse, I mostly think in balance sheets and basis points. But since you are here, want a two-minute money win? I am genuinely good at those.", "title": "Not quite my beat", "domain": dom, "disclaimer": "", "matched": False, "tone": tone}
 
-    return {"answer": f"Good question, and I would rather not hand you a generic non-answer. {_close(m, tone)} Tell me a bit more, saving, borrowing, investing, a suspicious charge, insurance, or a specific corner of banking or markets, and I will get precise fast.", "title": "Let us dig in", "domain": dom, "disclaimer": "", "matched": False, "tone": tone}
+    key = max([w.strip(".,!?'\"") for w in m.split() if len(w) > 4], key=len, default="")
+    hook = f'On "{key}", ' if key else "Good question, and "
+    return {"answer": f"{hook}I would rather not hand you a generic non-answer. {_close(m, tone)} Tell me a touch more, is this about saving, borrowing, investing, a suspicious charge, insurance, or a particular corner of banking or markets? I will get precise fast.", "title": "Let us dig in", "domain": dom, "disclaimer": "", "matched": False, "tone": tone}
 
 
 def topics() -> list[dict]:
