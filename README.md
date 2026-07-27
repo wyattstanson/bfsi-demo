@@ -131,6 +131,17 @@ database path is verified, not just SQLite.
 | Audit log | `audit_log` table | Unity Catalog and ModelOp lineage |
 | Agent runtime | hand-rolled or LangGraph | LangGraph on EKS with a real MCP server |
 
+## Demo materials
+
+The client-briefing deck and its narration are version-controlled under [`docs/`](docs/):
+
+* [`docs/pitch-deck.md`](docs/pitch-deck.md) — the 20-slide pitch outline (the stakes,
+  the five-layer blueprint, sub-98ms real-time path, the agentic loop, governance, and
+  the economics), extracted from `pitch.pptx`. Slides 6, 8 and 10 carry interactive 3D
+  models (`arch.glb`, `rt.glb`, `ag.glb`).
+* [`docs/demo_script.md`](docs/demo_script.md) — the slide-by-slide recording script
+  (5-7 minute run, with a 3-minute cut and recovery lines).
+
 ## Design decisions
 
 * Every decision is regulated. Governance runs inside the measured request and no

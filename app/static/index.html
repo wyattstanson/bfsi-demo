@@ -362,6 +362,13 @@ pre{background:var(--dark);color:#D7DCE5;border-radius:11px;padding:14px;overflo
   <div class="gtip" style="text-align:center;margin-top:12px">Your questions stay private. We never sell your data, and personal details never reach a model.</div>
 </div></div>
 
+<div id="hist" class="ovl" onclick="if(event.target===this)this.classList.remove('on')"><div class="ovlbox">
+  <h2 style="text-align:center">Your chats with Ava</h2>
+  <p class="hint" style="text-align:center">Saved privately on this device. Nothing leaves your browser.</p>
+  <div id="histlist" style="max-height:52vh;overflow:auto;margin:14px 0"></div>
+  <button class="btn ghost" style="width:100%;justify-content:center" onclick="clearHistory()">Clear all chats</button>
+</div></div>
+
 <script>
 const $=s=>document.querySelector(s), el=(h)=>{const d=document.createElement('div');d.innerHTML=h;return d.firstElementChild};
 function esc(s){return (s==null?'':String(s)).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));}
@@ -394,7 +401,7 @@ function localAnswer(msg){const m=(msg||'').toLowerCase();let best=null,bs=0;for
   if(best&&bs>0)return best.a+' A principle to hold onto: '+localPrinciple(m);
   return 'Here is how I would think about that. '+localPrinciple(m)+' Tell me a little more, for example whether this is about saving, borrowing, investing, a suspicious charge, or planning for a goal, and I can be far more specific.';}
 let TONE=localStorage.getItem('aria-tone')||'witty';
-let CHAT_HISTORY=[], LLM_LIVE=false;
+let CHAT_HISTORY=[], LLM_LIVE=false, CONVO_ID=null;
 function clientTone(m){m=(m||'').toLowerCase();
   if(/\b(be professional|professional mode|be formal|serious mode|keep it formal)\b/.test(m))return 'professional';
   if(/\b(talk like genz|be genz|gen ?z mode|be gen ?z)\b/.test(m))return 'genz';
@@ -520,6 +527,8 @@ function renderCustomer(pane){
       <div style="display:flex;gap:8px;align-items:center;margin:12px 0 6px">
         <span style="font-size:12px;color:var(--muted);font-weight:600">Area</span>
         <select id="custDomain" style="width:auto;padding:7px 11px" onchange="CUST.domain=this.value;saveCust();"></select>
+        <button class="chip" onclick="newChat()">New chat</button>
+        <button class="chip" onclick="openHistory()">History</button>
         <button class="chip" id="signinChip" style="margin-left:auto" onclick="openLogin(false)">Sign in</button></div>
       <div class="thread" id="cthread"></div>
       <div class="chips">
@@ -567,7 +576,41 @@ async function cSend(){
   const ans=await askApi(msg,CHAT_HISTORY);
   const bub=turn.querySelector('.bubble');bub.innerHTML=esc(ans).replace(/\n/g,'<br>');
   addSpeaker(bub,ans);if(AUDIO_ON)speak(ans);CHAT_HISTORY.push({role:'assistant',text:ans});
+  persistConvo();
 }
+
+// --- Ava chat history (private, on-device) ---
+function loadChats(){try{return JSON.parse(localStorage.getItem('aria-chats')||'[]')}catch(e){return[]}}
+function saveChats(a){localStorage.setItem('aria-chats',JSON.stringify(a.slice(0,50)))}
+function persistConvo(){
+  const msgs=CHAT_HISTORY.filter(m=>m&&(m.role==='user'||m.role==='assistant'));
+  if(!msgs.some(m=>m.role==='user'))return;
+  const chats=loadChats();
+  if(!CONVO_ID)CONVO_ID='c'+Date.now();
+  const first=(msgs.find(m=>m.role==='user')||{}).text||'Chat with Ava';
+  const rec={id:CONVO_ID,title:first.slice(0,60),ts:Date.now(),msgs:msgs};
+  const i=chats.findIndex(c=>c.id===CONVO_ID);
+  if(i>=0)chats[i]=rec;else chats.unshift(rec);
+  saveChats(chats);
+}
+function newChat(){CONVO_ID=null;cgreet();}
+function histWhen(ts){const d=Math.floor((Date.now()-ts)/1000);
+  if(d<60)return'just now';if(d<3600)return Math.floor(d/60)+'m ago';
+  if(d<86400)return Math.floor(d/3600)+'h ago';return new Date(ts).toLocaleDateString();}
+function openHistory(){const chats=loadChats(),box=$('#histlist');
+  if(!chats.length){box.innerHTML='<p class="hint" style="text-align:center;padding:18px 0">No saved chats yet. Once you talk to Ava, your conversations show up here.</p>';}
+  else{box.innerHTML=chats.map(c=>`<div onclick="restoreChat('${c.id}')" style="display:flex;align-items:center;gap:10px;padding:11px 12px;border:1px solid var(--line);border-radius:10px;margin-bottom:8px;cursor:pointer">
+    <div style="flex:1;min-width:0"><div style="font-weight:700;font-size:14px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${esc(c.title)}</div><div style="font-size:12px;color:var(--muted);margin-top:2px">${histWhen(c.ts)} · ${c.msgs.length} messages</div></div>
+    <button class="chip" onclick="event.stopPropagation();deleteChat('${c.id}')">Delete</button></div>`).join('');}
+  $('#hist').classList.add('on');}
+function closeHistory(){$('#hist').classList.remove('on')}
+function restoreChat(id){const c=loadChats().find(x=>x.id===id);if(!c)return;
+  CONVO_ID=c.id;CHAT_HISTORY=c.msgs.slice();
+  const th=$('#cthread');if(!th)return;th.innerHTML='';
+  c.msgs.forEach(m=>cbubble(m.text,m.role==='user'?'user':'bot'));
+  closeHistory();}
+function deleteChat(id){saveChats(loadChats().filter(c=>c.id!==id));if(CONVO_ID===id)CONVO_ID=null;openHistory();}
+function clearHistory(){if(!confirm('Delete all saved chats on this device? This cannot be undone.'))return;localStorage.removeItem('aria-chats');CONVO_ID=null;openHistory();}
 
 function renderAdvisor(pane){
   pane.innerHTML=`<div class="panel pad">${head('advisor','Relationship co-pilot')}
