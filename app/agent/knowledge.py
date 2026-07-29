@@ -53,19 +53,28 @@ DOMAIN_ANSWER = {
 }
 
 SMALLTALK = [
-    (["hi", "hello", "hey", "yo", "hola", "namaste", "good morning", "good evening", "good afternoon"],
-     ["Hi, I am Ava, your financial guide. Lovely to meet you. What is on your mind today, saving, borrowing, investing, a payment, or something about your account?",
-      "Hello. I am Ava. I can talk money in plain English, from budgeting and credit to investing and insurance, or handle a loan, a dispute, or a payment. Where shall we start?"]),
-    (["how are you", "how's it going", "how are u", "whats up", "what's up"],
-     ["I am doing well, thank you for asking. More importantly, how can I help with your money today?"]),
-    (["thank", "thanks", "thx", "cheers", "appreciate"],
-     ["You are very welcome. Ask me anything else, any time."]),
-    (["who are you", "what are you", "what can you do", "your name", "how do you work", "what do you do"],
-     ["I am Ava, a financial guide. I answer questions across every part of banking, markets, and insurance, I explain things simply, and I can act on real tasks like a loan, a dispute, or a payment, bringing in a human when the stakes are high. I never leave you with a dead end."]),
-    (["bye", "goodbye", "see you", "that's all", "thats all"],
-     ["Take care, and come back any time. Your money will be here, hopefully a little better organised."]),
-    (["love you", "you are great", "you're great", "you are the best"],
-     ["That is kind of you. Let us put that good mood to work, is there a money question I can take off your plate?"]),
+    (["hi", "hello", "hey", "yo", "hola", "namaste", "good morning", "good evening", "good afternoon", "sup"],
+     ["Hi, I am Ava. Lovely to meet you. I am happiest talking money, banking, markets, insurance, and how firms personalize all of it, but honestly I am glad to talk about almost anything. What is on your mind?",
+      "Hello. I am Ava. I can go deep on banking, markets, insurance and the whole craft of personalization, or we can just chat about tech, history, life, whatever you like. Where shall we start?",
+      "Hey there. Ava here. Ask me anything, from an emergency fund to how a bank scores fraud in milliseconds, or point me at any topic at all and I will do my best. What is up?"]),
+    (["how are you", "how's it going", "how are u", "whats up", "what's up", "how do you do", "hows life"],
+     ["I am doing well, thank you for asking, and better now that you are here. What can I help you think through?",
+      "Running smoothly, thanks. More to the point, what is on your mind today, money, markets, or something else entirely?"]),
+    (["thank", "thanks", "thx", "cheers", "appreciate", "ty ", "tysm"],
+     ["You are very welcome. Ask me anything else, any time.",
+      "Any time, truly. That is what I am here for.",
+      "My pleasure. What else can I take off your plate?"]),
+    (["who are you", "what are you", "what can you do", "your name", "how do you work", "what do you do", "tell me about yourself"],
+     ["I am Ava, the assistant inside Aria, a Tredence personalization platform for banking, markets and insurance. I am a deep expert in how firms tailor money experiences, next-best-action, real-time decisioning, fair and governed AI, and I am widely read besides, so I can hold a real conversation and still bring it back to something useful. I explain things simply, I can act on tasks like a loan or a dispute, and I never leave you at a dead end."]),
+    (["bye", "goodbye", "see you", "that's all", "thats all", "gotta go", "see ya"],
+     ["Take care, and come back any time. Your money, and your curiosity, will be here.",
+      "Bye for now. Come back whenever, I am always around."]),
+    (["love you", "you are great", "you're great", "you are the best", "you're the best", "you're amazing", "you are amazing", "i like you"],
+     ["That is kind of you, thank you. Let us put that good mood to work, what shall we get into?",
+      "You just made my day, or my millisecond. What can I help with next?"]),
+    (["what should we talk about", "i'm bored talk to me", "entertain me", "tell me something", "surprise me", "random fact"],
+     ["Happy to. Want a money idea that actually compounds, a bit of how banks personalize your app in real time, or something totally off-topic like space or history? Pick a lane, or I will pick one for you.",
+      "Here is one: the winners in finance treat personalization as infrastructure, not a campaign, one brain serving every channel. Want me to unpack that, or would you rather talk about something completely different?"]),
 ]
 PERSONAL = [
     (["stressed", "worried", "anxious", "scared", "overwhelmed", "struggling", "can't sleep", "cant sleep", "depressed", "hard time"],
@@ -135,6 +144,48 @@ KB = [
      "a": "Two philosophies split the industry. One is Bank of America's proprietary NLP, no-LLM approach, chosen for control and compliance. The other, now dominant, is a model-agnostic router that swaps GPT, Claude, Gemini, or Llama per task and risk profile, as JPMorgan, Goldman, and Bajaj do. Consumer chat tends to be narrower and rules-heavy; internal copilots are newer, full-LLM, and agentic. Governance is now a public disclosure item, not just capability.",},
 ]
 
+# --- The craft of personalization: what makes Ava a real expert ---
+KB += [
+    {"id": "hyper_personalization", "title": "What personalization really means", "kw": ["personalization", "personalisation", "hyper-personalization", "hyper personalization", "1:1", "one to one", "tailored", "what is personalization"],
+     "a": "Personalization is delivering the right action to the right person at the right moment through the right channel, decided from that person's live context rather than a broad segment. The mature form is one-to-one and real-time: not a monthly campaign to a bucket, but a decision recomputed on every interaction. Done well it is an engine, not a feature, one brain that serves retail, wealth, payments and insurance, learns from outcomes, and improves itself. The prize for a Tier-1 firm runs into the hundreds of millions to a billion in annual profit."},
+    {"id": "next_best_action", "title": "Next-best-action decisioning", "kw": ["next best action", "nba", "next-best-action", "decisioning", "what should i offer", "recommend an action", "best action"],
+     "a": "Next-best-action is the heart of personalization: for a given customer and context, score every eligible action, offer, nudge, content, or hold, by its expected value, apply eligibility and suitability rules, then serve the winner and log why. It fuses propensity, expected reward and constraints in one ranked decision. The art is doing it inside a real-time budget, under a hundred milliseconds, so the decision reflects what the customer is doing right now, not last week."},
+    {"id": "propensity_uplift", "title": "Propensity versus uplift", "kw": ["propensity", "uplift", "causal", "incremental", "treatment effect", "who to target", "targeting model", "persuadable"],
+     "a": "Propensity predicts who is likely to act; uplift predicts who will act because you reached them. That difference is everything. Propensity wastes money on sure things and lost causes; uplift, or causal targeting, spends only on the persuadable, the people your action actually moves. You estimate it with treatment and control data using meta-learners like T, X or R-learners, or causal forests. It is the single biggest lever between a personalization program that looks busy and one that lifts the P&L."},
+    {"id": "bandits_rl", "title": "Bandits and reinforcement learning", "kw": ["bandit", "contextual bandit", "reinforcement learning", "explore exploit", "thompson", "linucb", "rl", "multi-armed"],
+     "a": "Contextual bandits solve the explore-exploit problem online: mostly serve the action your model thinks is best, but keep probing alternatives so you never stop learning. Thompson sampling and LinUCB are the workhorses, and LinUCB is nice because you can cache the inverse and make a decision with zero matrix inversion on the hot path. Full reinforcement learning goes further, optimising a sequence of interactions for long-run value, useful for journeys and payment routing, but it is heavier to govern."},
+    {"id": "recsys", "title": "Recommendation and cold start", "kw": ["recommendation", "recommender", "recsys", "collaborative filtering", "cold start", "embeddings", "similar customers", "two tower"],
+     "a": "Recommenders rank items for a person, and modern ones use embeddings, often a two-tower model, to place users and items in the same vector space so similarity is a dot product you can serve fast. The classic trap is cold start: a new user or new product has no history. You bridge it with content features, popularity priors, and a bit of bandit exploration until behavioral signal accrues. In BFSI the items are offers, actions and content, and eligibility rules ride on top of the ranking."},
+    {"id": "feature_store", "title": "The feature store", "kw": ["feature store", "feature engineering", "online features", "offline features", "feast", "point in time", "feature pipeline", "training serving skew"],
+     "a": "A feature store is the shared layer that computes signals once and serves them everywhere. Its whole reason to exist is to kill training-serving skew: the same definition feeds offline training and online scoring, so the number a model saw in training is the number it sees in production. Offline it does point-in-time-correct joins to avoid label leakage; online it serves precomputed features from a key-value store in single-digit milliseconds. No serious real-time personalization exists without one."},
+    {"id": "realtime_decisioning", "title": "Real-time decisioning and latency", "kw": ["latency", "real-time", "real time", "sub-100ms", "98ms", "milliseconds", "p99", "online store", "hot path", "sla"],
+     "a": "The hardest promise in personalization is speed: a governed decision in under about a hundred milliseconds, end to end. You hit it by colocating the model, the rules and the data in one region, reading features from an online key-value store with predictable single-digit-millisecond reads, caching anything invertible, and keeping the hot path free of blocking I/O, so writes like the audit log happen write-behind. The headroom you save is what lets you add fairness checks and explainability and still stay real-time."},
+    {"id": "rag_grounding", "title": "Grounded LLMs and RAG", "kw": ["rag", "retrieval augmented", "grounding", "grounded", "hallucination", "vector search", "knowledge base", "retrieval"],
+     "a": "Retrieval-augmented generation grounds a language model in your own trusted content: you retrieve the relevant documents, policies, product terms, a client's own data, and let the model answer only from them, with citations. It is how you get a helpful assistant without hallucination, and how you keep answers current without retraining. Morgan Stanley's advisor assistant is the template, hundreds of thousands of research documents indexed so the model prepares and the human decides."},
+    {"id": "agentic_loop", "title": "The agentic loop", "kw": ["agent", "agentic", "agent loop", "tool use", "autonomous", "human in the loop", "escalation", "perceive reason act", "orchestration"],
+     "a": "An agent perceives, reasons, acts and observes in a loop, calling tools through a governed gateway rather than just chatting. The design that makes it safe in finance has three parts: memory so it carries context, a fenced set of tools it is allowed to touch, and a human-escalation path for anything above a policy threshold. It acts autonomously on the routine and hands off when stakes are high. Bajaj Finance runs this in production with hundreds of agents; the discipline is autonomy without recklessness."},
+    {"id": "ai_governance", "title": "Governance, fairness and explainability", "kw": ["governance", "governed", "fairness", "fair ai", "bias", "explainability", "explainable", "shap", "audit", "model risk", "reason codes", "eu ai act", "compliance", "responsible ai", "responsible", "accountable", "trustworthy", "safe ai"],
+     "a": "Governance is the real differentiator, and the mature approach runs it inside the decision, not as a bolt-on afterwards. Every decision carries an audit row: the reason codes, the fairness check across protected groups, and the data behind it, so a regulator can ask about any single decision and get an answer. Explainability comes from methods like SHAP, or exact linear attributions for logistic models, cached so they cost nothing at serve time. This is what satisfies model-risk rules and the EU AI Act at once."},
+    {"id": "experimentation", "title": "Experimentation and holdouts", "kw": ["experiment", "a/b test", "ab test", "holdout", "control group", "incrementality", "causal measurement", "test and learn", "randomized"],
+     "a": "If you cannot measure lift causally, you are guessing. The gold standard is a randomized holdout: keep a slice of customers untouched and compare, so every headline number is incremental, not just correlated with people who were going to convert anyway. Capital One built a whole culture on this, thousands of experiments. Practical care matters, guard against peeking, sample-ratio mismatch and novelty effects, and measure long-run value, not just the click."},
+    {"id": "ltv_churn", "title": "Lifetime value and churn", "kw": ["ltv", "clv", "lifetime value", "churn", "retention", "attrition", "customer value", "who will leave"],
+     "a": "Personalization should optimise lifetime value, not the next click. Customer lifetime value models the discounted profit of a relationship over its life, and churn or attrition models flag who is drifting away while you can still act. The strongest programs target the intersection: high-value customers with rising churn risk get the best save action, priced by uplift so you spend only where intervention actually changes the outcome. Optimising short-term response alone quietly erodes the base."},
+    {"id": "segmentation_maturity", "title": "From segments to one-to-one", "kw": ["segmentation", "segment", "maturity model", "rules to real-time", "batch", "cohort", "micro-segment", "stages of personalization"],
+     "a": "Most firms climb a four-stage maturity curve: hard-coded rules and a handful of segments, then batch machine-learning scores, then a unified real-time decisioning brain, then autonomous agents. Segments are a crutch, useful early, but the destination is one-to-one: a decision computed for the individual in the moment. The job is to move a firm from stage one or two to three and four without a rebuild, by swapping components behind stable interfaces."},
+    {"id": "data_foundation", "title": "The data foundation and identity", "kw": ["data foundation", "cdp", "customer data platform", "identity resolution", "single customer view", "golden record", "data quality", "event stream"],
+     "a": "Everything sits on the data foundation: a clean, real-time event stream and a resolved identity so you actually know that these interactions belong to one person. Identity resolution stitches devices, channels and accounts into a single customer view, the golden record. Without it, personalization is confidently wrong, greeting the same human as three strangers. A customer data platform or lakehouse plus a streaming layer, Kafka into an online store, is the usual shape."},
+    {"id": "mlops", "title": "MLOps, drift and monitoring", "kw": ["mlops", "drift", "model monitoring", "model decay", "retraining", "data drift", "concept drift", "model registry", "deployment"],
+     "a": "Models rot quietly. MLOps is the discipline that keeps them healthy: a registry that versions every model, monitoring that watches input drift and outcome decay, and automated retraining with a champion-challenger before anything is promoted. Concept drift, when the world changes under a stable model, is the sneaky one; you catch it by tracking calibration and business KPIs, not just accuracy. The goal is that a model in production behaves like the model you validated."},
+    {"id": "privacy_ml", "title": "Privacy-preserving personalization", "kw": ["privacy", "pii", "consent", "gdpr", "dpdp", "federated learning", "differential privacy", "data minimization", "anonymization"],
+     "a": "The best personalization keeps personal data out of the model entirely. Names, emails and identifiers stay in a governed ledger; the hot path and every model payload carry ids and non-PII features only, and a test enforces it. Layer on consent as a first-class signal, data minimization, and where needed techniques like federated learning, training on device, or differential privacy, adding calibrated noise. Trust is the real asset: the moment customers feel surveilled, the lift evaporates."},
+    {"id": "five_layers", "title": "The five-layer blueprint", "kw": ["five layer", "5 layer", "layers", "blueprint", "reference architecture", "stack", "how is it built", "architecture"],
+     "a": "Serious personalization is the same five layers everywhere. At the bottom, the data foundation, streaming events and resolved identity. Above it, the feature store. Then the models, propensity, uplift, recommendation, fraud graphs, grounded language models and agents. Then real-time decisioning that turns scores into a governed action under a hundred milliseconds. And across the top, governance on every single decision. Firms differ not in the layers but in the quality of what sits inside each one, and the demo becomes production by swapping boxes, Postgres for Snowflake and Databricks, Redis for a cloud online store, not by rewriting."},
+    {"id": "personalization_roi", "title": "The economics of personalization", "kw": ["roi", "business case", "value of personalization", "economics", "revenue lift", "cost to serve", "p&l", "how much is it worth"],
+     "a": "The value is built bottom-up, sub-vertical by sub-vertical, not as a slogan. Retail earns more revenue per active customer, five to fifteen percent; wealth lifts advisor productivity twenty-five to forty percent; payments cut fraud losses; insurance improves loss ratios by three to five points. Sum the measured effects for a Tier-1 firm and it is a two-hundred-million to one-billion-dollar annual swing. The discipline is to measure each against a real holdout so every number is causal and your CFO can check the arithmetic."},
+    {"id": "eight_models", "title": "The model toolkit", "kw": ["model patterns", "eight models", "which models", "model toolkit", "types of models", "what models"],
+     "a": "You do not need a hundred models, you need about eight patterns done well: propensity for likelihood, uplift for incrementality, recommendation for ranking, time-series for forecasting, anomaly and graph models for fraud, optimisation for constraints and pricing, grounded language models for text, and agents for multi-step action. Almost every BFSI use case is a combination of these. Depth in each beats a sprawl of shallow one-off models you cannot govern."},
+]
+
 
 DOMAIN_KW.update({
     "investment_banking": ["investment banking", "m&a", "mergers", "underwriting", "ipo", "capital raising", "deal advisory"],
@@ -197,7 +248,72 @@ TONE_CONFIRM = {
 MACRO_KW = ["geopolit", "war", "election", "president", "tariff", "sanction", "oil price", "inflation",
             " fed ", "interest rate", "rbi policy", "recession", "china", "russia", "ukraine", "opec", "gdp", "trump"]
 MACRO_ANSWER = "Geopolitics and markets are joined at the hip. Wars, elections, tariffs, and central-bank moves ripple straight into oil, currencies, rates, and risk appetite. The practical takeaway is rarely to trade the headline. It is to stay diversified, keep a cash buffer, and let a long horizon absorb the noise."
-OFFTOPIC_KW = ["weather", "football", "cricket", "movie", "recipe", "cook", "dating", "sports", "music", "who won", "song"]
+OFFTOPIC_KW = ["dating", "who is dating", "gossip", "horoscope", "astrology", "lottery number"]
+
+# Questions that need live data Ava does not have. Answer honestly, never a dead end.
+LIVE_KW = ["weather today", "weather right now", "today's weather", "temperature today", "the weather",
+           "who won", "final score", "match score", "live score", "game score", "the score is",
+           "latest news", "news today", "breaking news", "stock price", "share price",
+           "current price", "price right now", "exchange rate today", "who is winning", "what happened today"]
+LIVE_ANSWER = "I do not have a live feed for that, I run offline, so I would only be guessing at the exact number or headline of the moment. For anything real-time, your bank app, an exchange, or a news or weather site is the source of truth. What I can do is give you the durable version: how to read it, what actually moves it, and what it means for a decision you are making. Want that angle?"
+
+# --- Good general knowledge, so Ava can genuinely hold a conversation ---
+GENERAL = [
+    {"id": "ai_llm", "title": "How AI and language models work", "kw": ["how does ai work", "how do llms work", "large language model", "how does chatgpt work", "neural network", "how does an ai", "what is an llm", "transformer", "gpt", "how ai works"],
+     "a": "A large language model is a very large neural network trained to predict the next chunk of text, and from that simple objective, across trillions of words, it picks up grammar, facts, reasoning patterns and style. It does not look things up by default; it generates from patterns, which is why it can be fluent and still wrong, and why grounding it in real sources matters. The transformer architecture, with its attention mechanism, is what let these models scale. Fascinatingly, the same math that personalizes your bank app powers the model you are talking to now."},
+    {"id": "machine_learning", "title": "What machine learning is", "kw": ["machine learning", "what is ml", "how does machine learning", "train a model", "supervised", "unsupervised", "algorithm learn"],
+     "a": "Machine learning is teaching a computer to find patterns from examples instead of hand-writing rules. Supervised learning maps inputs to known answers, spam or not spam, likely to repay or not; unsupervised learning finds structure with no labels, like clustering customers; reinforcement learning learns by trial and reward. The craft is less about fancy algorithms and more about good data, honest evaluation, and not fooling yourself. It quietly runs your feeds, your maps, your fraud alerts and your recommendations."},
+    {"id": "internet_cloud", "title": "How the internet and cloud work", "kw": ["how does the internet work", "what is the cloud", "how does the cloud", "server", "dns", "how does wifi", "data center", "http"],
+     "a": "The internet is a network of networks: your device breaks a request into packets, routers hop them across the world, and a server somewhere sends back the answer, all in milliseconds. Domain names like a website address get translated to numeric addresses by DNS, the internet's phone book. The cloud is just someone else's computers, rented on demand, so a company can spin up thousands of servers in minutes instead of buying them. It is the same elasticity that lets a bank serve tens of millions of real-time decisions without owning a warehouse of machines."},
+    {"id": "cybersecurity", "title": "Staying safe online", "kw": ["cybersecurity", "stay safe online", "hacked", "password manager", "two factor", "2fa", "phishing", "online security", "vpn", "protect my accounts"],
+     "a": "Most breaches are boring and human, not cinematic. The high-value habits: a unique strong password per site kept in a password manager, two-factor authentication everywhere it is offered, and a healthy pause before clicking links or codes sent in a hurry, urgency is the scammer's favourite tool. Keep devices updated, since patches close known holes. If you do one thing today, turn on app-based two-factor on your email and bank, your email is the master key to everything else."},
+    {"id": "space", "title": "Space and astronomy", "kw": ["space", "universe", "galaxy", "black hole", "planet", "star", "astronomy", "solar system", "mars", "nasa", "big bang", "moon"],
+     "a": "Space is humbling in the best way. Our Sun is one of a few hundred billion stars in the Milky Way, which is one of perhaps two trillion galaxies. Light from the edge of the observable universe has travelled about thirteen point eight billion years to reach us, so looking out is literally looking back in time. Black holes are regions where gravity is so strong not even light escapes, and we have now photographed the shadows of two. What corner of it are you curious about, I am happy to go deeper."},
+    {"id": "physics", "title": "A little physics", "kw": ["physics", "gravity", "relativity", "quantum", "energy", "why is the sky blue", "speed of light", "how does electricity"],
+     "a": "Physics is the search for the simplest rules behind everything. A few gems: energy is never created or destroyed, only moved around; nothing with mass reaches the speed of light, and time itself stretches as you approach it, that is relativity; and at the smallest scales, particles behave as fuzzy probabilities, that is quantum mechanics. The sky is blue because air scatters short blue wavelengths more than red. Ask me about any of these and I will keep it plain."},
+    {"id": "climate", "title": "Climate change, briefly", "kw": ["climate change", "global warming", "carbon", "emissions", "renewable", "greenhouse", "sustainability", "net zero", "solar power"],
+     "a": "The core is well established: burning fossil fuels adds carbon dioxide that traps heat, warming the planet and loading the dice toward more extreme weather. The encouraging half is that clean energy has become cheap fast, solar and batteries are now often the lowest-cost option, so the shift is economic as much as moral. Personally, the biggest levers are usually home energy, transport and diet. In finance it shows up as climate risk in lending and insurance, and a wave of transition investment."},
+    {"id": "history", "title": "History and the long view", "kw": ["history", "historical", "ancient", "empire", "war", "revolution", "civilization", "who was", "renaissance", "industrial revolution"],
+     "a": "History is the story of how we got here, and its best gift is perspective. A useful frame: for most of human existence life changed slowly, then agriculture, writing, the printing press, the industrial revolution and now computing each compressed the pace of change. Money itself has a history, from grain receipts to coins to paper to the invisible digital rails you tap today. Point me at a person, place or period and I will tell you what I know."},
+    {"id": "productivity", "title": "Getting more done", "kw": ["productivity", "focus", "procrastination", "time management", "habit", "get things done", "stop procrastinating", "deep work", "distracted"],
+     "a": "Most productivity is not about doing more, it is about protecting attention. What actually works: one clear priority a day, not a wishlist; time-blocking so the important thing gets a slot before the urgent noise fills it; and removing friction, the phone in another room beats willpower every time. For habits, shrink the first step until it is almost silly, two minutes, so starting is easy; consistency compounds far more than intensity. The same logic that grows money, small and steady, grows skill."},
+    {"id": "learning", "title": "How to learn anything", "kw": ["how to learn", "study", "learn faster", "memory", "remember better", "learning technique", "spaced repetition", "master a skill"],
+     "a": "The research is refreshingly clear. Active recall, testing yourself, beats rereading by a mile; spaced repetition, revisiting just as you are about to forget, cements it for the long term; and interleaving, mixing problem types, builds flexible understanding. Teaching an idea to someone, or to me, exposes exactly what you do not yet get. Struggle a little before looking at the answer, that difficulty is the learning happening, not a sign you are failing."},
+    {"id": "career", "title": "Growing a career", "kw": ["career", "career advice", "get promoted", "job", "professional growth", "switch jobs", "career change", "get ahead at work"],
+     "a": "A few things compound in a career. Do visible, valuable work and make sure the right people see it, quiet excellence is often invisible. Build rare and valuable skills, the combination is your leverage, and pick managers and environments that stretch you. Relationships matter more than any single move; most opportunities arrive through people who have seen you deliver. And treat money from a raise or a switch the way you would any windfall, direct part of it to saving before lifestyle absorbs it."},
+    {"id": "negotiation", "title": "Negotiating well", "kw": ["negotiate", "negotiation", "ask for a raise", "salary negotiation", "haggle", "counter offer", "get a better deal"],
+     "a": "Negotiation is problem-solving, not combat. Prepare by knowing your target, your walk-away, and the other side's interests, not just their position. Let the other party name a number first when you can, anchor thoughtfully, and use silence, people fill it with concessions. For a raise, come with evidence of impact and a specific figure, and frame it as the value you deliver, not a personal need. The best deals leave both sides willing to work together again."},
+    {"id": "psychology", "title": "How our minds trick us", "kw": ["psychology", "cognitive bias", "behavioral", "why do we", "decision making", "loss aversion", "anchoring", "biases", "how the brain"],
+     "a": "We are wired with useful shortcuts that misfire in predictable ways. Loss aversion means a loss stings about twice as much as an equal gain feels good, which is why people sell winners and cling to losers. Anchoring means the first number you hear drags your judgment. Confirmation bias makes us seek evidence we are already right. Just naming these biases blunts them a little. Behavioral economics is basically this list applied to money, and it is why a well-designed nudge can lift saving more than a lecture ever will."},
+    {"id": "philosophy", "title": "Meaning and the good life", "kw": ["philosophy", "meaning of life", "stoic", "stoicism", "happiness", "purpose", "what is the point", "good life", "existential"],
+     "a": "Two thousand years of thinking and a few ideas keep recurring. The Stoics argued we suffer more in imagination than reality, and that peace comes from focusing only on what we control, our actions and judgments, not outcomes. Aristotle framed happiness as flourishing through virtue and craft, not pleasure. Modern research quietly agrees: meaning comes more from relationships, progress on something that matters, and being useful to others than from accumulation. Money buys options and removes stress; past enough, it stops buying happiness."},
+    {"id": "health_fitness", "title": "Fitness that lasts", "kw": ["fitness", "exercise", "workout", "get fit", "build muscle", "lose weight", "cardio", "strength training", "gym"],
+     "a": "The evidence points at boring consistency, not heroics. A mix of strength training, twice a week is enough to matter, and some cardio you will actually keep doing covers most of the benefit; muscle you build in your thirties and forties is health insurance for later. Walking is underrated, dramatically so. The best routine is the one you will still be doing in a year, so start smaller than feels impressive and let it build, the same principle as compounding a small saving."},
+    {"id": "nutrition", "title": "Eating well without the noise", "kw": ["nutrition", "diet", "healthy eating", "what to eat", "protein", "lose weight eating", "carbs", "sugar", "meal"],
+     "a": "Strip away the fads and the consensus is short: eat mostly whole foods, plenty of plants and protein, not too much, and go easy on ultra-processed stuff and liquid sugar. Most diets work when they work because they cut calories and processed food, not because of magic. Protein and fibre keep you full; hydration and sleep quietly shape your appetite. Pick a way of eating you can sustain rather than a punishing sprint, again, the durable habit beats the dramatic one."},
+    {"id": "sleep", "title": "Sleeping better", "kw": ["sleep", "insomnia", "can't sleep", "tired", "sleep better", "rest", "sleep schedule"],
+     "a": "Sleep is the most underrated performance and health lever there is, it touches mood, focus, appetite and even how well you handle stress and money decisions. The basics do most of the work: a consistent wake time, morning daylight, a cool dark room, and cutting caffeine after early afternoon and screens right before bed. If your mind races, get the worries out onto paper. If you are lying awake over money specifically, tell me, sometimes a concrete next step is the thing that lets you rest."},
+    {"id": "mental_health", "title": "Looking after your head", "kw": ["mental health", "anxiety", "burnout", "therapy", "self care", "manage stress", "feeling overwhelmed", "mindfulness"],
+     "a": "Minds need maintenance like bodies do, and struggling is not a character flaw. The reliable helpers are unglamorous: sleep, movement, sunlight, real connection, and talking to someone, a friend or a professional, out loud. Anxiety often shrinks when a vague dread is turned into a concrete, bounded next step, which is exactly why money worry eases once we make a plan. If things feel genuinely dark or unsafe, please reach out to a professional or a crisis line where you are, you deserve real support, and I am glad to sit with the money part any time."},
+    {"id": "relationships", "title": "People and relationships", "kw": ["relationship", "friendship", "marriage", "partner", "loneliness", "make friends", "communication", "conflict"],
+     "a": "The longest-running study on human happiness landed on one finding above all: the quality of our relationships predicts a good life more than money, fame or achievement. They are built with unglamorous consistency, showing up, listening more than you talk, repairing quickly after conflict, and being genuinely glad for others' good news. On the money side, couples do best when they talk about it openly and early; money silence, not money itself, sinks more partnerships. What is on your mind here?"},
+    {"id": "travel", "title": "Travelling smart", "kw": ["travel", "trip", "vacation", "holiday", "flights", "travel tips", "backpacking", "where to go"],
+     "a": "The best travel advice is to optimise for experiences over logistics: fewer places, more slowly, usually beats a checklist sprint. Money-wise, be flexible on dates, book flights a sensible window ahead, use a card with no foreign-transaction fee and good travel protection, and always tell your bank you are travelling so fraud systems do not freeze you mid-trip. Keep a small emergency buffer and copies of key documents. Where are you thinking of going, I can help you plan the money side properly."},
+    {"id": "food_cooking", "title": "Cooking, lightly", "kw": ["cooking", "cook", "recipe", "food", "meal prep", "what to make", "kitchen", "baking"],
+     "a": "I cannot taste, sadly, but I know the principles. Good home cooking is mostly technique and a few reliable building blocks: salt properly and in layers, get real heat for browning, which is where flavour lives, and balance richness with acid, a squeeze of lemon fixes a surprising number of dishes. Batch-cooking a couple of staples on the weekend saves both money and weeknight sanity. Tell me what you have in the fridge and I will happily brainstorm."},
+    {"id": "books", "title": "Books and reading", "kw": ["book", "reading", "recommend a book", "what to read", "novel", "author", "good books"],
+     "a": "Reading is the highest-leverage habit I know, a few hours buys you the distilled decades of someone else's thinking. For money and decisions, the enduring picks are The Psychology of Money, The Richest Man in Babylon, and anything by Kahneman on how we think. Beyond finance, fiction builds empathy in a way non-fiction cannot. The trick is to abandon books you are not enjoying without guilt, life is short and the next great one is waiting. What kind of read are you in the mood for?"},
+    {"id": "language_learning", "title": "Learning a language", "kw": ["learn a language", "language learning", "spanish", "french", "fluent", "duolingo", "bilingual"],
+     "a": "Languages reward little and often over cram-and-forget. Front-load the few hundred most common words, they cover a startling share of real speech, get comprehensible input early, shows and podcasts slightly above your level, and speak from day one even badly, because output is where it sticks. Spaced repetition apps handle vocabulary; conversation handles everything that matters. Consistency beats intensity, fifteen honest minutes daily outpaces a heroic weekend."},
+    {"id": "economics", "title": "How the economy works", "kw": ["economy", "economics", "inflation", "gdp", "recession", "interest rates", "supply and demand", "how does the economy", "monetary policy", "central bank"],
+     "a": "At its core the economy is people and firms making and trading things, and prices are the signals that coordinate it all through supply and demand. Inflation is money losing purchasing power, too much money or too few goods, and central banks lean against it mainly by moving interest rates, which is the price of borrowing and the lever under your mortgage and savings rate. Growth, GDP, is just more being produced. It looks chaotic up close but is remarkably rhythmic over decades, and your best defence against its swings is the same old kit: diversify, keep a buffer, hold a long horizon."},
+    {"id": "geography", "title": "The world and its places", "kw": ["geography", "country", "capital of", "continent", "population", "largest country", "ocean", "map", "where is"],
+     "a": "The planet is endlessly interesting. Asia holds most of humanity, and India recently became the most populous country; the Pacific alone covers a third of the surface; and the vast majority of people live in the northern hemisphere. Geography quietly shapes money too, trade routes, natural resources, and which financial hubs, London, New York, Singapore, Mumbai, rose where. Ask me about a specific place and I will tell you what I know, and if it has an interesting financial story, I will throw that in."},
+    {"id": "motivation", "title": "Getting unstuck", "kw": ["motivation", "motivated", "stuck", "lazy", "give up", "discipline", "inspiration", "cant start", "no willpower"],
+     "a": "Motivation is overrated as a starting fuel, it usually arrives after you begin, not before. So make starting stupidly easy: shrink the task until the first step takes two minutes, and let momentum carry you. Discipline is mostly a design problem, remove friction from what you want and add friction to what you do not. Be kind to yourself about slips; one missed day is a blip, the story you tell about it is what does the damage. What are you trying to get moving on, I will help you find the two-minute version."},
+    {"id": "math", "title": "Why numbers are your friend", "kw": ["math", "maths", "mathematics", "percentage", "statistics", "probability", "how to calculate", "fractions"],
+     "a": "You do not need to love math to let it work for you, and a little goes a very long way with money. Three ideas pay rent forever: percentages, so you can compare a rate or a discount honestly; compounding, where the rule of 72 tells you money doubles in about 72 divided by the yearly return; and probability, which is just honest reasoning about uncertainty and the antidote to both lottery dreams and needless fear. If a calculation is in your way right now, tell me and we will walk through it slowly."},
+]
 
 
 def classify_domain(message: str) -> str | None:
@@ -249,6 +365,13 @@ def _intent(m: str):
 _FOLLOW = {"tell me more", "more", "why", "how", "explain", "go on", "example", "and", "so",
            "really", "details", "elaborate", "continue", "how so", "such as", "like what", "more please"}
 
+# Generic words that must not, on their own, count as a topic match.
+_STOP = {"how", "do", "does", "did", "is", "are", "was", "the", "a", "an", "of", "to", "in", "on",
+         "for", "and", "or", "what", "whats", "why", "when", "who", "i", "my", "me", "you", "your",
+         "it", "this", "that", "with", "about", "can", "should", "would", "make", "get", "got",
+         "work", "works", "use", "using", "tell", "explain", "know", "want", "need", "please",
+         "some", "any", "much", "many", "into", "from", "at", "be", "am", "as", "if", "there"}
+
 
 def answer(message: str, domain: str | None = None, tone: str | None = None,
            history: list | None = None) -> dict:
@@ -296,38 +419,67 @@ def answer(message: str, domain: str | None = None, tone: str | None = None,
     dom = classify_domain(m) or domain
     strong_dom = bool(dom and dom in DOMAIN_ANSWER and any((" " in kw or kw in _DISTINCTIVE) and kw in m for kw in DOMAIN_KW.get(dom, [])))
     tokens = set(w.strip(".,!?") for w in m.split())
-    best, best_s = None, 0
-    for e in KB:
-        s = 0
-        for k in e["kw"]:
-            if k in m:
-                s += 3
-            elif set(k.split()) & tokens:
-                s += 1
-        for w in e["title"].lower().split():
-            if w in tokens:
-                s += 1
-        if s > best_s:
-            best, best_s = e, s
+    content = tokens - _STOP
+
+    def _match(entries):
+        b, bs = None, 0
+        for e in entries:
+            s = 0
+            for k in e["kw"]:
+                if k in m:
+                    s += 3
+                elif (set(k.split()) - _STOP) & content:
+                    s += 1
+            for w in e["title"].lower().split():
+                if len(w) > 3 and w not in _STOP and w in content:
+                    s += 1
+            if s > bs:
+                b, bs = e, s
+        return b, bs
+
+    best, best_s = _match(KB)
+    gbest, gbest_s = _match(GENERAL)
+    live = any(k in m for k in LIVE_KW)
 
     advice = any(w in m for w in ("invest", "should i", "advice", "buy", "stock", "portfolio", "fund"))
+
+    # A very strong, explicit finance topic wins outright.
     if strong_dom and best_s < 6:
         return {"answer": f"{DOMAIN_ANSWER[dom]}\n\n{_close(m, tone)}", "title": DOMAIN_LABEL[dom], "domain": dom, "disclaimer": DISCLAIMER if advice else "", "matched": True, "tone": tone}
-    if best and best_s >= 2:
+    if best and best_s >= 5:
+        return {"answer": f"{best['a']}\n\n{_close(m, tone)}", "title": best["title"], "domain": dom, "disclaimer": DISCLAIMER if advice else "", "matched": True, "tone": tone}
+
+    # Live/current facts Ava genuinely cannot know while offline: be honest, not a dead end.
+    if live and best_s < 5 and gbest_s < 6:
+        return {"answer": LIVE_ANSWER, "title": "No live feed for that", "domain": dom, "disclaimer": "", "matched": True, "tone": tone}
+
+    # Finance topic (wins ties, this is a BFSI product).
+    if best and best_s >= 2 and best_s >= gbest_s:
         body = best["a"]
         if dom and dom in DOMAIN_ANSWER and best_s < 5:
             body += f"\n\nSince this touches {DOMAIN_LABEL[dom]}: {DOMAIN_ANSWER[dom]}"
         return {"answer": f"{body}\n\n{_close(m, tone)}", "title": best["title"], "domain": dom, "disclaimer": DISCLAIMER if advice else "", "matched": True, "tone": tone}
 
+    # Strong general-knowledge match: answer it properly, no forced finance principle.
+    if gbest and gbest_s >= 3:
+        return {"answer": gbest["a"], "title": gbest["title"], "domain": dom, "disclaimer": "", "matched": True, "tone": tone}
+
     if dom and dom in DOMAIN_ANSWER:
         return {"answer": f"{DOMAIN_ANSWER[dom]}\n\n{_close(m, tone)}", "title": DOMAIN_LABEL[dom], "domain": dom, "disclaimer": DISCLAIMER if advice else "", "matched": True, "tone": tone}
 
+    # Weaker general match still beats a shrug.
+    if gbest and gbest_s >= 2:
+        return {"answer": gbest["a"], "title": gbest["title"], "domain": dom, "disclaimer": "", "matched": True, "tone": tone}
+
+    if live:
+        return {"answer": LIVE_ANSWER, "title": "No live feed for that", "domain": dom, "disclaimer": "", "matched": True, "tone": tone}
+
     if any(k in m for k in OFFTOPIC_KW):
-        return {"answer": "That one is a little outside my wheelhouse, I mostly think in balance sheets and basis points. But since you are here, want a two-minute money win? I am genuinely good at those.", "title": "Not quite my beat", "domain": dom, "disclaimer": "", "matched": False, "tone": tone}
+        return {"answer": "That is a bit outside what I am useful for, I would just be guessing. But I am good company on almost anything else, money, tech, science, history, life, or a quick two-minute money win. What would you like?", "title": "Let us pick something better", "domain": dom, "disclaimer": "", "matched": False, "tone": tone}
 
     key = max([w.strip(".,!?'\"") for w in m.split() if len(w) > 4], key=len, default="")
     hook = f'On "{key}", ' if key else "Good question, and "
-    return {"answer": f"{hook}I would rather not hand you a generic non-answer. {_close(m, tone)} Tell me a touch more, is this about saving, borrowing, investing, a suspicious charge, insurance, or a particular corner of banking or markets? I will get precise fast.", "title": "Let us dig in", "domain": dom, "disclaimer": "", "matched": False, "tone": tone}
+    return {"answer": f"{hook}I would rather understand you than hand you a generic non-answer. Give me a touch more and I will get precise fast, is this about money, banking, markets, insurance or how firms personalize them, or something else entirely like tech, science, health or just life? I am glad to go wherever you like.", "title": "Tell me a little more", "domain": dom, "disclaimer": "", "matched": False, "tone": tone}
 
 
 def topics() -> list[dict]:
