@@ -352,12 +352,33 @@ def _identity(m: str, tone: str):
     return None
 
 
+# Standalone greetings, including elongated ones: hii, heyy, hellooo, yo, good morning.
+_GREET_RE = re.compile(
+    r"^[\s]*(hi+|hey+|hello+|helo+|heya+|hiya+|yo+|hola+|sup+|namaste+|howdy+|greetings+|wassup+|"
+    r"good\s*(morning|evening|afternoon|day))"
+    r"([\s,!.~-]+(there|ava|friend|all|everyone|folks|mate|buddy|guys))?[\s!.,~]*$", re.I)
+
+# Same greeting words as a leading prefix, so we can peel them off a longer question.
+_GREET_PREFIX = re.compile(
+    r"^[\s]*(hi+|hey+|hello+|helo+|heya+|hiya+|yo+|hola+|sup+|namaste+|howdy+|wassup+|"
+    r"good\s*(morning|evening|afternoon|day))"
+    r"([\s,!.~-]+(there|ava|friend|mate|buddy))?[\s,!.~-]+", re.I)
+
+
+def _dedupe(m: str) -> str:
+    # Collapse any character repeated 3+ times so "byeee", "thanksss", "loveee" still match.
+    return re.sub(r"(.)\1{2,}", r"\1", m)
+
+
 def _intent(m: str):
+    if _GREET_RE.match(m):
+        return "smalltalk", SMALLTALK[0][1]
+    mv = _dedupe(m)
     for kws, replies in SMALLTALK:
-        if any(re.search(r"\b" + re.escape(k) + r"\b", m) for k in kws):
+        if any(re.search(r"\b" + re.escape(k) + r"\b", mv) for k in kws):
             return "smalltalk", replies
     for kws, reply in PERSONAL:
-        if any(k in m for k in kws):
+        if any(k in mv for k in kws):
             return "personal", reply
     return None, None
 
@@ -379,6 +400,13 @@ def answer(message: str, domain: str | None = None, tone: str | None = None,
     tone = tone if tone in ("witty", "professional", "genz") else "witty"
     if not m:
         return {"answer": "I am here whenever you are ready. What is on your mind?", "title": "Ava", "domain": domain, "disclaimer": "", "matched": True, "tone": tone}
+
+    # "hi, how do I invest?" is a real question with a greeting on the front. If a greeting
+    # is followed by genuine content, answer the content; a bare greeting stays a greeting.
+    if not _GREET_RE.match(m):
+        stripped = _GREET_PREFIX.sub("", m, count=1).strip()
+        if stripped and stripped != m and any(len(w.strip(".,!?")) > 3 for w in stripped.split()):
+            m = stripped
 
     if history and (m.rstrip("?.! ") in _FOLLOW or (len(m.split()) <= 3 and any(w in m for w in _FOLLOW))):
         prev = None
