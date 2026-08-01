@@ -133,6 +133,26 @@ svg.i{width:20px;height:20px;stroke:currentColor;fill:none;stroke-width:1.7;stro
   .crumb{display:none}
 }
 .pane{display:none}.pane.on{display:block;animation:rise .45s ease both}
+/* chat history overlay */
+.histhdr{display:flex;align-items:flex-start;justify-content:space-between;gap:12px;margin-bottom:6px}
+.histcloud{display:flex;align-items:center;gap:6px;font-size:12px;color:var(--good);font-weight:600;margin-top:5px}
+.histempty{text-align:center;padding:34px 10px;color:var(--muted);display:flex;flex-direction:column;align-items:center;gap:10px}
+.histempty p{margin:0;font-size:13.5px;line-height:1.6}
+.histrow{display:flex;align-items:center;gap:12px;width:100%;text-align:left;background:var(--soft);border:1px solid var(--line);border-radius:12px;padding:11px 12px;margin-bottom:8px;cursor:pointer;font:inherit;transition:.14s}
+.histrow:hover{border-color:var(--orange);background:var(--orange-50)}
+.histrow .hicn{width:34px;height:34px;flex:none;border-radius:9px;background:var(--panel);border:1px solid var(--line);display:grid;place-items:center;color:var(--orange)}
+.histrow .hmeta{flex:1;min-width:0;display:flex;flex-direction:column;gap:2px}
+.histrow .hmeta b{font-weight:700;font-size:14px;color:var(--ink);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.histrow .hmeta small{font-size:12px;color:var(--muted)}
+.histrow .hdel{width:30px;height:30px;flex:none;border-radius:8px;display:grid;place-items:center;color:var(--muted)}
+.histrow .hdel:hover{background:var(--bad-50);color:var(--bad)}
+/* Azure-style acrylic: soft translucent depth on the chrome */
+@supports (backdrop-filter:blur(1px)){
+  .appbar{background:color-mix(in srgb,var(--panel) 82%,transparent);backdrop-filter:saturate(1.5) blur(12px)}
+  .ovl{backdrop-filter:blur(3px)}
+}
+.appbar{box-shadow:0 1px 0 var(--line),0 6px 20px -18px rgba(15,20,30,.35)}
+.navitem.on{box-shadow:0 1px 2px rgba(241,89,42,.12)}
 .panel{background:var(--panel);border:1px solid var(--line);border-radius:var(--r);box-shadow:var(--shadow)}
 .pad{padding:20px}
 .row{display:grid;gap:18px}.two{grid-template-columns:1fr 1fr}
@@ -394,9 +414,11 @@ pre{background:var(--dark);color:#D7DCE5;border-radius:11px;padding:14px;overflo
 </div></div>
 
 <div id="hist" class="ovl" onclick="if(event.target===this)this.classList.remove('on')"><div class="ovlbox">
-  <h2 style="text-align:center">Your chats with Ava</h2>
-  <p class="hint" style="text-align:center">Saved privately on this device. Nothing leaves your browser.</p>
-  <div id="histlist" style="max-height:52vh;overflow:auto;margin:14px 0"></div>
+  <div class="histhdr">
+    <div><h2 style="margin:0">Your chats with Ava</h2><div class="histcloud"><span class="pdot" style="width:6px;height:6px"></span><span id="histcloud">Synced to the cloud</span></div></div>
+    <button class="btn" style="padding:9px 14px" onclick="closeHistory();newChat()"><svg class="i" viewBox="0 0 24 24" style="width:15px;height:15px"><path d="M12 5v14M5 12h14"/></svg>New chat</button>
+  </div>
+  <div id="histlist" style="max-height:54vh;overflow:auto;margin:6px 0 14px"></div>
   <button class="btn ghost" style="width:100%;justify-content:center" onclick="clearHistory()">Clear all chats</button>
 </div></div>
 
@@ -634,6 +656,8 @@ async function cSend(){
 }
 
 // --- Ava chat history (private, on-device) ---
+function chatOwner(){if(CUST&&CUST.loggedIn&&CUST.username)return'u:'+CUST.username;
+  let d=localStorage.getItem('aria-device');if(!d){d=Math.random().toString(36).slice(2,10);localStorage.setItem('aria-device',d);}return'g:'+d;}
 function loadChats(){try{return JSON.parse(localStorage.getItem('aria-chats')||'[]')}catch(e){return[]}}
 function saveChats(a){localStorage.setItem('aria-chats',JSON.stringify(a.slice(0,50)))}
 function persistConvo(){
@@ -642,29 +666,49 @@ function persistConvo(){
   const chats=loadChats();
   if(!CONVO_ID)CONVO_ID='c'+Date.now();
   const first=(msgs.find(m=>m.role==='user')||{}).text||'Chat with Ava';
-  const rec={id:CONVO_ID,title:first.slice(0,60),ts:Date.now(),msgs:msgs};
+  const title=first.slice(0,60);
+  const rec={id:CONVO_ID,title:title,ts:Date.now(),msgs:msgs};
   const i=chats.findIndex(c=>c.id===CONVO_ID);
   if(i>=0)chats[i]=rec;else chats.unshift(rec);
   saveChats(chats);
+  // cloud sync, best-effort (works across devices for a signed-in customer)
+  fetch('/chats',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({id:CONVO_ID,owner:chatOwner(),title:title,messages:msgs})}).catch(function(){});
 }
-function newChat(){CONVO_ID=null;cgreet();}
-function histWhen(ts){const d=Math.floor((Date.now()-ts)/1000);
+function newChat(){CONVO_ID=null;cgreet();if($('#cgoal'))$('#cgoal').focus();}
+function histWhen(ts){if(!ts)return'';const d=Math.floor((Date.now()-ts)/1000);
   if(d<60)return'just now';if(d<3600)return Math.floor(d/60)+'m ago';
   if(d<86400)return Math.floor(d/3600)+'h ago';return new Date(ts).toLocaleDateString();}
-function openHistory(){const chats=loadChats(),box=$('#histlist');
-  if(!chats.length){box.innerHTML='<p class="hint" style="text-align:center;padding:18px 0">No saved chats yet. Once you talk to Ava, your conversations show up here.</p>';}
-  else{box.innerHTML=chats.map(c=>`<div onclick="restoreChat('${c.id}')" style="display:flex;align-items:center;gap:10px;padding:11px 12px;border:1px solid var(--line);border-radius:10px;margin-bottom:8px;cursor:pointer">
-    <div style="flex:1;min-width:0"><div style="font-weight:700;font-size:14px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${esc(c.title)}</div><div style="font-size:12px;color:var(--muted);margin-top:2px">${histWhen(c.ts)} · ${c.msgs.length} messages</div></div>
-    <button class="chip" onclick="event.stopPropagation();deleteChat('${c.id}')">Delete</button></div>`).join('');}
-  $('#hist').classList.add('on');}
+function renderHistList(chats,cloud){const box=$('#histlist');if(!box)return;
+  if(!chats.length){box.innerHTML='<div class="histempty"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" style="width:26px;height:26px;opacity:.5"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z" stroke-linecap="round" stroke-linejoin="round"/></svg><p>No saved chats yet.<br>Once you talk to Ava, your conversations appear here.</p></div>';return;}
+  box.innerHTML=chats.map(function(c){return `<button class="histrow" onclick="restoreChat('${c.id}')">
+    <span class="hicn"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" style="width:16px;height:16px"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z" stroke-linecap="round" stroke-linejoin="round"/></svg></span>
+    <span class="hmeta"><b>${esc(c.title||'Chat with Ava')}</b><small>${histWhen(c.ts)}${c.count?(' · '+c.count+' messages'):''}</small></span>
+    <span class="hdel" onclick="event.stopPropagation();deleteChat('${c.id}')" title="Delete"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" style="width:15px;height:15px"><path d="M4 7h16M9 7V5a2 2 0 0 1 2-2h2a2 2 0 0 1 2 2v2M7 7l1 12a2 2 0 0 0 2 2h4a2 2 0 0 0 2-2l1-12" stroke-linecap="round" stroke-linejoin="round"/></svg></span></button>`;}).join('');
+  const tag=$('#histcloud');if(tag)tag.textContent=cloud?'Synced to the cloud':'Saved on this device';}
+async function openHistory(){$('#hist').classList.add('on');const box=$('#histlist');
+  if(box)box.innerHTML='<p class="hint" style="text-align:center;padding:22px 0">Loading your chats…</p>';
+  let chats=null,cloud=false;
+  try{const r=await fetch('/chats?owner='+encodeURIComponent(chatOwner()));if(r.ok){const j=await r.json();chats=(j.chats||[]).map(function(c){return{id:c.id,title:c.title,ts:(c.updated||0)*1000,count:c.count};});cloud=true;}}catch(e){}
+  if(!chats)chats=loadChats().map(function(c){return{id:c.id,title:c.title,ts:c.ts,count:(c.msgs||[]).length};});
+  renderHistList(chats,cloud);}
 function closeHistory(){$('#hist').classList.remove('on')}
-function restoreChat(id){const c=loadChats().find(x=>x.id===id);if(!c)return;
-  CONVO_ID=c.id;CHAT_HISTORY=c.msgs.slice();
+async function restoreChat(id){let msgs=null;
+  try{const r=await fetch('/chats/'+encodeURIComponent(id)+'?owner='+encodeURIComponent(chatOwner()));if(r.ok){const j=await r.json();msgs=j.messages;}}catch(e){}
+  if(!msgs){const c=loadChats().find(function(x){return x.id===id;});if(c)msgs=c.msgs;}
+  if(!msgs)return;
+  CONVO_ID=id;CHAT_HISTORY=msgs.slice();
   const th=$('#cthread');if(!th)return;th.innerHTML='';
-  c.msgs.forEach(m=>cbubble(m.text,m.role==='user'?'user':'bot'));
+  msgs.forEach(function(m){cbubble(m.text,m.role==='user'?'user':'bot');});
   closeHistory();}
-function deleteChat(id){saveChats(loadChats().filter(c=>c.id!==id));if(CONVO_ID===id)CONVO_ID=null;openHistory();}
-function clearHistory(){if(!confirm('Delete all saved chats on this device? This cannot be undone.'))return;localStorage.removeItem('aria-chats');CONVO_ID=null;openHistory();}
+async function deleteChat(id){saveChats(loadChats().filter(function(c){return c.id!==id;}));
+  try{await fetch('/chats/'+encodeURIComponent(id)+'?owner='+encodeURIComponent(chatOwner()),{method:'DELETE'});}catch(e){}
+  if(CONVO_ID===id)CONVO_ID=null;openHistory();}
+async function clearHistory(){if(!confirm('Delete all your saved chats? This cannot be undone.'))return;
+  const ids=loadChats().map(function(c){return c.id;});
+  try{const r=await fetch('/chats?owner='+encodeURIComponent(chatOwner()));if(r.ok){const j=await r.json();(j.chats||[]).forEach(function(c){if(ids.indexOf(c.id)<0)ids.push(c.id);});}}catch(e){}
+  localStorage.removeItem('aria-chats');CONVO_ID=null;
+  await Promise.all(ids.map(function(id){return fetch('/chats/'+encodeURIComponent(id)+'?owner='+encodeURIComponent(chatOwner()),{method:'DELETE'}).catch(function(){});}));
+  openHistory();}
 
 function renderAdvisor(pane){
   pane.innerHTML=`<div class="panel pad">${head('advisor','Relationship co-pilot')}

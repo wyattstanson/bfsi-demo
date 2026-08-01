@@ -383,17 +383,14 @@ def _identity(m: str, tone: str):
     return None
 
 
-# Standalone greetings, including elongated ones: hii, heyy, hellooo, yo, good morning.
-_GREET_RE = re.compile(
-    r"^[\s]*(hi+|hey+|hello+|helo+|heya+|hiya+|yo+|hola+|sup+|namaste+|howdy+|greetings+|wassup+|"
-    r"good\s*(morning|evening|afternoon|day))"
-    r"([\s,!.~-]+(there|ava|friend|all|everyone|folks|mate|buddy|guys))?[\s!.,~]*$", re.I)
-
-# Same greeting words as a leading prefix, so we can peel them off a longer question.
-_GREET_PREFIX = re.compile(
-    r"^[\s]*(hi+|hey+|hello+|helo+|heya+|hiya+|yo+|hola+|sup+|namaste+|howdy+|wassup+|"
-    r"good\s*(morning|evening|afternoon|day))"
-    r"([\s,!.~-]+(there|ava|friend|mate|buddy))?[\s,!.~-]+", re.I)
+# Casual address words that ride along with a greeting: "yo gang", "hey dude", "sup fam".
+_ADDR = r"(there|ava|friend|friends|all|everyone|folks|mate|mates|buddy|guys|gang|bro|bros|dude|dudes|man|fam|homie|homies|pal|team|champ|boss|yall|people|peeps)"
+_GREET_CORE = (r"(hi+|hey+|hello+|helo+|heya+|hiya+|yo+|hola+|sup+|namaste+|howdy+|greetings+|"
+               r"wassup+|wasup+|whatup+|what'?s?\s*up|good\s*(morning|evening|afternoon|day))")
+# Standalone greetings, including elongated ("hellooo") and casual-address ("yo gang gang").
+_GREET_RE = re.compile(r"^[\s]*" + _GREET_CORE + r"([\s,!.~-]+" + _ADDR + r")*[\s!.,~]*$", re.I)
+# Same, as a leading prefix, so we can peel it off a longer question.
+_GREET_PREFIX = re.compile(r"^[\s]*" + _GREET_CORE + r"([\s,!.~-]+" + _ADDR + r")*[\s,!.~-]+", re.I)
 
 
 def _dedupe(m: str) -> str:

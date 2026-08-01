@@ -324,6 +324,83 @@ def stats():
 def stream():
     return {'events': list(_events)[:24], 'decisions': list(_recent)[:24]}
 
+class ChatMsg(BaseModel):
+    role: str
+    text: str
+
+    @field_validator('role')
+    @classmethod
+    def _r(cls, v):
+        return 'user' if v == 'user' else 'assistant'
+
+    @field_validator('text')
+    @classmethod
+    def _t(cls, v):
+        return (v or '')[:2000]
+
+
+class ChatSave(BaseModel):
+    id: str
+    owner: str
+    title: str | None = None
+    messages: list[ChatMsg] = []
+
+    @field_validator('id', 'owner')
+    @classmethod
+    def _id(cls, v):
+        return re.sub(r'[^A-Za-z0-9_.:-]', '', (v or ''))[:80]
+
+    @field_validator('title')
+    @classmethod
+    def _ti(cls, v):
+        return (v or 'Chat with Ava')[:80]
+
+
+@app.post('/chats')
+def chat_save(req: ChatSave):
+    if not req.id or not req.owner:
+        raise HTTPException(status_code=400, detail='id and owner required')
+    msgs = [{'role': m.role, 'text': m.text} for m in req.messages][:200]
+    db.execute('DELETE FROM chat_session WHERE id=? AND owner=?', (req.id, req.owner))
+    db.execute('INSERT INTO chat_session (id, owner, title, messages, updated) VALUES (?,?,?,?,?)',
+               (req.id, req.owner, req.title, db.as_json(msgs), time.time()))
+    return {'ok': True, 'id': req.id, 'count': len(msgs)}
+
+
+@app.get('/chats')
+def chat_list(owner: str = ''):
+    owner = re.sub(r'[^A-Za-z0-9_.:-]', '', owner or '')[:80]
+    if not owner:
+        return {'chats': []}
+    rows = db.fetchall('SELECT id, title, messages, updated FROM chat_session WHERE owner=? ORDER BY updated DESC LIMIT 50', (owner,))
+    out = []
+    for cid, title, msgs, updated in rows:
+        try:
+            n = len(db.from_json(msgs) or [])
+        except Exception:
+            n = 0
+        out.append({'id': cid, 'title': title, 'count': n, 'updated': updated})
+    return {'chats': out}
+
+
+@app.get('/chats/{cid}')
+def chat_get(cid: str, owner: str = ''):
+    cid = re.sub(r'[^A-Za-z0-9_.:-]', '', cid or '')[:80]
+    owner = re.sub(r'[^A-Za-z0-9_.:-]', '', owner or '')[:80]
+    row = db.fetchone('SELECT id, title, messages FROM chat_session WHERE id=? AND owner=?', (cid, owner))
+    if not row:
+        raise HTTPException(status_code=404, detail='not found')
+    return {'id': row[0], 'title': row[1], 'messages': db.from_json(row[2]) or []}
+
+
+@app.delete('/chats/{cid}')
+def chat_delete(cid: str, owner: str = ''):
+    cid = re.sub(r'[^A-Za-z0-9_.:-]', '', cid or '')[:80]
+    owner = re.sub(r'[^A-Za-z0-9_.:-]', '', owner or '')[:80]
+    db.execute('DELETE FROM chat_session WHERE id=? AND owner=?', (cid, owner))
+    return {'ok': True}
+
+
 @app.get('/health')
 def health():
     return {'status': 'ok', 'backends': db.backends(), 'parties': (db.fetchone('SELECT COUNT(*) FROM party') or [0])[0], 'audit_rows': audit.count(), 'agent_engine': 'langgraph' if agent._HAS_LANGGRAPH else 'hand-rolled'}
