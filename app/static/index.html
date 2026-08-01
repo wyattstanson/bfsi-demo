@@ -104,7 +104,34 @@ svg.i{width:20px;height:20px;stroke:currentColor;fill:none;stroke-width:1.7;stro
 .seg button.on{background:var(--panel);color:var(--ink);box-shadow:0 1px 2px rgba(0,0,0,.06)}
 .live{margin-left:auto;display:flex;align-items:center;gap:10px;font-size:12.5px;color:var(--muted)}
 .pdot{width:8px;height:8px;border-radius:50%;background:var(--good);box-shadow:0 0 0 3px var(--good-50)}
-.content{padding:26px 0 60px}
+.crumb{font-size:13px;font-weight:600;color:var(--muted)}
+.shell{display:flex;gap:28px;align-items:flex-start;padding:24px 0 60px}
+.sidebar{flex:0 0 214px;position:sticky;top:74px}
+.sidelbl{font-size:11px;text-transform:uppercase;letter-spacing:.08em;color:var(--muted);font-weight:700;padding:0 12px 10px}
+#nav{display:flex;flex-direction:column;gap:4px}
+.navitem{display:flex;align-items:center;gap:11px;width:100%;text-align:left;border:1px solid transparent;background:none;padding:9px 11px;border-radius:11px;font:inherit;color:var(--muted);cursor:pointer;transition:.14s}
+.navitem:hover{background:var(--soft);color:var(--ink)}
+.navitem.on{background:var(--orange-50);color:var(--orange-600);border-color:color-mix(in srgb,var(--orange) 22%,transparent)}
+.navitem .ni{width:34px;height:34px;flex:none;border-radius:9px;background:var(--soft);display:grid;place-items:center;color:var(--muted)}
+.navitem:hover .ni{color:var(--ink)}
+.navitem.on .ni{background:var(--panel);color:var(--orange)}
+.navitem .nx{display:flex;flex-direction:column;line-height:1.18;min-width:0}
+.navitem .nx b{font-weight:700;font-size:13.5px;color:inherit}
+.navitem .nx span{font-size:11px;color:var(--muted);font-weight:600}
+.navitem.on .nx span{color:var(--orange-600);opacity:.85}
+.navitem .nlock{margin-left:auto;opacity:.55}
+.sidetip{margin-top:16px;padding:12px 13px;border:1px dashed var(--line);border-radius:11px;font-size:11.5px;color:var(--muted);line-height:1.5}
+.content{flex:1;min-width:0}
+@media(max-width:900px){
+  .shell{flex-direction:column;gap:14px;padding:16px 0 50px;align-items:stretch}
+  .sidebar{position:static;flex:none;width:100%}
+  .sidelbl,.sidetip{display:none}
+  #nav{flex-direction:row;overflow:auto;gap:6px;padding-bottom:4px;-webkit-overflow-scrolling:touch}
+  .navitem{flex:0 0 auto;width:auto;padding:7px 11px;border:1px solid var(--line)}
+  .navitem .nx span{display:none}
+  .navitem .ni{width:24px;height:24px}
+  .crumb{display:none}
+}
 .pane{display:none}.pane.on{display:block;animation:rise .45s ease both}
 .panel{background:var(--panel);border:1px solid var(--line);border-radius:var(--r);box-shadow:var(--shadow)}
 .pad{padding:20px}
@@ -169,7 +196,7 @@ h2.pt{font-size:19px;font-weight:800;letter-spacing:-.01em;margin:2px 0 3px}
 .composer{display:flex;gap:8px;align-items:center;border:1px solid var(--line);border-radius:11px;padding:5px 5px 5px 13px;background:var(--panel)}
 .composer input{border:0;flex:1;padding:8px 0;background:none;color:var(--ink)}.composer input::placeholder{color:var(--muted)}.composer input:focus{box-shadow:none;outline:none}
 .composer .send{width:38px;height:38px;border-radius:9px;border:0;background:var(--orange);color:#fff;display:grid;place-items:center;cursor:pointer;flex:0 0 auto}
-.pipe{display:flex;align-items:stretch;gap:0;margin-top:4px}
+.pipe{display:flex;align-items:stretch;gap:0;margin-top:4px;overflow-x:auto}
 .node{flex:1;text-align:center;padding:10px 6px;border-radius:10px;transition:.3s}
 .node .n{font-size:10.5px;color:var(--muted);font-weight:700}.node .t{font-weight:700;font-size:13px;margin-top:2px}.node .d{font-size:10.5px;color:var(--muted)}
 .node.active{background:var(--orange-50)}.node.active .t{color:var(--orange-600)}
@@ -316,21 +343,25 @@ pre{background:var(--dark);color:#D7DCE5;border-radius:11px;padding:14px;overflo
 
 <section id="app" class="view">
   <div class="appbar"><div class="wrap in">
-    <div class="tlogo" style="cursor:pointer" onclick="home()">
+    <div class="tlogo" style="cursor:pointer" onclick="nav('')">
       <svg class="tmark" width="26" height="26" viewBox="0 0 100 100"><polygon class="bar" fill="#F1592A" points="14,40 70,40 86,16 30,16"/><polygon class="stem" fill="#F1592A" points="40,40 58,40 58,86 40,86"/></svg>
       <span class="wm" style="font-size:16px">Aria</span></div>
-    <div class="seg" id="seg"></div>
+    <span class="crumb" id="crumb"></span>
     <div class="live"><span class="pdot"></span><span id="livetxt">live</span>
       <button class="tgl" onclick="openGuide()" title="Guide"><svg class="i" viewBox="0 0 24 24" style="width:17px;height:17px"><circle cx="12" cy="12" r="9"/><path d="M9.5 9.5a2.5 2.5 0 114 2c-.9.7-1.5 1.2-1.5 2.5M12 17.5v.01"/></svg></button>
       <button class="tgl" id="audioTgl" onclick="toggleAudio()" title="Audio commentary"></button>
       <button class="tgl" onclick="toggleTheme()" title="Toggle theme"></button></div>
   </div></div>
-  <div class="wrap content">
-    <div class="pane" id="pane-customer"></div>
-    <div class="pane" id="pane-advisor"></div>
-    <div class="pane" id="pane-executive"></div>
-    <div class="pane" id="pane-regulator"></div>
-    <div class="pane" id="pane-developer"></div>
+  <div class="wrap shell">
+    <aside class="sidebar"><div class="sidelbl">Stakeholder views</div><nav id="nav" aria-label="Views"></nav>
+      <div class="sidetip">Each view is the same engine, seen through one stakeholder's eyes.</div></aside>
+    <div class="content">
+      <div class="pane" id="pane-customer"></div>
+      <div class="pane" id="pane-advisor"></div>
+      <div class="pane" id="pane-executive"></div>
+      <div class="pane" id="pane-regulator"></div>
+      <div class="pane" id="pane-developer"></div>
+    </div>
   </div>
 </section>
 
@@ -467,12 +498,15 @@ async function boot(){
   catch(e){META={references:{}};PERSONAS=FALLBACK;}
   try{const d=await api.get('/domains');if(d&&d.length)DOMAINS_LIST=d;}catch(e){}
   try{const c=await api.get('/config');if(c&&c.guest_tries)GUEST_TRIES=c.guest_tries;LLM_LIVE=!!(c&&c.llm);}catch(e){}
-  $('#mgrid').innerHTML=MODES.map(m=>`<div class="mcard ${m.locked?'locked':''}" onclick="pick('${m.id}')">
+  $('#mgrid').innerHTML=MODES.map(m=>`<div class="mcard ${m.locked?'locked':''}" onclick="nav('${m.id}')">
     ${m.locked?`<span class="lock"><svg class="i" viewBox="0 0 24 24" style="width:16px;height:16px">${LOCK}</svg></span>`:''}
     <div class="ic"><svg class="i" viewBox="0 0 24 24"><path d="${m.ic}"/></svg></div>
     <h3>${m.name}</h3><div class="role">${m.role}</div><p>${m.desc}</p></div>`).join('');
-  $('#seg').innerHTML=MODES.map(m=>`<button data-m="${m.id}" onclick="pick('${m.id}')">${m.name}${m.locked?` <svg class="i" viewBox="0 0 24 24" style="width:13px;height:13px;opacity:.7">${LOCK}</svg>`:''}</button>`).join('');
-  countUp();
+  $('#nav').innerHTML=MODES.map(m=>`<button class="navitem" data-m="${m.id}" onclick="nav('${m.id}')">
+    <span class="ni"><svg class="i" viewBox="0 0 24 24" style="width:18px;height:18px"><path d="${m.ic}"/></svg></span>
+    <span class="nx"><b>${m.name}</b><span>${m.role}</span></span>
+    ${m.locked?`<span class="nlock"><svg class="i" viewBox="0 0 24 24" style="width:14px;height:14px">${LOCK}</svg></span>`:''}</button>`).join('');
+  countUp();initRoute();
 }
 function countUp(){document.querySelectorAll('#lstats .v').forEach(n=>{const to=+n.dataset.c,suf=n.dataset.suf||'';n.textContent=to+suf;let i=0;
   const step=()=>{i+=Math.ceil(to/24);if(i>=to){n.textContent=to+suf}else{n.textContent=i+suf;setTimeout(step,26)}};setTimeout(step,60);})}
@@ -494,12 +528,22 @@ function updateTriesBadge(){const b=$('#triesBadge');if(!b)return;if(CUST.logged
 function onAuthChanged(){const d=$('#custDomain');if(d)d.value=CUST.domain||'';updateTriesBadge();
   if($('#cthread')){const who=CUST.loggedIn?(' '+CUST.username):'';const area=CUST.domain?(' I see you are interested in '+(DOMAINS_LIST.find(x=>x.id===CUST.domain)||{}).label+'. '):' ';
     $('#cthread').innerHTML='';cbubble('Welcome back'+who+'. '+area+'Ask me anything, from budgeting and credit to investing, insurance, or a payment. What is on your mind?','bot');}}
-function enter(){pick('customer')}
+function enter(){nav('customer')}
 function home(){stopSpeak();$('#app').classList.remove('on');$('#landing').classList.add('on');window.scrollTo(0,0);stopStream();}
 function pick(id){const m=MODES.find(x=>x.id===id);if(m.locked&&!DEV_OK){openApp(id);renderLock();return;}openApp(id);}
+
+// --- Client-side routing: /concierge, /co-pilot, /control-tower, /assurance, /engine-room ---
+const PATH_OF={customer:'/concierge',advisor:'/co-pilot',executive:'/control-tower',regulator:'/assurance',developer:'/engine-room'};
+const ID_OF={'/concierge':'customer','/co-pilot':'advisor','/control-tower':'executive','/assurance':'regulator','/engine-room':'developer'};
+function renderRoute(id){if(id)pick(id);else home();}
+function nav(id){const p=id?PATH_OF[id]:'/';if(location.pathname!==p)history.pushState({id:id||''},'',p);renderRoute(id);}
+window.addEventListener('popstate',function(e){const id=(e.state&&e.state.id)||ID_OF[location.pathname]||'';renderRoute(id);});
+function initRoute(){const id=ID_OF[location.pathname];if(id){history.replaceState({id:id},'',location.pathname);pick(id);}else{history.replaceState({id:''},'','/');}}
+
 function openApp(id){
   MODE=id;stopSpeak();$('#landing').classList.remove('on');$('#app').classList.add('on');window.scrollTo(0,0);
-  document.querySelectorAll('#seg button').forEach(b=>b.classList.toggle('on',b.dataset.m===id));
+  const cr=$('#crumb');if(cr)cr.textContent=modeName(id)+' · '+modeRole(id);
+  document.querySelectorAll('.navitem').forEach(b=>b.classList.toggle('on',b.dataset.m===id));
   document.querySelectorAll('.pane').forEach(p=>p.classList.remove('on'));
   const pane=$('#pane-'+id);pane.classList.add('on');stopStream();
   if(!localStorage.getItem('aria-guided')){localStorage.setItem('aria-guided','1');setTimeout(openGuide,450);}
@@ -712,7 +756,8 @@ async function regDecide(){
 
 function renderLock(){
   const pane=$('#pane-developer');document.querySelectorAll('.pane').forEach(p=>p.classList.remove('on'));pane.classList.add('on');
-  document.querySelectorAll('#seg button').forEach(b=>b.classList.toggle('on',b.dataset.m==='developer'));
+  const cr=$('#crumb');if(cr)cr.textContent='Engine Room · AI engineer';
+  document.querySelectorAll('.navitem').forEach(b=>b.classList.toggle('on',b.dataset.m==='developer'));
   pane.innerHTML=`<div class="lockwrap"><div class="ic"><svg class="i" viewBox="0 0 24 24" style="width:26px;height:26px">${LOCK}</svg></div>
     <h2 class="pt">Engine Room</h2><p class="hint">Architecture, latency internals and agentic streams. Restricted access.</p>
     <input id="pass" type="password" placeholder="Passcode" onkeydown="if(event.key==='Enter')unlock()"/>
@@ -720,7 +765,7 @@ function renderLock(){
 }
 async function unlock(){
   const p=$('#pass').value;
-  try{const r=await api.post('/dev-auth',{passcode:p});if(r.ok){DEV_OK=true;openApp('developer');}else{$('#perr').textContent='Incorrect passcode.';}}
+  try{const r=await api.post('/dev-auth',{passcode:p});if(r.ok){DEV_OK=true;nav('developer');}else{$('#perr').textContent='Incorrect passcode.';}}
   catch(e){$('#perr').textContent='Still connecting, please try again in a moment.';}
 }
 function refPill(kind){

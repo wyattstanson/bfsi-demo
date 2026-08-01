@@ -327,3 +327,15 @@ def stream():
 @app.get('/health')
 def health():
     return {'status': 'ok', 'backends': db.backends(), 'parties': (db.fetchone('SELECT COUNT(*) FROM party') or [0])[0], 'audit_rows': audit.count(), 'agent_engine': 'langgraph' if agent._HAS_LANGGRAPH else 'hand-rolled'}
+
+# Single-page routes: deep links and refreshes on these paths serve the same app,
+# which then renders the matching view client-side. Declared last so every real
+# API route above wins first.
+_SPA_PATHS = {'concierge', 'co-pilot', 'control-tower', 'assurance', 'engine-room'}
+
+
+@app.get('/{page}')
+def spa(page: str):
+    if page in _SPA_PATHS:
+        return FileResponse(_STATIC / 'index.html', headers={'Cache-Control': 'no-cache, must-revalidate'})
+    raise HTTPException(status_code=404)
