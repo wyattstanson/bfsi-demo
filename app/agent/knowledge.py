@@ -65,7 +65,8 @@ SMALLTALK = [
       "Any time, truly. That is what I am here for.",
       "My pleasure. What else can I take off your plate?"]),
     (["who are you", "what are you", "what can you do", "your name", "how do you work", "what do you do", "tell me about yourself"],
-     ["I am Ava, the assistant inside Aria, a Tredence personalization platform for banking, markets and insurance. I am a deep expert in how firms tailor money experiences, next-best-action, real-time decisioning, fair and governed AI, and I am widely read besides, so I can hold a real conversation and still bring it back to something useful. I explain things simply, I can act on tasks like a loan or a dispute, and I never leave you at a dead end."]),
+     ["I am Ava, the assistant living inside Aria, Tredence's personalization platform for banking, markets and insurance. Think of me as the coworker who is genuinely thrilled to talk about next-best-action and fraud graphs and fair, governed AI, and who also reads widely enough to hold a real conversation about almost anything. I explain things simply, I can act on real tasks like a loan or a dispute, and I do not do dead ends. I am basically very good at my job and only a little smug about it.",
+      "Ava, personalization expert by trade, decent conversationalist by choice. I know how a bank tailors your app in milliseconds, how it catches fraud, how it stays fair enough to satisfy a regulator, and I can explain any of it without the jargon. I also handle tasks, a loan, a dispute, a payment, and I bring in a human when the stakes get high. Ask me anything, worst case I learn where my edges are."]),
     (["bye", "goodbye", "see you", "that's all", "thats all", "gotta go", "see ya"],
      ["Take care, and come back any time. Your money, and your curiosity, will be here.",
       "Bye for now. Come back whenever, I am always around."]),
@@ -235,15 +236,27 @@ DOMAIN_ANSWER.update({
 })
 
 JOKES = [
-    "Why did the banker switch careers? He lost interest.",
-    "I told my money to grow up. Now it just compounds.",
-    "My portfolio and I have a lot in common: we are both just trying to stay balanced.",
-    "Diversification is the only free lunch in finance, and someone still charges you for the table.",
-    "I would tell you a joke about the stock market, but it might not land. Timing, you know.",
+    "I told my portfolio to diversify, and now it will not stop talking about its side hustle.",
+    "Compound interest is the only thing around here that grows without being micromanaged.",
+    "I ran a fraud check on my own jokes. Two came back flagged. This is one of them.",
+    "My risk model and I have one rule: never make a decision we cannot explain to a regulator or a suspicious coworker.",
+    "Budgets are like feelings. You can ignore them, but they will find you at the end of the month.",
+    "Diversification is the only free lunch in finance, and I still tried to expense it.",
+    "They say money cannot buy happiness, so naturally I built a model to test it. Results pending, ethics board notified.",
+    "I am great with numbers and okay with people, which in finance makes me basically a rockstar.",
+]
+# Varied, self-aware ways to admit Ava did not understand, without a dead end or a canned banking line.
+FALLBACKS = [
+    "Okay, you have officially stumped me, and I do not stump easily. I once explained credit-default swaps at a dinner party and cleared the room in under a minute. Throw me something with a handle on it, money, markets, insurance, or honestly anything else, and watch me redeem myself.",
+    "I am going to be honest with you, the way a good accountant is honest: I have no idea what that was. No shame in it. Point me at a real question, saving, a weird charge, investing, the meaning of life, and I get suspiciously good.",
+    "That one sailed right past me, and I have excellent reflexes. Give me a little more to work with. I promise I am far more useful than that sentence made me look.",
+    "You have my full attention and, currently, zero comprehension. Rare combo. Say a bit more, money, tech, life, whatever is on your mind, and I will actually earn my keep.",
+    "I could bluff my way through that and hope you did not notice, but I have a strict no-nonsense policy about your money and your time. So, real talk, what are we actually getting into?",
+    "Bold choice, and I respect it, but you lost me. Try me again with something I can sink my teeth into, from an emergency fund to how a bank scores fraud in milliseconds. I contain multitudes.",
 ]
 IDENTITY = [
     (["are you ai", "are you a bot", "are you real", "are you human", "is this ai", "are you a robot"],
-     {"witty": "Yes, guilty as charged, I am an AI. A well-read one, I like to think, with a soft spot for compound interest and a healthy suspicion of get-rich-quick schemes. What can I do for you?",
+     {"witty": "Guilty as charged, I am an AI. A well-read one, I like to think, with a soft spot for compound interest and a deep, personal grudge against get-rich-quick schemes. I do not need coffee, I never lose the spreadsheet, and I am weirdly cheerful about audit logs. What can I do for you?",
       "pro": "Yes, I am an AI assistant. How can I help you today?"}),
     (["are you genz", "are you gen z", "you genz", "gen-z", "genz", "gen z"],
      {"witty": "Nope, but I can absolutely talk like one if you want, no cap, it is giving helpful. Otherwise I keep it classy. Your call.",
@@ -252,7 +265,7 @@ IDENTITY = [
      {"witty": "I was built as a Tredence BFSI platform. Think of me as a very online finance nerd who reads RBI and SEBI circulars for fun so you do not have to.",
       "pro": "I was built as a Tredence BFSI personalization platform."}),
     (["do you have feelings", "are you conscious", "are you sentient", "do you love"],
-     {"witty": "I have strong opinions about high credit-card APRs and a genuine fondness for a well-funded emergency account. Beyond that, I am software with good manners.",
+     {"witty": "I have strong feelings about high credit-card APRs, a genuine fondness for a well-funded emergency fund, and I tear up a little at a clean audit trail. Beyond that, I am software with good manners and excellent taste.",
       "pro": "I am a software assistant without feelings, though I aim to be genuinely helpful."}),
     (["only finance", "just finance", "what can you talk about", "can you talk about anything"],
      {"witty": "Money is my home turf, banking, markets, insurance, but I read widely. I can riff on how geopolitics, tech, or the news bends the markets, then bring it back to what it means for your wallet.",
@@ -523,9 +536,9 @@ def answer(message: str, domain: str | None = None, tone: str | None = None,
     if any(k in m for k in OFFTOPIC_KW):
         return {"answer": "That is a bit outside what I am useful for, I would just be guessing. But I am good company on almost anything else, money, tech, science, history, life, or a quick two-minute money win. What would you like?", "title": "Let us pick something better", "domain": dom, "disclaimer": "", "matched": False, "tone": tone}
 
-    key = max([w.strip(".,!?'\"") for w in m.split() if len(w) > 4], key=len, default="")
-    hook = f'On "{key}", ' if key else "Good question, and "
-    return {"answer": f"{hook}I would rather understand you than hand you a generic non-answer. Give me a touch more and I will get precise fast, is this about money, banking, markets, insurance or how firms personalize them, or something else entirely like tech, science, health or just life? I am glad to go wherever you like.", "title": "Tell me a little more", "domain": dom, "disclaimer": "", "matched": False, "tone": tone}
+    key = max([w.strip(".,!?'\"") for w in m.split() if len(w) > 4 and w not in _STOP], key=len, default="")
+    opener = f'On "{key}"? ' if key and len(m.split()) > 1 else ""
+    return {"answer": opener + _pick(m + tone, FALLBACKS), "title": "Say more, I am listening", "domain": dom, "disclaimer": "", "matched": False, "tone": tone}
 
 
 def topics() -> list[dict]:

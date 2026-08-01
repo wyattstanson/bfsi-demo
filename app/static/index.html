@@ -526,27 +526,18 @@ function renderCustomer(pane){
         <span class="tries" id="triesBadge"></span></div>
       <div style="display:flex;gap:8px;align-items:center;margin:12px 0 6px">
         <span style="font-size:12px;color:var(--muted);font-weight:600">Area</span>
-        <select id="custDomain" style="width:auto;padding:7px 11px" onchange="CUST.domain=this.value;saveCust();"></select>
+        <select id="custDomain" style="width:auto;padding:7px 11px" onchange="CUST.domain=this.value;saveCust();renderChips();if($('#avaStatus')){}"></select>
         <button class="chip" onclick="newChat()">New chat</button>
         <button class="chip" onclick="openHistory()">History</button>
         <button class="chip" id="signinChip" style="margin-left:auto" onclick="openLogin(false)">Sign in</button></div>
       <div class="thread" id="cthread"></div>
-      <div class="chips">
-        <span class="chip" onclick="cquick(this)">How do I start investing?</span>
-        <span class="chip" onclick="cquick(this)">Build an emergency fund</span>
-        <span class="chip" onclick="cquick(this)">Improve my credit score</span>
-        <span class="chip" onclick="cquick(this)">Should I worry about a market dip?</span>
-        <span class="chip" onclick="cquick(this)">How does personalization actually work?</span>
-        <span class="chip" onclick="cquick(this)">Explain uplift vs propensity</span>
-        <span class="chip" onclick="cquick(this)">How do LLMs work?</span>
-        <span class="chip" onclick="cquick(this)">How does the economy work?</span>
-        <span class="chip" onclick="cquick(this)">Just chat: tell me about black holes</span></div>
+      <div class="chips" id="cchips"></div>
       <div class="composer"><input id="cgoal" type="text" placeholder="Ask Ava anything" onkeydown="if(event.key==='Enter')cAgent()"/>
         <button class="send" onclick="cAgent()"><svg class="i" viewBox="0 0 24 24" style="width:16px;height:16px"><path d="M4 12l16-8-6 16-3-6-7-2z"/></svg></button></div>
     </div></div></div>`;
   $('#custDomain').innerHTML=domainOptions(CUST.domain);
   $('#signinChip').textContent=CUST.loggedIn?('Hi, '+CUST.username):'Sign in';
-  cgreet();updateTriesBadge();
+  cgreet();updateTriesBadge();renderChips();
   if($('#avaStatus'))$('#avaStatus').textContent=LLM_LIVE?'online · smart mode':'online · here for anything';
   if(!CUST.loggedIn && !localStorage.getItem('aria-saw-login')){localStorage.setItem('aria-saw-login','1');setTimeout(()=>openLogin(false),500);}
 }
@@ -564,6 +555,22 @@ async function custDecide(){
 function addSpeaker(bub,text){const b=el('<button class="audiobtn" style="margin-top:9px;padding:5px 10px;font-size:12px"><span class="wave"><i></i><i></i><i></i><i></i></span>Hear this</button>');b.onclick=function(){speak(text,this)};bub.appendChild(b);}
 function cbubble(t,who){const d=el(`<div class="msg ${who}">${who==='bot'?'<span class="av">A<b>.</b></span>':''}<div class="bubble">${esc(t).replace(/\n/g,'<br>')}</div></div>`);$('#cthread').appendChild(d);$('#cthread').scrollTop=1e9;return d}
 function cgreet(){$('#cthread').innerHTML='';CHAT_HISTORY=[];cbubble("Hey, I am Ava. I am great with money, banking, insurance, all of it, but honestly I am happy to just talk too, history, tech, the news, whatever is on your mind. What is up?",'bot')}
+const CHIPS_BY_DOMAIN={
+  '':["How do I start investing?","Build an emergency fund","How does personalization actually work?","Explain uplift vs propensity","How do LLMs work?","Just chat: tell me about black holes"],
+  retail:["How do I start investing?","Build an emergency fund","Improve my credit score","A payment I do not recognise"],
+  corporate:["What is corporate banking personalization?","How does a treasury workstation help?","How do banks cross-sell to businesses?","What is working capital?"],
+  wealth:["How does an advisor co-pilot work?","What are tax-aware, goal-based portfolios?","What is Aladdin Auto-Commentary?","Planning for retirement"],
+  asset_mgmt:["What is direct indexing?","ETFs vs mutual funds","What is tax-loss harvesting?","Why diversification matters"],
+  payments:["How is fraud caught in milliseconds?","What is agentic commerce?","How do card-linked offers work?","Buy now, pay later, explained"],
+  capital_markets:["How does research personalization work?","What is RFQ pricing?","Reading the market without panic","What moves the markets?"],
+  nbfc:["Sub-five-minute loan underwriting?","What is an account aggregator?","Am I pre-approved for a loan?","Bajaj FinAI, explained"],
+  personal_ins:["How does telematics pricing work?","How much life insurance do I need?","How do wellness programs cut premiums?","What is term life?"],
+  general_ins:["How do instant claims work?","What is geospatial property risk?","What is a loss ratio?","How Lemonade pays claims in seconds"],
+  commercial_ins:["What is parametric insurance?","How is cyber risk priced?","How does underwriting scale?","What is broker-submission triage?"],
+};
+function renderChips(){const box=$('#cchips');if(!box)return;
+  const list=CHIPS_BY_DOMAIN[(CUST&&CUST.domain)||'']||CHIPS_BY_DOMAIN[''];
+  box.innerHTML=list.map(q=>`<span class="chip" onclick="cquick(this)">${esc(q)}</span>`).join('');}
 function cquick(e){$('#cgoal').value=e.textContent;cSend()}
 function cAgent(){cSend()}
 async function cSend(){
