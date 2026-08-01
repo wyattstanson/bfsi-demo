@@ -141,6 +141,9 @@ The client-briefing deck and its narration are version-controlled under [`docs/`
   models (`arch.glb`, `rt.glb`, `ag.glb`).
 * [`docs/demo_script.md`](docs/demo_script.md) — the slide-by-slide recording script
   (5-7 minute run, with a 3-minute cut and recovery lines).
+* [`docs/tech-stack-demo-script.md`](docs/tech-stack-demo-script.md) — an 8-10 minute
+  spoken walkthrough of the Engine Room's Industry Reference, explaining why each
+  tech-stack choice was made (speed, governance, or cost) and how the majors diverge.
 
 ## Design decisions
 

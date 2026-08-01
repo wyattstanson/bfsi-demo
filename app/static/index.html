@@ -668,7 +668,7 @@ async function refreshExec(feedOnly){
     const max=Math.max(1,...s.by_action.map(x=>x.count));
     $('#exact').innerHTML=s.by_action.slice(0,6).map(x=>`<div class="bar"><span class="bl">${esc(actionLabel(x.action))}</span><div class="tk"><div class="fl" style="width:${x.count/max*100}%"></div></div><span class="bv">${x.count}</span></div>`).join('')||'<div class="hint">No decisions yet.</div>';
     const rmax=Math.max(1,...s.by_region.map(x=>x.count));
-    $('#exreg').innerHTML=s.by_region.map(x=>`<div class="bar"><span class="bl">${esc(x.region||'—')}</span><div class="tk"><div class="fl" style="width:${x.count/rmax*100}%"></div></div><span class="bv">${x.count}</span></div>`).join('')||'<div class="hint">No decisions yet.</div>';
+    $('#exreg').innerHTML=s.by_region.map(x=>`<div class="bar"><span class="bl">${esc(x.region||', ')}</span><div class="tk"><div class="fl" style="width:${x.count/rmax*100}%"></div></div><span class="bv">${x.count}</span></div>`).join('')||'<div class="hint">No decisions yet.</div>';
   }
   $('#exfeed').innerHTML=st.decisions.map(d=>`<div class="frow"><span class="tg">${esc(d.ts_label)}</span><span class="ev">${esc(actionLabel(d.action))}</span><span class="rg">${esc(d.region)} · ${d.latency_ms} ms</span></div>`).join('')||'<div class="hint">Make a decision to see it here.</div>';
 }
@@ -697,7 +697,7 @@ async function regDecide(){
       <div class="hint" style="margin-top:10px">Green pushes the model toward the action, red pulls away. Every contribution is cached with the decision for the adverse-action notice and audit.</div>
       <div style="margin-top:10px"><span class="pill ${d.fairness_flag==='adverse_impact'?'warn':'ok'}">fairness · ${esc(d.fairness_flag)}</span><span class="pill ${gov.air!=null&&gov.air<0.8?'warn':'ok'}">adverse-impact ratio · ${gov.air!=null?gov.air:'building'}</span><span class="pill n">action · ${esc(actionLabel(d.action))}</span></div></div>
     <div class="panel pad" style="box-shadow:none"><div class="eyebrow2">Audit record, 16 fields</div>
-      <table class="tbl">${[['decision_id','Decision reference',row.decision_id],['party_id','Customer reference',maskId(row.party_id)],['channel','Channel',row.channel],['use_case','Use case',useCaseLabel(row.use_case)],['action_id','Action',actionLabel(row.action_id)],['fairness_flag','Fairness flag',row.fairness_flag],['mode','Mode',row.mode],['latency_ms','Latency (ms)',row.latency_ms],['consent_ref','Consent reference',row.consent_ref],['human_reviewed','Human reviewed',row.human_reviewed]].map(r=>`<tr><td>${r[1]}</td><td>${esc(r[2]!==undefined&&r[2]!==null?r[2]:'—')}</td></tr>`).join('')}</table>
+      <table class="tbl">${[['decision_id','Decision reference',row.decision_id],['party_id','Customer reference',maskId(row.party_id)],['channel','Channel',row.channel],['use_case','Use case',useCaseLabel(row.use_case)],['action_id','Action',actionLabel(row.action_id)],['fairness_flag','Fairness flag',row.fairness_flag],['mode','Mode',row.mode],['latency_ms','Latency (ms)',row.latency_ms],['consent_ref','Consent reference',row.consent_ref],['human_reviewed','Human reviewed',row.human_reviewed]].map(r=>`<tr><td>${r[1]}</td><td>${esc(r[2]!==undefined&&r[2]!==null?r[2]:', ')}</td></tr>`).join('')}</table>
       <div class="hint" style="margin-top:8px">Append-only. Replayable. Satisfies SR 11-7, EU AI Act, ECOA, NAIC simultaneously.</div></div></div>`;
   $('#rsp').onclick=function(){speak(spoken,this)};
   if(AUDIO_ON)speak(spoken,$('#rsp'));
@@ -715,6 +715,70 @@ async function unlock(){
   const p=$('#pass').value;
   try{const r=await api.post('/dev-auth',{passcode:p});if(r.ok){DEV_OK=true;openApp('developer');}else{$('#perr').textContent='Incorrect passcode.';}}
   catch(e){$('#perr').textContent='Still connecting, please try again in a moment.';}
+}
+function refPill(kind){
+  const m={high:['High-risk','var(--bad)','var(--bad-50)'],grey:['Grey zone','var(--warn)','var(--warn-50)'],mix:['High-risk · grey','var(--warn)','var(--warn-50)']};
+  const[t,fg,bg]=m[kind];
+  return `<span style="display:inline-block;font-size:11px;font-weight:700;padding:2px 8px;border-radius:999px;color:${fg};background:${bg};white-space:nowrap">${t}</span>`;
+}
+function refSection(){
+  const NP='<i style="color:var(--muted);font-size:12px">not public</i>';
+  const STACK=[
+    ['V','Visa','Card network','Decision Manager (0-99), VAA/VDA trees + deep learning, VPI, VAAI Score','VisaNet backbone · OLTP '+NP,'Proprietary global network','&lt;100ms VAA · 269B txns/yr','high'],
+    ['M','Mastercard','Card network','Decision Intelligence (real-time scoring)','Delta Lake + Unity Catalog on Databricks','Multi-cloud via Databricks (AWS/Azure/GCP)',NP,'high'],
+    ['F','Fiserv','Core banking','Commerce Graph (GNN, 125B+ txns); Copilot + Azure AI Foundry','Finxact core; Clover 23× MySQL → Snowflake via Striim CDC','Azure; AWS for Finxact','Finxact “real-time”','high'],
+    ['P','PayPal','Payments','Custom MLOps; graph fraud (TinkerPop/Gremlin)','Aerospike (memory+SSD KV) for real-time features',NP+', hybrid historically','~75% of risk decisions &lt;50ms','mix'],
+    ['S','Stripe','Payments','Radar (in-line ML fraud scoring)','PostgreSQL + custom feature store','AWS multi-region, Kubernetes','Sub-100ms in-auth budget','grey'],
+    ['JP','JPMorgan','Universal bank','450+ models (→1,000); RAG for internal knowledge','Feature stores; vector DBs for RAG',NP+', AWS + private cloud','Zero-downtime · $10T/day','high'],
+    ['C1','Capital One','Consumer bank','ML fraud/credit review; data science on Snowflake','Snowflake VPS + Redshift; off Hadoop','100% AWS, first major bank off-prem',NP,'high'],
+  ];
+  const rows=STACK.map(r=>`<tr><td><b>${r[1]}</b><div style="font-size:11px;color:var(--muted)">${r[2]}</div></td><td>${r[3]}</td><td>${r[4]}</td><td>${r[5]}</td><td style="white-space:nowrap">${r[6]}</td><td>${refPill(r[7])}</td></tr>`).join('');
+
+  const CLOUD=[
+    ['AWS','Default substrate','De-facto default for cloud-native banks (Capital One fully exited on-prem). EKS + S3 under Delta/Iceberg, and the host under Snowflake and Databricks even when a bank “chooses” one.'],
+    ['Databricks','ML &amp; streaming engine','Preferred for ML training plus real-time streaming inference, Capital One fraud and Mastercard DI lean here. Delta Lake, Unity Catalog for AI-Act lineage, Spark Streaming, MLflow.'],
+    ['Snowflake','Governed SQL layer','High-concurrency governed reporting for risk, compliance and finance. Virtual Private Snowflake (VPS) is the single-tenant regulated variant; Cortex AI for in-warehouse gen-AI.'],
+    ['Azure','Microsoft-stack shops','Fiserv’s primary partner (Copilot, AI Foundry). Most common where Microsoft-heavy enterprise IT already dominates.'],
+  ];
+  const cloud=CLOUD.map(c=>`<div class="panel pad" style="box-shadow:none"><div style="display:flex;align-items:center;justify-content:space-between;gap:8px"><b>${c[0]}</b><span style="font-size:10.5px;text-transform:uppercase;letter-spacing:.05em;color:var(--muted);font-weight:700">${c[1]}</span></div><div class="hint" style="margin-top:8px">${c[2]}</div></div>`).join('');
+
+  const LAYERS=[
+    ['1','Ingestion','Kafka, Kinesis, core / card-network streams','5-10 ms',0],
+    ['2','Feature store','Aerospike, Redis, DynamoDB, sub-10ms KV, no RDBMS joins in-path','5-15 ms',0],
+    ['3','Graph layer','TinkerPop/Gremlin, Neo4j-class, only if synchronous','10-20 ms',0],
+    ['4','Model serving','XGBoost/LightGBM tabular; DL for high-value CNP','20-40 ms',0],
+    ['5','Governed data / training','Databricks Lakehouse, Snowflake VPS, train, backfill, audit','offline',1],
+    ['6','Vector / RAG','Pinecone, Milvus, pgvector, OpenSearch, not in auth path','async',1],
+  ];
+  const layers=LAYERS.map(l=>`<div style="display:flex;align-items:center;gap:12px;padding:9px 0;border-top:1px solid var(--line)">
+    <span style="width:26px;height:26px;flex:none;display:grid;place-items:center;border-radius:8px;font-weight:800;font-size:13px;${l[4]?'background:var(--soft);color:var(--muted)':'background:var(--orange-50);color:var(--orange-600)'}">${l[0]}</span>
+    <div style="flex:1;min-width:0"><b style="font-size:13.5px">${l[1]}</b><div class="hint" style="font-size:12px">${l[2]}</div></div>
+    <span style="font-family:ui-monospace,monospace;font-size:11.5px;font-weight:700;padding:3px 10px;border-radius:999px;white-space:nowrap;${l[4]?'color:var(--muted);background:var(--soft)':'color:var(--orange-600);background:var(--orange-50)'}">${l[3]}</span></div>`).join('');
+
+  const seg=(w,bg,txt,col)=>`<div style="flex:0 0 ${w}%;background:${bg};color:${col||'#fff'};display:flex;align-items:center;justify-content:center;font-size:10.5px;font-weight:700;white-space:nowrap;min-width:0">${txt}</div>`;
+  const meter=`<div style="display:flex;height:30px;border-radius:8px;overflow:hidden;border:1px solid var(--line);background:var(--soft)">
+    ${seg(10.2,'#F5885F','10')}${seg(15.3,'#F1592A','15')}${seg(40.8,'#D84A1D','Model · 40')}${seg(20.4,'repeating-linear-gradient(45deg,#8A9099,#8A9099 6px,#767C85 6px,#767C85 12px)','Graph · 20')}${seg(13.3,'transparent','headroom','var(--muted)')}</div>`;
+
+  const GAPS=['VisaNet core-switch DBMS internals','PayPal’s current cloud provider mix (hybrid, unconfirmed post-migration)','JPMorgan’s specific vector-DB and feature-store vendors','Any institution’s exact p99 authorization latency (only aggregates disclosed)'];
+  const gaps=GAPS.map(g=>`<li style="margin:6px 0">${g}</li>`).join('');
+
+  return `<div class="panel pad" style="margin-top:18px">
+    <div class="eyebrow2">Industry reference, how the majors build this</div>
+    <div class="hint" style="margin:6px 0 4px">Public engineering blogs, investor disclosures and vendor case studies, as of Aug 2026. Internals are marked <i>not public</i> where undisclosed, not omitted.</div>
+    <div style="overflow:auto;margin-top:12px"><table class="tbl"><tr class="hd"><td>Platform</td><td>AI / ML layer</td><td>Data layer</td><td>Cloud infra</td><td>Latency</td><td>EU AI Act</td></tr>${rows}</table></div>
+
+    <div class="eyebrow2" style="margin-top:20px">Cloud platform layer, how the big three get used</div>
+    <div class="row two" style="margin-top:10px">${cloud}</div>
+    <div class="hint" style="margin-top:10px"><b>The mature pattern is both, side by side:</b> Snowflake for governed reporting, Databricks for the ML engine, Unity Catalog bridging governance across the two.</div>
+
+    <div class="eyebrow2" style="margin-top:20px">Reference blueprint, the sub-98ms budget</div>
+    <div style="margin-top:10px">${meter}</div>
+    <div class="hint" style="margin-top:8px"><b>Ingestion + Feature Store + Model Serving = 65 ms &lt; 98 ms.</b> Graph counts only if synchronous (→ 85 ms). Governed, vector and training layers are async, excluded from the hot path. Tune to your client’s measured p99s.</div>
+    <div style="margin-top:12px">${layers}</div>
+
+    <div class="eyebrow2" style="margin-top:20px">Open gaps, flag if a client asks</div>
+    <ul class="hint" style="margin:8px 0 0;padding-left:18px">${gaps}</ul>
+  </div>`;
 }
 async function renderDeveloper(pane){
   pane.innerHTML=`${head('developer','Under the hood')}
@@ -736,6 +800,7 @@ async function renderDeveloper(pane){
     <div class="panel pad" style="margin-top:18px"><div class="eyebrow2">Production topology, one deploy away</div>
       <div class="provrow"><span class="prov">AWS</span><span class="prov">Databricks</span><span class="prov">Snowflake</span></div>
       <div id="dtopo" style="margin-top:8px;overflow:auto"></div></div>
+    ${refSection()}
     <div class="panel pad" style="margin-top:18px"><div class="eyebrow2">Throughput and scale, agentic at a million</div>
       <div class="hint">Decisioning is stateless. Fire a concurrent burst to measure this instance, then scale linearly.</div>
       <div style="margin-top:10px"><button class="btn" onclick="devLoad()">Run a 120-request burst</button></div>
