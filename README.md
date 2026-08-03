@@ -144,6 +144,9 @@ The client-briefing deck and its narration are version-controlled under [`docs/`
 * [`docs/tech-stack-demo-script.md`](docs/tech-stack-demo-script.md) — an 8-10 minute
   spoken walkthrough of the Engine Room's Industry Reference, explaining why each
   tech-stack choice was made (speed, governance, or cost) and how the majors diverge.
+* [`docs/full-demo-script.md`](docs/full-demo-script.md) — the complete click-by-click
+  presenter's script for the live site: where to click, when, what to say, and the
+  tech behind each of the five views, with timing, objection handling, and recovery lines.
 
 ## Design decisions
 
