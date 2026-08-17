@@ -622,7 +622,7 @@ function addSpeaker(bub,text){const b=el('<button class="audiobtn" style="margin
 function cbubble(t,who){const d=el(`<div class="msg ${who}">${who==='bot'?'<span class="av">A<b>.</b></span>':''}<div class="bubble">${esc(t).replace(/\n/g,'<br>')}</div></div>`);$('#cthread').appendChild(d);$('#cthread').scrollTop=1e9;return d}
 function cgreet(){$('#cthread').innerHTML='';CHAT_HISTORY=[];cbubble("Hey, I am Ava. I am great with money, banking, insurance, all of it, but honestly I am happy to just talk too, history, tech, the news, whatever is on your mind. What is up?",'bot')}
 const CHIPS_BY_DOMAIN={
-  '':["How do I start investing?","Build an emergency fund","How does personalization actually work?","Explain uplift vs propensity","How do LLMs work?","Just chat: tell me about black holes"],
+  '':["How does personalization actually work?","Why demographics-free?","What are the five layers?","Explain uplift vs propensity","What is SHAP?","Build an emergency fund"],
   retail:["How do I start investing?","Build an emergency fund","Improve my credit score","A payment I do not recognise"],
   corporate:["What is corporate banking personalization?","How does a treasury workstation help?","How do banks cross-sell to businesses?","What is working capital?"],
   wealth:["How does an advisor co-pilot work?","What are tax-aware, goal-based portfolios?","What is Aladdin Auto-Commentary?","Planning for retirement"],

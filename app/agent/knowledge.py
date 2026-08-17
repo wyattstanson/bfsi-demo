@@ -3,6 +3,8 @@ from __future__ import annotations
 import hashlib
 import re
 
+from . import expert
+
 DISCLAIMER = "This is general financial education, not personalized investment advice. For decisions about your money, please speak with a licensed advisor."
 
 PRINCIPLES = [
@@ -31,7 +33,7 @@ DOMAIN_KW = {
     "nbfc": ["nbfc", "microfinance", "consumer loan", "gold loan", "two wheeler", "emi card", "collections", "account aggregator"],
     "personal_ins": ["life insurance", "health insurance", "term life", "wellness", "telematics", "vitality", "mediclaim"],
     "general_ins": ["auto insurance", "home insurance", "motor insurance", "property", "claim", "p&c", "flood", "catastrophe"],
-    "commercial_ins": ["commercial insurance", "cyber insurance", "business insurance", "liability", "underwriting", "broker submission", "parametric"],
+    "commercial_ins": ["commercial insurance", "cyber insurance", "cyber risk", "cyber", "business insurance", "liability", "underwriting", "broker submission", "parametric"],
 }
 DOMAIN_LABEL = {
     "retail": "Retail Banking", "corporate": "Corporate Banking", "wealth": "Wealth",
@@ -78,7 +80,7 @@ SMALLTALK = [
       "Here is one: the winners in finance treat personalization as infrastructure, not a campaign, one brain serving every channel. Want me to unpack that, or would you rather talk about something completely different?"]),
 ]
 PERSONAL = [
-    (["stressed", "worried", "anxious", "anxiety", "scared", "overwhelmed", "struggling", "can't sleep", "cant sleep", "panic", "freaking out", "hard time", "so tired"],
+    (["stress", "worried", "worry", "anxious", "anxiety", "scared", "overwhelmed", "struggling", "can't sleep", "cant sleep", "panic", "freaking out", "hard time", "so tired"],
      "I hear you, and I want to slow this down with you for a second, because money worry sits heavy in the body, not just the spreadsheet. You are not behind, and you are not alone in this. Let us shrink it: just name the one thing that is loudest right now, and we will take only that, one small piece, together. Often the fear is bigger than the number once we look at it directly. What is weighing on you most?"),
     (["lost my job", "unemployed", "laid off", "let go", "no income", "fired", "redundant", "redundancy"],
      "I am really sorry. Losing a job shakes more than the paycheck, it hits your footing and your sense of self, and it is okay to feel thrown. Take a breath, you have more room than it feels like right now. The first moves are gentle and practical: protect your cash, pause anything non-essential, and contact lenders early, because most will genuinely work with you if you reach out first. Then we check every bit of support you are owed. Tell me your biggest fixed cost and we will look at it side by side."),
@@ -131,6 +133,8 @@ KB = [
      "a": "Insurance exists to protect against losses you could not absorb yourself, not small affordable ones. Prioritise health cover and, if people depend on your income, term life, which is cheap because it is pure protection. Buy enough to cover your dependents' needs and debts, and revisit after big life events like a marriage, a child, or a home."},
     {"id": "loan", "title": "Borrowing sensibly", "kw": ["loan", "borrow", "mortgage", "pre-approved", "apr", "interest rate", "credit offer"],
      "a": "Borrow for things that build value or are genuine needs, and treat the rate and total cost, not the monthly payment, as the real price. Compare the annual rate across lenders, check fees, and make sure the repayment fits comfortably in your budget. A pre-approved offer is a starting point, not an obligation; shop around and read the terms."},
+    {"id": "dispute", "title": "Disputing a charge", "kw": ["dispute", "disputed", "disputing", "chargeback", "charge back", "wrong charge", "incorrect charge", "double charged", "charged twice", "charged me twice", "unauthorized charge", "unauthorised charge", "contest a charge", "billing error", "raise a dispute", "wrong transaction", "wrongful charge", "refund a charge", "did not make this", "didn't make this", "not my transaction"],
+     "a": "If a charge is wrong, act quickly and keep it calm and documented. First, check it is not a pending hold, a subscription you forgot, or a merchant trading under a different name. If it is genuinely wrong, contact the merchant first, since many errors are fixed fastest at the source. If that fails, raise a formal dispute with your bank or card issuer: most give you a window, often sixty to a hundred and twenty days, and a provisional credit while they investigate. If it is outright fraud rather than a billing error, freeze or replace the card immediately. Keep dates, amounts, and any reference numbers, and never share a one-time code with anyone who calls you about it."},
     {"id": "goal", "title": "Saving for a goal", "kw": ["save for", "goal", "house", "car", "wedding", "down payment", "vacation", "big purchase"],
      "a": "Give every goal a name, a number, and a date, then work backwards to a monthly amount. Keep anything you need within three years in safe cash-like savings so a market dip cannot derail you; let longer goals ride in diversified investments. Automating the transfer on payday turns a wish into a funded plan."},
     {"id": "market", "title": "Reading the market without panic", "kw": ["market crash", "volatility", "recession", "downturn", "should i sell", "market dip", "stocks falling"],
@@ -165,7 +169,7 @@ KB = [
 
 # --- The craft of personalization: what makes Ava a real expert ---
 KB += [
-    {"id": "hyper_personalization", "title": "What personalization really means", "kw": ["personalization", "personalisation", "hyper-personalization", "hyper personalization", "1:1", "one to one", "tailored", "what is personalization"],
+    {"id": "hyper_personalization", "title": "What personalization really means", "kw": ["personalization", "personalisation", "personalize", "personalise", "personalized", "personalised", "personalizes", "personalizing", "personalising", "hyper-personalization", "hyper personalization", "1:1", "one to one", "tailored", "what is personalization", "how does aria", "how aria works"],
      "a": "Personalization is delivering the right action to the right person at the right moment through the right channel, decided from that person's live context rather than a broad segment. The mature form is one-to-one and real-time: not a monthly campaign to a bucket, but a decision recomputed on every interaction. Done well it is an engine, not a feature, one brain that serves retail, wealth, payments and insurance, learns from outcomes, and improves itself. The prize for a Tier-1 firm runs into the hundreds of millions to a billion in annual profit."},
     {"id": "next_best_action", "title": "Next-best-action decisioning", "kw": ["next best action", "nba", "next-best-action", "decisioning", "what should i offer", "recommend an action", "best action"],
      "a": "Next-best-action is the heart of personalization: for a given customer and context, score every eligible action, offer, nudge, content, or hold, by its expected value, apply eligibility and suitability rules, then serve the winner and log why. It fuses propensity, expected reward and constraints in one ranked decision. The art is doing it inside a real-time budget, under a hundred milliseconds, so the decision reflects what the customer is doing right now, not last week."},
@@ -183,7 +187,7 @@ KB += [
      "a": "Retrieval-augmented generation grounds a language model in your own trusted content: you retrieve the relevant documents, policies, product terms, a client's own data, and let the model answer only from them, with citations. It is how you get a helpful assistant without hallucination, and how you keep answers current without retraining. Morgan Stanley's advisor assistant is the template, hundreds of thousands of research documents indexed so the model prepares and the human decides."},
     {"id": "agentic_loop", "title": "The agentic loop", "kw": ["agent", "agentic", "agent loop", "tool use", "autonomous", "human in the loop", "escalation", "perceive reason act", "orchestration"],
      "a": "An agent perceives, reasons, acts and observes in a loop, calling tools through a governed gateway rather than just chatting. The design that makes it safe in finance has three parts: memory so it carries context, a fenced set of tools it is allowed to touch, and a human-escalation path for anything above a policy threshold. It acts autonomously on the routine and hands off when stakes are high. Bajaj Finance runs this in production with hundreds of agents; the discipline is autonomy without recklessness."},
-    {"id": "ai_governance", "title": "Governance, fairness and explainability", "kw": ["governance", "governed", "fairness", "fair ai", "bias", "explainability", "explainable", "shap", "audit", "model risk", "reason codes", "eu ai act", "compliance", "responsible ai", "responsible", "accountable", "trustworthy", "safe ai"],
+    {"id": "ai_governance", "title": "Governance, fairness and explainability", "kw": ["governance", "governed", "fairness", "fair ai", "fair", "unfair", "stay fair", "keep it fair", "is it fair", "how fair", "bias", "explainability", "explainable", "shap", "audit", "model risk", "reason codes", "eu ai act", "compliance", "responsible ai", "responsible", "accountable", "trustworthy", "safe ai"],
      "a": "Governance is the real differentiator, and the mature approach runs it inside the decision, not as a bolt-on afterwards. Every decision carries an audit row: the reason codes, the fairness check across protected groups, and the data behind it, so a regulator can ask about any single decision and get an answer. Explainability comes from methods like SHAP, or exact linear attributions for logistic models, cached so they cost nothing at serve time. This is what satisfies model-risk rules and the EU AI Act at once."},
     {"id": "experimentation", "title": "Experimentation and holdouts", "kw": ["experiment", "a/b test", "ab test", "holdout", "control group", "incrementality", "causal measurement", "test and learn", "randomized"],
      "a": "If you cannot measure lift causally, you are guessing. The gold standard is a randomized holdout: keep a slice of customers untouched and compare, so every headline number is incremental, not just correlated with people who were going to convert anyway. Capital One built a whole culture on this, thousands of experiments. Practical care matters, guard against peeking, sample-ratio mismatch and novelty effects, and measure long-run value, not just the click."},
@@ -277,7 +281,8 @@ TONE_CONFIRM = {
     "genz": "Bet. Genz mode on, lowkey thrilled. What do you need, fr?",
 }
 MACRO_KW = ["geopolit", "war", "election", "president", "tariff", "sanction", "oil price", "inflation",
-            " fed ", "interest rate", "rbi policy", "recession", "china", "russia", "ukraine", "opec", "gdp", "trump"]
+            " fed ", "interest rate", "rbi policy", "recession", "china", "russia", "ukraine", "opec", "gdp", "trump",
+            "moves the market", "move the market", "moves markets", "what moves"]
 MACRO_ANSWER = "Geopolitics and markets are joined at the hip. Wars, elections, tariffs, and central-bank moves ripple straight into oil, currencies, rates, and risk appetite. The practical takeaway is rarely to trade the headline. It is to stay diversified, keep a cash buffer, and let a long horizon absorb the noise."
 OFFTOPIC_KW = ["dating", "who is dating", "gossip", "horoscope", "astrology", "lottery number"]
 
@@ -421,6 +426,11 @@ _STOP = {"how", "do", "does", "did", "is", "are", "was", "the", "a", "an", "of",
          "work", "works", "use", "using", "tell", "explain", "know", "want", "need", "please",
          "some", "any", "much", "many", "into", "from", "at", "be", "am", "as", "if", "there"}
 
+# Pure intensifiers/fillers that carry no topic meaning. Stripped before substring keyword
+# matching so an inserted filler ("how do llms *actually* work") cannot break a phrase match.
+_FILLER = {"actually", "really", "exactly", "basically", "literally", "genuinely", "truly",
+           "essentially", "simply", "even", "quite", "totally", "honestly", "seriously"}
+
 
 def answer(message: str, domain: str | None = None, tone: str | None = None,
            history: list | None = None) -> dict:
@@ -471,18 +481,32 @@ def answer(message: str, domain: str | None = None, tone: str | None = None,
     if any(k in (" " + m + " ") for k in MACRO_KW):
         return {"answer": f"{MACRO_ANSWER}\n\n{_close(m, tone)}", "title": "Markets and the wider world", "domain": domain, "disclaimer": "", "matched": True, "tone": tone}
 
+    # Expert brain: grounded retrieval over the BFSI research corpus (glossary, the
+    # paper's framework and benchmarks, use cases). This is what makes Ava a real
+    # domain expert rather than a generalist; it wins for technical/industry questions
+    # but sits below the human conversation handlers above so warmth is never lost.
+    hit = expert.retrieve(m)
+    if hit:
+        composed = expert.compose(hit, m, tone)
+        if composed:
+            composed["domain"] = classify_domain(m) or domain
+            composed["disclaimer"] = ""
+            return composed
+
     _DISTINCTIVE = {"reinsurance", "microfinance", "insurtech", "brokerage", "annuity", "mediclaim", "nbfc", "treasury", "insurtech"}
     dom = classify_domain(m) or domain
     strong_dom = bool(dom and dom in DOMAIN_ANSWER and any((" " in kw or kw in _DISTINCTIVE) and kw in m for kw in DOMAIN_KW.get(dom, [])))
     tokens = set(w.strip(".,!?") for w in m.split())
     content = tokens - _STOP
+    # Filler-stripped message so intensifiers do not break contiguous phrase keywords.
+    mnf = " ".join(w for w in m.split() if w.strip(".,!?") not in _FILLER)
 
     def _match(entries):
         b, bs = None, 0
         for e in entries:
             s = 0
             for k in e["kw"]:
-                if k in m:
+                if k in m or (mnf != m and k in mnf):
                     s += 3
                 elif (set(k.split()) - _STOP) & content:
                     s += 1
